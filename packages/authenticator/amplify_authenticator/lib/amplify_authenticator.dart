@@ -829,6 +829,7 @@ class _AuthenticatorBody extends StatelessWidget {
               child: ScaffoldMessenger(
                 key: _AuthenticatorState.scaffoldMessengerKey,
                 child: Scaffold(
+                  resizeToAvoidBottomInset: false,
                   body: SizedBox.expand(
                     child: child,
                   ),
@@ -868,6 +869,7 @@ class AuthenticatedView extends StatelessWidget {
           return ScaffoldMessenger(
             key: _AuthenticatorState.scaffoldMessengerKey,
             child: Scaffold(
+              resizeToAvoidBottomInset: false,
               body: SizedBox.expand(
                 child: child is AuthenticatorScreen
                     ? SingleChildScrollView(child: child)
