@@ -175,6 +175,7 @@ class AuthenticatorFormState<T extends AuthenticatorForm>
     if (widget.child != null) {
       return Form(
         key: formKey,
+        autovalidateMode: AutovalidateMode.always,
         child: widget.child!,
       );
     }
@@ -182,6 +183,7 @@ class AuthenticatorFormState<T extends AuthenticatorForm>
     final runtimeActions = this.runtimeActions(context);
     return Form(
       key: formKey,
+      autovalidateMode: AutovalidateMode.always,
       child: Column(
         children: [
           ...allFields,
@@ -576,8 +578,16 @@ class ConfirmSignInNewPasswordForm extends AuthenticatorForm {
     super.key,
   }) : super._(
           fields: [
-            ConfirmSignInFormField.newPassword(),
-            ConfirmSignInFormField.confirmNewPassword(),
+            ConfirmSignInFormField.newPassword(
+              autofillHints: [
+                AutofillHints.newPassword
+              ]
+            ),
+            ConfirmSignInFormField.confirmNewPassword(
+              autofillHints: [
+                AutofillHints.newPassword
+              ]
+            ),
           ],
           actions: const [
             ConfirmSignInNewPasswordButton(),
