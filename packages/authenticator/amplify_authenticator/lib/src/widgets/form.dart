@@ -578,8 +578,16 @@ class ConfirmSignInNewPasswordForm extends AuthenticatorForm {
     super.key,
   }) : super._(
           fields: [
-            ConfirmSignInFormField.newPassword(),
-            ConfirmSignInFormField.confirmNewPassword(),
+            ConfirmSignInFormField.newPassword(
+              autofillHints: [
+                AutofillHints.newPassword,
+              ],
+            ),
+            ConfirmSignInFormField.confirmNewPassword(
+              autofillHints: [
+                AutofillHints.newPassword,
+              ],
+            ),
           ],
           actions: const [
             ConfirmSignInNewPasswordButton(),
