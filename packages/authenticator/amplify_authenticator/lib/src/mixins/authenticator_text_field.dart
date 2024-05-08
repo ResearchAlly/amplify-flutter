@@ -21,6 +21,7 @@ mixin AuthenticatorTextField<FieldType extends Enum,
       builder: (BuildContext context, bool toggleObscureText, Widget? _) {
         final obscureText = this.obscureText && toggleObscureText;
         return TextFormField(
+          autovalidateMode: AutovalidateMode.always,
           style: enabled
               ? null
               : TextStyle(color: Theme.of(context).disabledColor),
