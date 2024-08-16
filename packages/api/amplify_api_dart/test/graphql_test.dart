@@ -14,83 +14,12 @@ import 'package:aws_common/testing.dart';
 import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 
+import 'mocks.dart';
 import 'test_data/fake_amplify_configuration.dart';
 import 'test_models/ModelProvider.dart';
 import 'util.dart';
 
 final _deepEquals = const DeepCollectionEquality().equals;
-
-// Success Mocks
-const _expectedQuerySuccessResponseBody = {
-  'data': {
-    'listBlogs': {
-      'items': [
-        {
-          'id': 'TEST_ID',
-          'name': 'Test App Blog',
-          'createdAt': '2022-06-28T17:36:52.460Z',
-        }
-      ],
-    },
-  },
-};
-
-final _modelQueryId = uuid();
-final _expectedModelQueryResult = {
-  'data': {
-    'getBlog': {
-      'createdAt': '2021-07-21T22:23:33.707Z',
-      'id': _modelQueryId,
-      'name': 'Test App Blog',
-    },
-  },
-};
-const _expectedMutateSuccessResponseBody = {
-  'data': {
-    'createBlog': {
-      'id': 'TEST_ID',
-      'name': 'Test App Blog',
-      'createdAt': '2022-07-06T18:42:26.126Z',
-    },
-  },
-};
-
-// Error Mocks
-const _errorMessage = 'Unable to parse GraphQL query.';
-const _errorLocations = [
-  {'line': 2, 'column': 3},
-  {'line': 4, 'column': 5},
-];
-const _errorPath = ['a', 1, 'b'];
-const _errorExtensions = {
-  'a': 'blah',
-  'b': {'c': 'd'},
-};
-const _errorType = 'DynamoDB:ConditionalCheckFailedException';
-const _errorInfo = {'a': 'b'};
-const _expectedErrorResponseBody = {
-  'data': null,
-  'errors': [
-    {
-      'message': _errorMessage,
-      'locations': _errorLocations,
-      'path': _errorPath,
-      'extensions': _errorExtensions,
-      'errorType': _errorType,
-      'errorInfo': _errorInfo,
-    },
-  ],
-};
-
-const _authErrorMessage = 'Not authorized';
-const _expectedAuthErrorResponseBody = {
-  'data': null,
-  'errors': [
-    {
-      'message': _authErrorMessage,
-    },
-  ],
-};
 
 final mockHttpClient = MockAWSHttpClient((request, _) async {
   if (request.headers[xApiKey] != 'abc123' &&
@@ -99,7 +28,7 @@ final mockHttpClient = MockAWSHttpClient((request, _) async {
     // does not work for this query.
     return AWSHttpResponse(
       statusCode: 401,
-      body: utf8.encode(json.encode(_expectedAuthErrorResponseBody)),
+      body: utf8.encode(json.encode(expectedAuthErrorResponseBody)),
     );
   }
   if (request.headers[xApiKey] != 'abc123') {
@@ -110,25 +39,32 @@ final mockHttpClient = MockAWSHttpClient((request, _) async {
   if (body.contains('getBlog')) {
     return AWSHttpResponse(
       statusCode: 200,
-      body: utf8.encode(json.encode(_expectedModelQueryResult)),
+      body: utf8.encode(json.encode(expectedModelQueryResult)),
     );
   }
   if (body.contains('TestMutate')) {
     return AWSHttpResponse(
       statusCode: 400,
-      body: utf8.encode(json.encode(_expectedMutateSuccessResponseBody)),
+      body: utf8.encode(json.encode(expectedMutateSuccessResponseBody)),
     );
   }
   if (body.contains('TestError')) {
     return AWSHttpResponse(
       statusCode: 400,
-      body: utf8.encode(json.encode(_expectedErrorResponseBody)),
+      body: utf8.encode(json.encode(expectedErrorResponseBody)),
+    );
+  }
+  if (body.contains('createModelWithCustomType')) {
+    return AWSHttpResponse(
+      statusCode: 200,
+      body: utf8
+          .encode(json.encode(expectedModelWithCustomTypeSuccessResponseBody)),
     );
   }
 
   return AWSHttpResponse(
     statusCode: 400,
-    body: utf8.encode((json.encode(_expectedQuerySuccessResponseBody))),
+    body: utf8.encode((json.encode(expectedQuerySuccessResponseBody))),
   );
 });
 
@@ -138,9 +74,7 @@ WebSocketBloc? mockWebSocketBloc;
 
 class MockAmplifyAPI extends AmplifyAPIDart {
   MockAmplifyAPI({
-    super.authProviders,
-    super.modelProvider,
-    super.baseHttpClient,
+    super.options,
   });
 
   @override
@@ -155,9 +89,11 @@ void main() {
 
   setUp(() async {
     final api = MockAmplifyAPI(
-      authProviders: [const CustomFunctionProvider()],
-      baseHttpClient: mockHttpClient,
-      modelProvider: ModelProvider.instance,
+      options: APIPluginOptions(
+        authProviders: [const CustomFunctionProvider()],
+        baseHttpClient: mockHttpClient,
+        modelProvider: ModelProvider.instance,
+      ),
     );
 
     await Amplify.addPlugin(api);
@@ -195,7 +131,7 @@ void main() {
       final operation = Amplify.API.query(request: req);
       final res = await operation.response;
 
-      final expected = json.encode(_expectedQuerySuccessResponseBody['data']);
+      final expected = json.encode(expectedQuerySuccessResponseBody['data']);
 
       expect(res.data, equals(expected));
       expect(res.errors, isEmpty);
@@ -219,7 +155,7 @@ void main() {
       final operation = Amplify.API.query(request: req);
       final res = await operation.response;
 
-      final expected = json.encode(_expectedQuerySuccessResponseBody['data']);
+      final expected = json.encode(expectedQuerySuccessResponseBody['data']);
 
       expect(res.data, equals(expected));
       expect(res.errors, isEmpty);
@@ -242,7 +178,23 @@ void main() {
       final operation = Amplify.API.mutate(request: req);
       final res = await operation.response;
 
-      final expected = json.encode(_expectedMutateSuccessResponseBody['data']);
+      final expected = json.encode(expectedMutateSuccessResponseBody['data']);
+
+      expect(res.data, equals(expected));
+      expect(res.errors, isEmpty);
+    });
+
+    test('Mutate returns proper response.data for custom types', () async {
+      final req = GraphQLRequest<String>(
+        document: modelWithCustomTypeDocument,
+        variables: modelWithCustomTypeVariables,
+      );
+
+      final operation = Amplify.API.mutate(request: req);
+      final res = await operation.response;
+
+      final expected =
+          json.encode(expectedModelWithCustomTypeSuccessResponseBody['data']);
 
       expect(res.data, equals(expected));
       expect(res.errors, isEmpty);
@@ -255,7 +207,7 @@ void main() {
       const expectedDoc =
           'query getBlog(\$id: ID!) { getBlog(id: \$id) { $blogSelectionSet } }';
       const decodePath = 'getBlog';
-      final blog = Blog(id: _modelQueryId, name: 'Lorem ipsum $_modelQueryId');
+      final blog = Blog(id: modelQueryId, name: 'Lorem ipsum $modelQueryId');
       final req = ModelQueries.get<Blog>(Blog.classType, blog.modelIdentifier);
 
       final operation = Amplify.API.query(request: req);
@@ -263,15 +215,49 @@ void main() {
 
       // request asserts
       expect(req.document, expectedDoc);
-      expect(_deepEquals(req.variables, {'id': _modelQueryId}), isTrue);
+      expect(_deepEquals(req.variables, {'id': modelQueryId}), isTrue);
       expect(req.modelType, Blog.classType);
       expect(req.decodePath, decodePath);
       // response asserts
       expect(res.data, isA<Blog>());
-      expect(res.data?.id, _modelQueryId);
+      expect(res.data?.id, modelQueryId);
+      expect(res.errors, isEmpty);
+    });
+
+    test(
+        'Mutation.create returns proper response.data for Models with custom types',
+        () async {
+      const expectedDoc = modelWithCustomTypeDocument;
+      const decodePath = 'createModelWithCustomType';
+      final req = ModelMutations.create<ModelWithCustomType>(
+        modelWithCustomType,
+      );
+
+      final operation = Amplify.API.query(request: req);
+      final res = await operation.response;
+
+      // request asserts
+      expect(req.document, expectedDoc);
+      expect(_deepEquals(req.variables, modelWithCustomTypeVariables), isTrue);
+      expect(req.modelType, ModelWithCustomType.classType);
+      expect(req.decodePath, decodePath);
+      // response asserts
+      expect(res.data, isA<ModelWithCustomType>());
+      expect(res.data?.id, modelCustomTypeId);
+
+      final data = res.data!;
+      expect(
+        data.customTypeValue,
+        equals(modelWithCustomType.customTypeValue),
+      );
+      expect(
+        data.listOfCustomTypeValue,
+        equals(modelWithCustomType.listOfCustomTypeValue),
+      );
       expect(res.errors, isEmpty);
     });
   });
+
   const graphQLDocument = '''subscription MySubscription {
         onCreateBlog {
           id
@@ -550,15 +536,15 @@ void main() {
       final res = await operation.response;
 
       const errorExpected = GraphQLResponseError(
-        message: _errorMessage,
+        message: errorMessage,
         locations: [
           GraphQLResponseErrorLocation(2, 3),
           GraphQLResponseErrorLocation(4, 5),
         ],
-        path: <dynamic>[..._errorPath],
-        extensions: <String, dynamic>{..._errorExtensions},
-        errorType: _errorType,
-        errorInfo: _errorInfo,
+        path: <dynamic>[...errorPath],
+        extensions: <String, dynamic>{...errorExtensions},
+        errorType: errorType,
+        errorInfo: errorInfo,
       );
 
       expect(res.data, equals(null));
@@ -585,7 +571,7 @@ void main() {
       final res = await operation.response;
 
       const errorExpected = GraphQLResponseError(
-        message: _authErrorMessage,
+        message: authErrorMessage,
       );
 
       expect(res.data, equals(null));
@@ -689,6 +675,150 @@ void main() {
             emitsDone,
           ],
         ),
+      );
+    });
+  });
+
+  group('Model fromJson()', () {
+    final mockBlogJson = Map<String, dynamic>.from({
+      'id': '2219c0fe-5243-48ec-8449-b3a2c8fbd3f5',
+      'name': 'Example Blog - 7dc976d7-53a0-47e7-8617-3e62ccebc9e9',
+    });
+    final mockPostJson = Map<String, dynamic>.from({
+      'id': '3bb89c75-22a9-4ee6-94b0-2fc0a20f01a4',
+      'title': 'Example Post - ee824e31-e85d-4faf-97a0-f00649b32599',
+      'rating': 3,
+      'createdAt': '2024-04-04T15:06:30.203Z',
+      'updatedAt': '2024-04-04T15:06:30.203Z',
+    });
+    final mockCommentsJson = List<Map<String, dynamic>>.from([
+      {
+        'content': 'Example Comment - fbc844fa-6ef4-4594-a2ed-9d124275ed30',
+        'id': '288d2f5d-39fa-4d70-8fd9-467a4dee9d41',
+      },
+      {
+        'content': 'Example Comment - c09ed2ea-1d9b-4bff-baf4-f19d806338ee',
+        'id': '84908a82-826a-45d3-978c-0842ad26a493',
+      },
+      {
+        'content': 'Example Comment - f83339ee-0845-4930-be08-bd592ef29321',
+        'id': '3cebd81c-fb26-4adc-996a-b869ff83fa8b',
+      },
+      {
+        'content': 'Example Comment - 6fc3b904-b977-4256-96a9-43221d01d046',
+        'id': 'cac2e916-3fc9-4842-8ba6-ce58e59f163c',
+      }
+    ]);
+    final appsyncResponse = Map<String, dynamic>.from({
+      ...mockPostJson,
+      'comments': {
+        'items': mockCommentsJson,
+      },
+      'blog': mockBlogJson,
+    });
+    final appsyncSerializedResponse = Map<String, dynamic>.from({
+      ...mockPostJson,
+      'comments': [
+        {
+          'serializedData': mockCommentsJson[0],
+        },
+        {
+          'serializedData': mockCommentsJson[1],
+        },
+        {
+          'serializedData': mockCommentsJson[2],
+        },
+        {
+          'serializedData': mockCommentsJson[3],
+        },
+      ],
+      'blog': {'serializedData': mockBlogJson},
+    });
+    final nullResponse = Map<String, dynamic>.from({
+      ...mockPostJson,
+      'comments': null,
+      'blog': null,
+    });
+
+    final malformedResponse = Map<String, dynamic>.from({
+      ...mockPostJson,
+      'comments': 'foo',
+      'blog': null,
+    });
+
+    test('should work with nested models V2', () async {
+      final post = Post.fromJson(appsyncResponse);
+
+      expect(
+        post.id,
+        mockPostJson['id'],
+      );
+      expect(
+        post.blog?.name,
+        mockBlogJson['name'],
+      );
+      expect(
+        post.comments?.length,
+        mockCommentsJson.length,
+      );
+      expect(
+        post.comments?[0].content,
+        mockCommentsJson[0]['content'],
+      );
+    });
+
+    test('should work with nested models V1', () async {
+      final post = Post.fromJson(appsyncSerializedResponse);
+
+      expect(
+        post.id,
+        mockPostJson['id'],
+      );
+      expect(
+        post.blog?.name,
+        mockBlogJson['name'],
+      );
+      expect(
+        post.comments?.length,
+        mockCommentsJson.length,
+      );
+      expect(
+        post.comments?[0].content,
+        mockCommentsJson[0]['content'],
+      );
+    });
+
+    test('should work with null nested models', () async {
+      final post = Post.fromJson(nullResponse);
+
+      expect(
+        post.id,
+        mockPostJson['id'],
+      );
+      expect(
+        post.blog,
+        isNull,
+      );
+      expect(
+        post.comments,
+        isNull,
+      );
+    });
+
+    test('should gracefully handle wrong types', () async {
+      final post = Post.fromJson(malformedResponse);
+
+      expect(
+        post.id,
+        mockPostJson['id'],
+      );
+      expect(
+        post.blog,
+        isNull,
+      );
+      expect(
+        post.comments,
+        isNull,
       );
     });
   });

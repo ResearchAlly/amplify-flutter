@@ -1,3 +1,16 @@
+## 0.7.1
+
+- Minor bug fixes and improvements
+
+## 0.7.0
+
+- Minor bug fixes and improvements
+
+## 0.6.5
+
+### Fixes
+- fix: properly handle 16-bit code units ([#4717](https://github.com/aws-amplify/amplify-flutter/pull/4717))
+
 ## 0.6.4
 
 ### Features

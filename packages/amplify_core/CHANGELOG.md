@@ -1,3 +1,55 @@
+## 2.3.0
+
+- Minor bug fixes and improvements
+
+## 2.2.0
+
+### Fixes
+- fix(api): GraphQLResponse.toString() include data & errors ([#5079](https://github.com/aws-amplify/amplify-flutter/pull/5079))
+- fix(core): improve amplify configure api error message ([#5021](https://github.com/aws-amplify/amplify-flutter/pull/5021))
+- fix(notifications): allow offline configuration
+- fix: wait for in progress multi part uploads to cancel for `pause` and `cancel`
+
+### Features
+- feat: Support Amplify Gen 2 outputs ([#5073](https://github.com/aws-amplify/amplify-flutter/pull/5073))
+
+## 2.1.0
+
+### Features
+- feat(datastore): Migrate to Amplify Swift V2 ([#4962](https://github.com/aws-amplify/amplify-flutter/pull/4962))
+
+## 2.0.0
+
+We are thrilled to release version 2.0 of the Amplify Flutter libraries to add support for Amplify Gen 2. Learn more about Amplify Gen 2 at [https://docs.amplify.aws](https://docs.amplify.aws).
+
+This release enables flexible storage paths when using Amplify Gen 2 Storage. This release also addresses several bugs that required breaking changes to resolve. See the change log below for the full list of updates.
+
+If you are upgrading an existing project using Amplify Flutter v1 (created with Amplify Gen 1 CLI or a custom pipeline) please see the [upgrade guide](https://docs.amplify.aws/gen1/flutter/start/project-setup/upgrade-guide/).
+
+As always, you can find us on [GitHub](https://github.com/aws-amplify/amplify-flutter/) and [Discord](https://discord.gg/jWVbPfC) to answer any questions.
+
+### Breaking Changes
+- chore(auth)!: remove deprecated auth types ([#4764](https://github.com/aws-amplify/amplify-flutter/pull/4764))
+- fix(auth)!: regenerate cognito sdks to update signup operation for adding limit exceeded exception ([#4781](https://github.com/aws-amplify/amplify-flutter/pull/4781))
+- chore(analytics)!: remove deprecated apis
+- chore(api)!: Model .fromJson() Refactor ([#4665](https://github.com/aws-amplify/amplify-flutter/pull/4665))
+- chore(api)!: Removed deprecated members … ([#4772](https://github.com/aws-amplify/amplify-flutter/pull/4772))
+- chore(api)!: remove Model.getId() usages ([#4774](https://github.com/aws-amplify/amplify-flutter/pull/4774))
+- chore(core)!: make asyncConfig internal
+- chore(core)!: removed toJson fallback ([#4793](https://github.com/aws-amplify/amplify-flutter/pull/4793))
+- feat(core)!: use plugin options for optional plugin parameters ([#4762](https://github.com/aws-amplify/amplify-flutter/pull/4762))
+- feat(smithy)!: remove error match on http status code ([#4750](https://github.com/aws-amplify/amplify-flutter/pull/4750))
+- feat(storage)!: Update storage APIs to accept `StoragePath` ([#4713](https://github.com/aws-amplify/amplify-flutter/pull/4713))
+- feat(storage)!: move `delimiter` to `S3ListPluginOptions` ([#4773](https://github.com/aws-amplify/amplify-flutter/pull/4773))
+- chore(storage)!: rename StorageNotFoundException ([#4770](https://github.com/aws-amplify/amplify-flutter/pull/4770))
+
+### Features
+- feat(api): Add attributeExists query predicate ([#4134](https://github.com/aws-amplify/amplify-flutter/pull/4134))
+
+### Fixes
+- fix(auth): Android Intent URI Query Parameter Parsing ([#4546](https://github.com/aws-amplify/amplify-flutter/pull/4546))
+- fix(auth): map Lambda exceptions correctly ([#4804](https://github.com/aws-amplify/amplify-flutter/pull/4804))
+
 ## 1.8.0
 
 ### Features

@@ -54,7 +54,7 @@ class AppState {
 /// main app component
 class AppComponent extends StatefulComponent {
   AppState appState = AppState();
-  late AmplifyConfig config;
+  late AmplifyOutputs config;
 
   String? _error;
 
@@ -62,14 +62,12 @@ class AppComponent extends StatefulComponent {
     if (Amplify.isConfigured) return;
     try {
       await configure();
-      // TODO(nikahsn): remove after making the api internal in 2.0.0.
-      // ignore: deprecated_member_use
+      // ignore: invalid_use_of_internal_member
       config = await Amplify.asyncConfig;
 
       Amplify.Hub.listen(HubChannel.Auth, (AuthHubEvent event) {
         if (event.type == AuthHubEventType.signedIn) {
-          // TODO(nikahsn): remove after making the api internal in 2.0.0.
-          // ignore: deprecated_member_use
+          // ignore: invalid_use_of_internal_member
           Amplify.asyncConfig.then((_) {
             if (!appState.authState.isAuthenticatedRoute) {
               setState(
@@ -191,7 +189,7 @@ class AppComponent extends StatefulComponent {
                       );
                     },
                   ),
-                  if (config.auth!.awsPlugin!.auth!.default$!.oAuth != null)
+                  if (config.auth!.oauth != null)
                     ButtonComponent(
                       id: 'hostedUiLogin',
                       innerHtml: 'Login with Hosted UI',

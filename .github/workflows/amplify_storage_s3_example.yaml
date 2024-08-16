@@ -138,6 +138,7 @@ on:
       - 'packages/worker_bee/worker_bee_builder/pubspec.yaml'
   schedule:
     - cron: "0 13 * * *" # Everyday at 06:00 PST
+  workflow_dispatch:
 defaults:
   run:
     shell: bash
@@ -169,6 +170,7 @@ jobs:
       package-name: amplify_storage_s3_example
       working-directory: packages/storage/amplify_storage_s3/example
       needs-aws-config: true
+      needs-gen2-config: false
   e2e_ios_test:
     needs: [test]
     uses: ./.github/workflows/e2e_ios.yaml
@@ -177,6 +179,7 @@ jobs:
       package-name: amplify_storage_s3_example
       working-directory: packages/storage/amplify_storage_s3/example
       needs-aws-config: true
+      needs-gen2-config: false
   e2e_web_test:
     needs: [test]
     uses: ./.github/workflows/e2e_web.yaml
@@ -185,6 +188,7 @@ jobs:
       package-name: amplify_storage_s3_example
       working-directory: packages/storage/amplify_storage_s3/example
       needs-aws-config: true
+      needs-gen2-config: false
   e2e_linux_test:
     needs: [test]
     uses: ./.github/workflows/e2e_linux.yaml
@@ -193,6 +197,7 @@ jobs:
       package-name: amplify_storage_s3_example
       working-directory: packages/storage/amplify_storage_s3/example
       needs-aws-config: true
+      needs-gen2-config: false
   e2e_windows_test:
     needs: [test]
     uses: ./.github/workflows/e2e_windows.yaml
@@ -201,3 +206,4 @@ jobs:
       package-name: amplify_storage_s3_example
       working-directory: packages/storage/amplify_storage_s3/example
       needs-aws-config: true
+      needs-gen2-config: false

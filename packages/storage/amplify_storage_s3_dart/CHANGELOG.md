@@ -1,3 +1,26 @@
+## 0.4.3
+
+- Minor bug fixes and improvements
+
+## 0.4.2
+
+### Fixes
+- fix: wait for in progress multi part uploads to cancel for `pause` and `cancel`
+
+### Features
+- feat: Support Amplify Gen 2 outputs ([#5073](https://github.com/aws-amplify/amplify-flutter/pull/5073))
+
+## 0.4.1
+
+- Minor bug fixes and improvements
+
+## 0.4.0
+
+### Breaking Changes
+- chore!: rename StorageNotFoundException ([#4770](https://github.com/aws-amplify/amplify-flutter/pull/4770))
+- feat!: Update storage APIs to accept `StoragePath` ([#4713](https://github.com/aws-amplify/amplify-flutter/pull/4713))
+- feat!: move `delimiter` to `S3ListPluginOptions` ([#4773](https://github.com/aws-amplify/amplify-flutter/pull/4773))
+
 ## 0.3.11
 
 ### Features

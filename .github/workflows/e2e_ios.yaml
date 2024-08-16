@@ -14,10 +14,15 @@ on:
         description: Whether the E2E workflow needs configuration pulled from AWS
         required: true
         type: boolean
+      needs-gen2-config:
+        required: true
+        description: Whether the E2E workflow needs amplify_outputs from AWS
+        type: boolean
 
 jobs:
   e2e-test-ios:
-    runs-on: macos-latest-xl
+    # TODO(equartey): Change to `macos-latest` after github migrates their runners - https://github.blog/changelog/2024-01-30-github-actions-macos-14-sonoma-is-now-available/
+    runs-on: macos-14-xlarge
     strategy:
       # Allows other matrix items to run if one fails
       fail-fast: false
@@ -59,6 +64,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           scope: ${{ inputs.package-name }}
           secret-identifier: ${{ secrets.AWS_SECRET_IDENTIFIER }}
+          needs-gen2-config: ${{ inputs.needs-gen2-config }}
 
       - name: Run integration tests
         timeout-minutes: 60

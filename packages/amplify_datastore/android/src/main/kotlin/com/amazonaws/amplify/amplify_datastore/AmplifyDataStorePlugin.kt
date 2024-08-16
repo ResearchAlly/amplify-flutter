@@ -19,6 +19,7 @@ import com.amazonaws.amplify.amplify_datastore.pigeons.NativeApiPlugin
 import com.amazonaws.amplify.amplify_datastore.pigeons.NativeAuthBridge
 import com.amazonaws.amplify.amplify_datastore.pigeons.NativeAuthPlugin
 import com.amazonaws.amplify.amplify_datastore.pigeons.NativeAuthUser
+import com.amazonaws.amplify.amplify_datastore.pigeons.NativeGraphQLSubscriptionResponse
 import com.amazonaws.amplify.amplify_datastore.types.model.FlutterCustomTypeSchema
 import com.amazonaws.amplify.amplify_datastore.types.model.FlutterModelSchema
 import com.amazonaws.amplify.amplify_datastore.types.model.FlutterSerializedModel
@@ -30,6 +31,7 @@ import com.amazonaws.amplify.amplify_datastore.util.cast
 import com.amazonaws.amplify.amplify_datastore.util.safeCastToList
 import com.amazonaws.amplify.amplify_datastore.util.safeCastToMap
 import com.amplifyframework.AmplifyException
+import com.amplifyframework.annotations.AmplifyFlutterApi
 import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.api.aws.AuthModeStrategyType
 import com.amplifyframework.api.aws.AuthorizationType
@@ -37,6 +39,7 @@ import com.amplifyframework.auth.AuthUser
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.AmplifyConfiguration
 import com.amplifyframework.core.async.Cancelable
+import com.amplifyframework.core.configuration.AmplifyOutputs
 import com.amplifyframework.core.model.CustomTypeSchema
 import com.amplifyframework.core.model.Model
 import com.amplifyframework.core.model.ModelSchema
@@ -900,6 +903,7 @@ class AmplifyDataStorePlugin :
 
     override fun addApiPlugin(
         authProvidersList: List<String>,
+        endpoints: Map<String, String>,
         callback: (kotlin.Result<Unit>) -> Unit
     ) {
         try {
@@ -920,6 +924,13 @@ class AmplifyDataStorePlugin :
             callback(kotlin.Result.failure(e))
         }
     }
+    
+    override fun sendSubscriptionEvent(
+        event: NativeGraphQLSubscriptionResponse,
+        callback: (kotlin.Result<Unit>) -> Unit
+    ) {
+        throw NotImplementedError("Not yet implemented")
+    }
 
     override fun configure(
         version: String,
@@ -928,11 +939,9 @@ class AmplifyDataStorePlugin :
     ) {
         coroutineScope.launch(dispatcher) {
             try {
-                val configuration = AmplifyConfiguration.builder(JSONObject(config))
-                    .addPlatform(UserAgent.Platform.FLUTTER, "$version /datastore")
-                    .devMenuEnabled(false)
-                    .build()
-                Amplify.configure(configuration, context)
+                @OptIn(AmplifyFlutterApi::class)
+                Amplify.addUserAgentPlatform(UserAgent.Platform.FLUTTER, "$version /datastore")
+                Amplify.configure(AmplifyOutputs(config), context)
                 withContext(Dispatchers.Main) {
                     callback(kotlin.Result.success(Unit))
                 }

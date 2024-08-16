@@ -68,7 +68,7 @@ abstract class AuthService {
     required CognitoUserAttributeKey userAttributeKey,
     required String confirmationCode,
   });
-  Future<AmplifyConfig> waitForConfiguration();
+  Future<AmplifyOutputs> waitForConfiguration();
 
   Future<void> rememberDevice();
 
@@ -324,7 +324,7 @@ class AmplifyAuthService
   }
 
   @override
-  Future<AmplifyConfig> waitForConfiguration() async {
+  Future<AmplifyOutputs> waitForConfiguration() async {
     final timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       logger.warn(
         'Amplify is taking longer than expected to configure.'
@@ -332,8 +332,7 @@ class AmplifyAuthService
       );
     });
     try {
-      // TODO(nikahsn): remove after making the api internal in 2.0.0.
-      // ignore: deprecated_member_use
+      // ignore: invalid_use_of_internal_member
       return await Amplify.asyncConfig;
     } finally {
       timer.cancel();

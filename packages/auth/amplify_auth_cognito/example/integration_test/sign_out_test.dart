@@ -49,14 +49,13 @@ void main() {
             environmentName: environmentName,
           );
 
-          // TODO(nikahsn): remove after making the api internal in 2.0.0.
-          // ignore: deprecated_member_use
+          // ignore: invalid_use_of_internal_member
           final config = await Amplify.asyncConfig;
-          final authConfig = config.auth!.awsPlugin!.cognitoUserPool!.default$!;
+          final authConfig = config.auth!;
           client = AWSHttpClient()
             ..supportedProtocols = SupportedProtocols.http1;
           cognitoClient = cognito_idp.CognitoIdentityProviderClient(
-            region: authConfig.region,
+            region: authConfig.awsRegion,
           );
           addTearDown(client.close);
 
