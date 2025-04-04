@@ -9,6 +9,8 @@ library amplify_api.graphql.ws.web_socket_types;
 import 'dart:convert';
 
 import 'package:amplify_core/amplify_core.dart';
+// ignore: implementation_imports
+import 'package:amplify_core/src/config/amplify_outputs/api_outputs.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
@@ -100,7 +102,7 @@ class SubscriptionRegistrationPayload extends WebSocketMessagePayload {
     required this.authorizationHeaders,
   });
   final GraphQLRequest<dynamic> request;
-  final AWSApiConfig config;
+  final ApiOutputs config;
   final Map<String, String> authorizationHeaders;
 
   @override
@@ -142,8 +144,15 @@ class WebSocketError extends WebSocketMessagePayload implements Exception {
   final List<Map<String, dynamic>> errors;
 
   static WebSocketError fromJson(Map<String, dynamic> json) {
-    final errors = json['errors'] as List?;
-    return WebSocketError(errors?.cast() ?? []);
+    final errors = json['errors'];
+    List<Map<String, dynamic>>? errorsList = [];
+    if (errors is List?) {
+      errorsList = errors?.cast();
+    } else if (errors is Map<String, dynamic>) {
+      errorsList = [errors];
+    }
+
+    return WebSocketError(errorsList ?? []);
   }
 
   @override

@@ -1,3 +1,12 @@
+## 2.4.1
+
+- Minor bug fixes and improvements
+
+## 2.4.0
+
+### Fixes
+- fix: push notification flush events ([#5215](https://github.com/aws-amplify/amplify-flutter/pull/5215))
+
 ## 2.3.0
 
 ### Fixes

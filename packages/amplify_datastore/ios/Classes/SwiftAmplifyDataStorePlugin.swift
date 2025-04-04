@@ -145,8 +145,6 @@ public class SwiftAmplifyDataStorePlugin: NSObject, FlutterPlugin, NativeAmplify
                     nil
                 )
             }
-            // TODO: Migrate to Async Swift v2
-            //            AmplifyAWSServiceConfiguration.addUserAgentPlatform(.flutter, version: "\(version) /datastore")
             try Amplify.configure(with : .data(data))
             return completion(.success(()))
         } catch let error as ConfigurationError {
@@ -234,6 +232,9 @@ public class SwiftAmplifyDataStorePlugin: NSObject, FlutterPlugin, NativeAmplify
             onStart(flutterResult: result)
         case "stop":
             onStop(flutterResult: result)
+            DispatchQueue.main.async {
+                self.nativeApiPlugin.onStop {}
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

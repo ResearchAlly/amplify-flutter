@@ -66,8 +66,9 @@ void main() {
 
     seedStorage(
       secureStorage,
-      userPoolKeys: CognitoUserPoolKeys(userPoolConfig),
-      identityPoolKeys: CognitoIdentityPoolKeys(identityPoolConfig),
+      userPoolKeys: CognitoUserPoolKeys(mockConfig.auth!.userPoolClientId!),
+      identityPoolKeys:
+          CognitoIdentityPoolKeys(mockConfig.auth!.identityPoolId!),
     );
 
     await plugin.addPlugin(authProviderRepo: testAuthRepo);

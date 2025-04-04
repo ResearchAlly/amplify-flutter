@@ -37,10 +37,12 @@ class MockHostedUiPlatform extends HostedUiPlatform {
   }) async {}
 
   @override
-  Uri get signInRedirectUri => config.signInRedirectUris.first;
+  Uri get signInRedirectUri =>
+      Uri.parse(authOutputs.oauth!.redirectSignInUri.first);
 
   @override
-  Uri get signOutRedirectUri => config.signOutRedirectUris.first;
+  Uri get signOutRedirectUri =>
+      Uri.parse(authOutputs.oauth!.redirectSignOutUri.first);
 }
 
 class FailingHostedUiPlatform extends HostedUiPlatform {
@@ -62,15 +64,17 @@ class FailingHostedUiPlatform extends HostedUiPlatform {
   }
 
   @override
-  Uri get signInRedirectUri => config.signInRedirectUris.first;
+  Uri get signInRedirectUri =>
+      Uri.parse(authOutputs.oauth!.redirectSignInUri.first);
 
   @override
-  Uri get signOutRedirectUri => config.signOutRedirectUris.first;
+  Uri get signOutRedirectUri =>
+      Uri.parse(authOutputs.oauth!.redirectSignOutUri.first);
 }
 
 void main() {
   AWSLogger().logLevel = LogLevel.verbose;
-  const keys = HostedUiKeys(hostedUiConfig);
+  final keys = HostedUiKeys(mockConfig.auth!.userPoolClientId!);
 
   group('HostedUiStateMachine', () {
     late MockOAuthServer server;
@@ -93,7 +97,7 @@ void main() {
         ..addInstance<Dispatcher<AuthEvent, AuthState>>(
           const MockDispatcher(),
         )
-        ..addInstance<CognitoOAuthConfig>(hostedUiConfig);
+        ..addInstance(mockConfig.auth!);
 
       final platform = stateMachine.create<HostedUiPlatform>();
       final authorizationUri = await platform.getSignInUri();
@@ -107,10 +111,16 @@ void main() {
       expect(authorizationUri.queryParameters['redirect_uri'], isNotEmpty);
 
       expect(authorizationUri.queryParameters['scope'], isNotNull);
-      expect(authorizationUri.queryParameters['scope'], scopes.join(' '));
+      expect(
+        authorizationUri.queryParameters['scope'],
+        mockConfig.auth!.oauth!.scopes.join(' '),
+      );
 
       expect(authorizationUri.queryParameters['response_type'], 'code');
-      expect(authorizationUri.queryParameters['client_id'], testAppClientId);
+      expect(
+        authorizationUri.queryParameters['client_id'],
+        mockConfig.auth!.userPoolClientId,
+      );
 
       expect(authorizationUri.queryParameters['code_challenge'], isNotNull);
       expect(authorizationUri.queryParameters['code_challenge'], isNotEmpty);

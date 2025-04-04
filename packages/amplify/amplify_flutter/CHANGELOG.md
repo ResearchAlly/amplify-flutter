@@ -1,3 +1,27 @@
+## 2.4.1
+
+### Fixes
+- fix(datastore): FlutterSerializedModel.extractJsonValue returns `.some(nil)` instead of `nil` ([#5370](https://github.com/aws-amplify/amplify-flutter/pull/5370))
+- fix(api): web socket error handling ([#5359](https://github.com/aws-amplify/amplify-flutter/pull/5359))
+
+### Chores
+- chore(deps): Amplify Android 2.21.1 ([#5376](https://github.com/aws-amplify/amplify-flutter/pull/5376))
+
+## 2.4.0
+
+### Features
+- feat(Auth): Add fetchCurrentDevice API ([#5251](https://github.com/aws-amplify/amplify-flutter/pull/5251))
+
+### Fixes
+- fix(datastore): Clear subscriptions on Stop ([#5253](https://github.com/aws-amplify/amplify-flutter/pull/5253))
+- fix(datastore): Restart Sync Engine when network on/off ([#5218](https://github.com/aws-amplify/amplify-flutter/pull/5218))
+- fix(notification): flush events ([#5215](https://github.com/aws-amplify/amplify-flutter/pull/5215))
+- fix(secure_storage): Plugin Endorsement ([#5208](https://github.com/aws-amplify/amplify-flutter/pull/5208))
+- fix(authenticator): Export InstructionsResolver ([#5169](https://github.com/aws-amplify/amplify-flutter/pull/5169))
+
+### Chores
+- chore: bump json_annotation dependency to v4.9
+
 ## 2.3.0
 
 ### Fixes

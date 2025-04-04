@@ -1,3 +1,12 @@
+## 2.4.1
+
+- Minor bug fixes and improvements
+
+## 2.4.0
+
+### Chores
+- chore: bump json_annotation dependency to v4.9
+
 ## 2.3.0
 
 - Minor bug fixes and improvements
