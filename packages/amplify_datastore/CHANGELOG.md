@@ -1,3 +1,20 @@
+## 2.6.1
+
+- Minor bug fixes and improvements
+
+## 2.6.0
+
+### Fixes
+- fix(datastore): properly handle multiple configures on Android ([#5740](https://github.com/aws-amplify/amplify-flutter/pull/5740))
+
+## 2.5.0
+
+- Minor bug fixes and improvements
+
+## 2.4.2
+
+- Minor bug fixes and improvements
+
 ## 2.4.1
 
 ### Fixes

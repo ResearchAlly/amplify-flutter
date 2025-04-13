@@ -1,3 +1,21 @@
+## 2.6.1
+
+- Minor bug fixes and improvements
+
+## 2.6.0
+
+### Features
+- feat(storage): add multi-bucket feature support  ([#5681](https://github.com/aws-amplify/amplify-flutter/pull/5681))
+
+### Fixes
+- fix(aws_common): removed JS streamed requests ([#5797](https://github.com/aws-amplify/amplify-flutter/pull/5797))
+- fix(datastore): properly handle multiple configures on Android ([#5740](https://github.com/aws-amplify/amplify-flutter/pull/5740))
+
+## 2.5.0
+
+### Features
+- feat(auth, authenticator): Add support for Email OTP MFA ([#5449](https://github.com/aws-amplify/amplify-flutter/pull/5449)) (#5472)
+
 ## 2.4.1
 
 ### Fixes
@@ -79,7 +97,7 @@ As always, you can find us on [GitHub](https://github.com/aws-amplify/amplify-fl
 ## 1.8.0
 
 NOTE: This version has been updated to:
-- Flutter: ">=3.19.0"
+- flutter: ">=3.19.0"
 - Dart ^3.3.0
 - Java 17, Kotlin 1.9.10 and Gradle 8.1 for Android projects
 

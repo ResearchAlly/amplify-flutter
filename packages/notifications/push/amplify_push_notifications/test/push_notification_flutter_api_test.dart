@@ -13,6 +13,7 @@ import 'amplify_push_notifications_impl_test.mocks.dart';
 import 'test_data/fake_notification_messges.dart';
 import 'test_data/test_amplify_push_notifications_impl.dart';
 
+@pragma('vm:entry-point')
 void testGlobalCallbackFunction(PushNotificationMessage pushMessage) {
   expect(
     pushMessage.title,
@@ -80,7 +81,7 @@ void main() {
       'should invoke the top-level or static external callback function on Android',
       () async {
     await overrideOperatingSystem(
-      const OperatingSystem('android', ''),
+      OperatingSystem('android', ''),
       () async {
         final pref = await SharedPreferences.getInstance();
         TestAmplifyPushNotifications(

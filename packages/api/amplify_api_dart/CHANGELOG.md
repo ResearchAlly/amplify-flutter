@@ -1,3 +1,23 @@
+## 0.5.9
+
+- Minor bug fixes and improvements
+
+## 0.5.8
+
+- Minor bug fixes and improvements
+
+## 0.5.7
+
+- Minor bug fixes and improvements
+
+## 0.5.6
+
+### Features
+- feat(api): move App Sync subscription headers to protocol ([#5301](https://github.com/aws-amplify/amplify-flutter/pull/5301))
+
+### Fixes
+- fix(api): Reconnect WebSocket when resuming app from a paused state ([#5567](https://github.com/aws-amplify/amplify-flutter/pull/5567))
+
 ## 0.5.5
 
 ### Fixes

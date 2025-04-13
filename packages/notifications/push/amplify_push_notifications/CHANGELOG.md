@@ -1,3 +1,19 @@
+## 2.6.1
+
+- Minor bug fixes and improvements
+
+## 2.6.0
+
+- Minor bug fixes and improvements
+
+## 2.5.0
+
+- Minor bug fixes and improvements
+
+## 2.4.2
+
+- Minor bug fixes and improvements
+
 ## 2.4.1
 
 - Minor bug fixes and improvements

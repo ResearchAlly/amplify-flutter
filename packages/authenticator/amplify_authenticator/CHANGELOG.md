@@ -1,3 +1,26 @@
+## 2.3.3
+
+- Minor bug fixes and improvements
+
+## 2.3.2
+
+- Minor bug fixes and improvements
+
+## 2.3.1
+
+### Fixes
+- fix(authenticator): recover from exceptions during reset password flow ([#5672](https://github.com/aws-amplify/amplify-flutter/pull/5672))
+
+## 2.3.0
+
+### Features
+- feat(auth, authenticator): Add support for Email OTP MFA ([#5449](https://github.com/aws-amplify/amplify-flutter/pull/5449)) (#5472)
+
+## 2.2.0
+
+### Features
+- feat(authenticator): export unmet password requirements ([#5437](https://github.com/aws-amplify/amplify-flutter/pull/5437))
+
 ## 2.1.3
 
 - Minor bug fixes and improvements
