@@ -69,10 +69,7 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
       case AuthenticatorStep.continueSignInWithMfaSelection:
         baseBloc.setState(
           const ContinueSignInWithMfaSelection(
-            allowedMfaTypes: {
-              MfaType.totp,
-              MfaType.sms,
-            },
+            allowedMfaTypes: {MfaType.totp, MfaType.sms, MfaType.email},
           ),
         );
       case AuthenticatorStep.continueSignInWithTotpSetup:
@@ -87,9 +84,14 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
             ),
           ),
         );
+      case AuthenticatorStep.continueSignInWithMfaSetupSelection:
+        baseBloc.setState(
+          const ContinueSignInWithMfaSetupSelection(
+            allowedMfaTypes: {MfaType.sms, MfaType.totp, MfaType.email},
+          ),
+        );
       default:
         baseBloc.add(const AuthLoad());
-        break;
     }
 
     return baseBloc;
@@ -108,7 +110,8 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
       authBlocOverride: _authBloc,
       signInForm: widget.signInForm,
       signUpForm: widget.signUpForm,
-      child: widget.child ??
+      child:
+          widget.child ??
           MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: widget.lightTheme,
@@ -117,9 +120,7 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
             builder: Authenticator.builder(),
             home: const Scaffold(
               key: authenticatedAppKey,
-              body: Center(
-                child: SignOutButton(),
-              ),
+              body: Center(child: SignOutButton()),
             ),
           ),
     );

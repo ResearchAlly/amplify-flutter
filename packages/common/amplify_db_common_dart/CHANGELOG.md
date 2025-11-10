@@ -1,3 +1,43 @@
+## 0.4.13
+
+### Chores
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 0.4.12
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 0.4.11
+
+- Minor bug fixes and improvements
+
+## 0.4.10
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 0.4.9
+
+- Minor bug fixes and improvements
+
+## 0.4.8
+
+- Minor bug fixes and improvements
+
+## 0.4.7
+
+### Fixes
+- fix(common): db_common windows sqlite3 collision ([#5481](https://github.com/aws-amplify/amplify-flutter/pull/5481))
+
+## 0.4.6
+
+- Minor bug fixes and improvements
+
+## 0.4.5
+
+- Minor bug fixes and improvements
+
 ## 0.4.4
 
 - Minor bug fixes and improvements

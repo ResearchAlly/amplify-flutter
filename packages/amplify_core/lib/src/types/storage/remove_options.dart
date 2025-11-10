@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import 'package:aws_common/aws_common.dart';
+import 'package:amplify_core/amplify_core.dart';
 
 /// {@template amplify_core.storage.remove_options}
 /// Configurable options for `Amplify.Storage.remove`.
@@ -12,23 +12,25 @@ class StorageRemoveOptions
         AWSSerializable<Map<String, Object?>>,
         AWSDebuggable {
   /// {@macro amplify_core.storage.remove_options}
-  const StorageRemoveOptions({
-    this.pluginOptions,
-  });
+  const StorageRemoveOptions({this.pluginOptions, this.bucket});
 
   /// {@macro amplify_core.storage.remove_plugin_options}
   final StorageRemovePluginOptions? pluginOptions;
 
+  /// Optionally specify which bucket to target
+  final StorageBucket? bucket;
+
   @override
-  List<Object?> get props => [pluginOptions];
+  List<Object?> get props => [pluginOptions, bucket];
 
   @override
   String get runtimeTypeName => 'StorageRemoveOptions';
 
   @override
   Map<String, Object?> toJson() => {
-        'pluginOptions': pluginOptions?.toJson(),
-      };
+    'pluginOptions': pluginOptions?.toJson(),
+    'bucket': bucket?.toJson(),
+  };
 }
 
 /// {@template amplify_core.storage.remove_plugin_options}

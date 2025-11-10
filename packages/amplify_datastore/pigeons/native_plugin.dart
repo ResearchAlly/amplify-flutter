@@ -13,7 +13,7 @@
         'android/src/main/kotlin/com/amazonaws/amplify/amplify_datastore/pigeons/NativePluginBindings.kt',
   ),
 )
-library native_plugin;
+library;
 
 import 'package:pigeon/pigeon.dart';
 
@@ -41,6 +41,12 @@ abstract class NativeApiPlugin {
 
   @async
   void unsubscribe(String subscriptionId);
+
+  @async
+  void deviceOffline();
+
+  @async
+  void onStop();
 }
 
 /// Bridge for calling Amplify from Flutter into Native
@@ -64,7 +70,9 @@ abstract class NativeAuthBridge {
 abstract class NativeApiBridge {
   @async
   void addApiPlugin(
-      List<String> authProvidersList, Map<String, String> endpoints);
+    List<String> authProvidersList,
+    Map<String, String> endpoints,
+  );
 
   @async
   void sendSubscriptionEvent(NativeGraphQLSubscriptionResponse event);

@@ -1,3 +1,55 @@
+## 0.7.11
+
+### Chores
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 0.7.10
+
+- Minor bug fixes and improvements
+
+## 0.7.9
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+- chore(aws_common): Added IOT Core device service to service list ([#6170](https://github.com/aws-amplify/amplify-flutter/pull/6170))
+
+## 0.7.8
+
+- Minor bug fixes and improvements
+
+## 0.7.7
+
+### Fixes
+- fix(sigv4): Convert empty query parameters to null ([#6082](https://github.com/aws-amplify/amplify-flutter/pull/6082))
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 0.7.6
+
+- Minor bug fixes and improvements
+
+## 0.7.5
+
+### Fixes
+- fix(aws_common): removed JS streamed requests ([#5797](https://github.com/aws-amplify/amplify-flutter/pull/5797))
+
+## 0.7.4
+
+- Minor bug fixes and improvements
+
+## 0.7.3
+
+### Features
+- feat(aws_common): Generated new AWSService constructors ([#5378](https://github.com/aws-amplify/amplify-flutter/pull/5378))
+
+## 0.7.2
+
+- Minor bug fixes and improvements
+
+### Chores
+- chore: bump json_annotation dependency to v4.9
+
 ## 0.7.1
 
 - Minor bug fixes and improvements

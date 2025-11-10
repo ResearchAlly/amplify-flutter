@@ -1,3 +1,51 @@
+## 0.5.13
+
+### Chores
+- chore(all): Bumped Flutter SDK to ^3.35.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped com.android.tools.build:gradle to 8.12.1 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(secure_storage): Bumped androidx.security:security-crypto to 1.1.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 0.5.12
+
+### Chores
+- chore(secure_storage): Bumped kotlin_version to 2.2.0 ([#6224](https://github.com/aws-amplify/amplify-flutter/pull/6224))
+- chore(secure_storage): Bumped com.android.tools.build:gradle to 8.11.0 ([#6203](https://github.com/aws-amplify/amplify-flutter/pull/6203))
+
+## 0.5.11
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 0.5.10
+
+- Minor bug fixes and improvements
+
+## 0.5.9
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 0.5.8
+
+- Minor bug fixes and improvements
+
+## 0.5.7
+
+- Minor bug fixes and improvements
+
+## 0.5.6
+
+### Fixes
+- fix(secure_storage): add missing macOS plugin ([#5372](https://github.com/aws-amplify/amplify-flutter/pull/5372))
+
+## 0.5.5
+
+### Fixes
+- fix(secure_storage): Add plugin platform entry. ([#5178](https://github.com/aws-amplify/amplify-flutter/pull/5178))
+- fix(secure_storage): process file system operations one at a time on Windows ([#5195](https://github.com/aws-amplify/amplify-flutter/pull/5195))
+- fix(secure_storage): Plugin Endorsement ([#5208](https://github.com/aws-amplify/amplify-flutter/pull/5208))
+
 ## 0.5.4
 
 - Minor bug fixes and improvements

@@ -9,7 +9,6 @@ import 'package:amplify_analytics_pinpoint_dart/src/impl/analytics_client/endpoi
 import 'package:amplify_analytics_pinpoint_dart/src/impl/analytics_client/event_client/event_client.dart';
 import 'package:amplify_analytics_pinpoint_dart/src/impl/analytics_client/event_client/queued_item_store/dart_queued_item_store.dart';
 import 'package:amplify_analytics_pinpoint_dart/src/impl/analytics_client/session_manager.dart';
-import 'package:amplify_analytics_pinpoint_dart/src/impl/analytics_client/stoppable_timer.dart';
 import 'package:amplify_analytics_pinpoint_dart/src/impl/flutter_provider_interfaces/app_lifecycle_provider.dart';
 import 'package:amplify_analytics_pinpoint_dart/src/impl/flutter_provider_interfaces/cached_events_path_provider.dart';
 import 'package:amplify_analytics_pinpoint_dart/src/impl/flutter_provider_interfaces/device_context_info_provider.dart';
@@ -42,13 +41,13 @@ class AmplifyAnalyticsPinpointDart extends AnalyticsPluginInterface {
     SecureStorageFactory? secureStorageFactory,
     AnalyticsPinpointPluginOptions options =
         const AnalyticsPinpointPluginOptions(),
-  })  : _pathProvider = pathProvider,
-        _legacyNativeDataProvider = legacyNativeDataProvider,
-        _deviceContextInfoProvider = deviceContextInfoProvider,
-        _appLifecycleProvider = appLifecycleProvider,
-        _secureStorageFactory =
-            secureStorageFactory ?? AmplifySecureStorageWorker.factoryFrom(),
-        _options = options;
+  }) : _pathProvider = pathProvider,
+       _legacyNativeDataProvider = legacyNativeDataProvider,
+       _deviceContextInfoProvider = deviceContextInfoProvider,
+       _appLifecycleProvider = appLifecycleProvider,
+       _secureStorageFactory =
+           secureStorageFactory ?? AmplifySecureStorageWorker.factoryFrom(),
+       _options = options;
 
   void _ensureConfigured() {
     if (!_isConfigured) {
@@ -96,8 +95,9 @@ class AmplifyAnalyticsPinpointDart extends AnalyticsPluginInterface {
     final region = pinpointConfig.awsRegion;
 
     // Prepare PinpointClient
-    final authProvider = authProviderRepo
-        .getAuthProvider(APIAuthorizationType.iam.authProviderToken);
+    final authProvider = authProviderRepo.getAuthProvider(
+      APIAuthorizationType.iam.authProviderToken,
+    );
 
     if (authProvider == null) {
       throw ConfigurationError(
@@ -114,7 +114,8 @@ class AmplifyAnalyticsPinpointDart extends AnalyticsPluginInterface {
       AmplifySecureStorageScope.awsPinpointAnalyticsPlugin,
     );
 
-    final analyticsClient = dependencies.get<AnalyticsClient>() ??
+    final analyticsClient =
+        dependencies.get<AnalyticsClient>() ??
         AnalyticsClient(
           endpointStorage: endpointStorage,
           deviceContextInfoProvider: _deviceContextInfoProvider,
@@ -215,9 +216,7 @@ class AmplifyAnalyticsPinpointDart extends AnalyticsPluginInterface {
   }
 
   @override
-  Future<void> recordEvent({
-    required AnalyticsEvent event,
-  }) async {
+  Future<void> recordEvent({required AnalyticsEvent event}) async {
     _ensureConfigured();
     await _eventClient.recordEvent(
       eventType: event.name,

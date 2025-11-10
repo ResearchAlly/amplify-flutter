@@ -1,11 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import * as cognito_identity from "@aws-cdk/aws-cognito-identitypool-alpha";
 import * as cdk from "aws-cdk-lib";
-import { Duration, Expiration, Fn, RemovalPolicy } from "aws-cdk-lib";
+import { Fn, RemovalPolicy } from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as cognito_identity from "aws-cdk-lib/aws-cognito-identitypool";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -22,7 +22,7 @@ import {
   IntegrationTestStackEnvironmentProps,
   Mutable,
   UserPoolConfig,
-  inOneYear
+  inOneYear,
 } from "../common";
 import { UserMfaPreference } from "./common";
 import { CustomAuthorizerIamStackEnvironment } from "./custom-authorizer-iam/stack";
@@ -35,7 +35,7 @@ export type AuthIntegrationEnvironmentType =
 
 export type AuthIntegrationTestStackEnvironmentProps =
   AuthBaseEnvironmentProps &
-  (AuthFullEnvironmentProps | AuthCustomAuthorizerEnvironmentProps);
+    (AuthFullEnvironmentProps | AuthCustomAuthorizerEnvironmentProps);
 
 export interface AuthBaseEnvironmentProps
   extends IntegrationTestStackEnvironmentProps {
@@ -48,7 +48,7 @@ export interface AuthBaseEnvironmentProps
 export interface MfaConfiguration extends UserMfaPreference {
   /**
    * The MFA requirement at sign-in.
-   * 
+   *
    * @default cognito.Mfa.OPTIONAL
    */
   signIn?: cognito.Mfa;
@@ -118,7 +118,7 @@ export interface AuthFullEnvironmentProps {
 
   /**
    * Whether to issue a client secret to the user pool client.
-   * 
+   *
    * @default false
    */
   withClientSecret?: boolean;
@@ -260,7 +260,6 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
     const customSenderKmsKey = new kms.Key(this, "CustomSenderKey", {
       description: `Key for encrypting/decrypting SMS messages sent from ${this.name} user pool`,
       removalPolicy: RemovalPolicy.DESTROY,
-      alias: this.name,
     });
 
     const lambdaTriggers: Mutable<cognito.UserPoolTriggers> = {};
@@ -302,7 +301,6 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
     lambdaTriggers.customSmsSender = customSmsSender;
     graphQLApi.grantMutation(customSmsSender);
     customSenderKmsKey.grantDecrypt(customSmsSender);
-
 
     if (autoConfirm) {
       lambdaTriggers.preSignUp = new lambda_nodejs.NodejsFunction(
@@ -379,7 +377,8 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
     let mfaSecondFactor: cognito.MfaSecondFactor | undefined;
     if (mfaConfiguration) {
       mfa = mfaConfiguration.signIn ?? cognito.Mfa.OPTIONAL;
-      const { SoftwareTokenMfaSettings: totp, SMSMfaSettings: sms } = mfaConfiguration;
+      const { SoftwareTokenMfaSettings: totp, SMSMfaSettings: sms } =
+        mfaConfiguration;
       if (totp?.Enabled && sms?.Enabled) {
         mfaSecondFactor = { sms: true, otp: true };
       } else if (totp?.Enabled) {
@@ -387,7 +386,9 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
       } else if (sms?.Enabled) {
         mfaSecondFactor = { sms: true, otp: false };
       } else {
-        throw new Error(`Either SMS or TOTP must be enabled. Got ${mfaConfiguration}`);
+        throw new Error(
+          `Either SMS or TOTP must be enabled. Got ${mfaConfiguration}`
+        );
       }
     } else {
       mfa = standardAttributes.phoneNumber?.required
@@ -420,10 +421,13 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
       customSenderKmsKey,
       deviceTracking,
       mfaSecondFactor,
-      advancedSecurityMode,
-      keepOriginal
+      keepOriginal,
     });
-    this.createUserCleanupJob(userPool);
+
+    const cfnUserPool = userPool.node.defaultChild as cognito.CfnUserPool;
+    cfnUserPool.addPropertyOverride('UserPoolAddOns', {
+      AdvancedSecurityMode: advancedSecurityMode
+    });
 
     let oAuth: cognito.OAuthSettings | undefined;
     let webDomain: cognito.UserPoolDomain | undefined;
@@ -477,23 +481,32 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
     // Add stub unauthenticated/authenticated roles since these are needed by
     // the user pool.
 
-    const userPools: cognito_identity.IUserPoolAuthenticationProvider[] =
-      [];
+    const userPools: cognito_identity.IUserPoolAuthenticationProvider[] = [];
     if (includeUserPool) {
       userPools.push(
-        new cognito_identity.UserPoolAuthenticationProvider({ userPool, userPoolClient })
+        new cognito_identity.UserPoolAuthenticationProvider({
+          userPool,
+          userPoolClient,
+        })
       );
     }
-    const identityPool = new cognito_identity.IdentityPool(this, "IdentityPool", {
-      identityPoolName: this.name,
-      allowUnauthenticatedIdentities,
-      authenticationProviders: {
-        userPools,
-      },
-    });
+    const identityPool = new cognito_identity.IdentityPool(
+      this,
+      "IdentityPool",
+      {
+        identityPoolName: this.name,
+        allowUnauthenticatedIdentities,
+        authenticationProviders: {
+          userPools,
+        },
+      }
+    );
 
     this.associateWithWaf(`${this.environmentName}GraphQL`, graphQLApi.arn);
-    this.associateWithWaf(`${this.environmentName}UserPool`, userPool.userPoolArn);
+    this.associateWithWaf(
+      `${this.environmentName}UserPool`,
+      userPool.userPoolArn
+    );
 
     // Create the DynamoDB table to store MFA codes for AppSync subscriptions
 
@@ -540,10 +553,7 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
         },
       }
     );
-    userPool.grant(
-      enableSmsMfaLambda,
-      "cognito-idp:AdminSetUserMFAPreference",
-    );
+    userPool.grant(enableSmsMfaLambda, "cognito-idp:AdminSetUserMFAPreference");
 
     const deleteUserLambda = new lambda_nodejs.NodejsFunction(
       this,
@@ -684,7 +694,9 @@ class AuthIntegrationTestStackEnvironment extends IntegrationTestStackEnvironmen
       userPoolConfig = {
         userPoolId: userPool.userPoolId,
         userPoolClientId: userPoolClient.userPoolClientId,
-        userPoolClientSecret: withClientSecret ? userPoolClient.userPoolClientSecret.unsafeUnwrap() : undefined,
+        userPoolClientSecret: withClientSecret
+          ? userPoolClient.userPoolClientSecret.unsafeUnwrap()
+          : undefined,
         standardAttributes,
         signInAliases,
         mfa,

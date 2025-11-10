@@ -6,21 +6,18 @@ import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:amplify_core/amplify_core.dart';
 import 'package:amplify_secure_storage/amplify_secure_storage.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
-import 'package:amplify_storage_s3_example/amplifyconfiguration.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'amplify_outputs.dart';
+
 final AmplifyLogger _logger = AmplifyLogger('MyStorageApp');
 
 void main() {
   AmplifyLogger().logLevel = LogLevel.debug;
-  runApp(
-    const MyApp(
-      title: 'Amplify Storage Example',
-    ),
-  );
+  runApp(const MyApp(title: 'Amplify Storage Example'));
 }
 
 class MyApp extends StatefulWidget {
@@ -38,7 +35,7 @@ class _MyAppState extends State<MyApp> {
     routes: [
       GoRoute(
         path: '/',
-        builder: (BuildContext _, GoRouterState __) => const HomeScreen(),
+        builder: (BuildContext _, GoRouterState _) => const HomeScreen(),
       ),
     ],
   );
@@ -64,7 +61,7 @@ class _MyAppState extends State<MyApp> {
 
     try {
       await Amplify.addPlugins([auth, storage]);
-      await Amplify.configure(amplifyconfig);
+      await Amplify.configure(amplifyConfig);
       _logger.debug('Successfully configured Amplify');
     } on Exception catch (error) {
       _logger.error('Something went wrong configuring Amplify: $error');
@@ -182,8 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
       await Amplify.Storage.downloadFile(
         path: StoragePath.fromString(path),
         localFile: AWSFile.fromPath(filepath),
-        onProgress: (p0) => _logger
-            .debug('Progress: ${(p0.transferredBytes / p0.totalBytes) * 100}%'),
+        onProgress: (p0) => _logger.debug(
+          'Progress: ${(p0.transferredBytes / p0.totalBytes) * 100}%',
+        ),
       ).result;
       await _listAllPublicFiles();
     } on StorageException catch (e) {
@@ -197,8 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
       await Amplify.Storage.downloadFile(
         path: StoragePath.fromString(path),
         localFile: AWSFile.fromPath(path),
-        onProgress: (p0) => _logger
-            .debug('Progress: ${(p0.transferredBytes / p0.totalBytes) * 100}%'),
+        onProgress: (p0) => _logger.debug(
+          'Progress: ${(p0.transferredBytes / p0.totalBytes) * 100}%',
+        ),
       ).result;
       await _listAllPublicFiles();
     } on StorageException catch (e) {
@@ -209,9 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // delete file from S3 bucket
   Future<void> removeFile(String path) async {
     try {
-      await Amplify.Storage.remove(
-        path: StoragePath.fromString(path),
-      ).result;
+      await Amplify.Storage.remove(path: StoragePath.fromString(path)).result;
       setState(() {
         // set the imageUrl to empty if the deleted file is the one being displayed
         imageUrl = '';
@@ -247,9 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Amplify Storage Example'),
-      ),
+      appBar: AppBar(title: const Text('Amplify Storage Example')),
       body: Stack(
         children: [
           Center(

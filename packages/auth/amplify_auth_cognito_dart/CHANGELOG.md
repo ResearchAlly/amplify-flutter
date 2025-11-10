@@ -1,3 +1,60 @@
+## 0.11.14
+
+### Features
+- feat(auth): Added support for Android private browsing ([#6336](https://github.com/aws-amplify/amplify-flutter/pull/6336))
+- feat(auth): Refresh token rotation ([#6293](https://github.com/aws-amplify/amplify-flutter/pull/6293))
+
+### Chores
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 0.11.13
+
+### Fixes
+- fix(auth): handle fallthrough exceptions in sign out state ([#6226](https://github.com/aws-amplify/amplify-flutter/pull/6226))
+
+## 0.11.12
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 0.11.11
+
+- Minor bug fixes and improvements
+
+## 0.11.10
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 0.11.9
+
+- Minor bug fixes and improvements
+
+## 0.11.8
+
+- Minor bug fixes and improvements
+
+## 0.11.7
+
+### Features
+- feat(auth, authenticator): Add support for Email OTP MFA ([#5449](https://github.com/aws-amplify/amplify-flutter/pull/5449)) (#5472)
+
+## 0.11.6
+
+- Minor bug fixes and improvements
+
+## 0.11.5
+
+- Minor bug fixes and improvements
+
+## 0.11.4
+
+### Features
+- feat(Auth): Add fetchCurrentDevice API ([#5251](https://github.com/aws-amplify/amplify-flutter/pull/5251))
+
+### Chores
+- chore: bump json_annotation dependency to v4.9
+
 ## 0.11.3
 
 - Minor bug fixes and improvements

@@ -74,6 +74,7 @@
 
 ## Generated SDK files
 packages/**/lib/src/sdk/src/**              linguist-generated
+packages/auth/amplify_auth_cognito_dart/lib/src/sdk/sdk_exception.dart linguist-generated
 
 ## Generated Swift Plugins
 packages/amplify_datastore/ios/internal/**  linguist-generated
@@ -87,6 +88,10 @@ packages/smithy/goldens/models/custom/**    -linguist-vendored
 ## Genrated dart files
 *.g.dart                                    linguist-generated
 
+## Genrated test files
+**/snapshots/*.diff                         linguist-generated
+**/repo_snapshot/**                         linguist-generated
+
 ## Lock files
 package-lock.json                           linguist-generated
 pnpm-lock.yaml                              linguist-generated
@@ -97,3 +102,7 @@ yarn.lock                                   linguist-generated
 **/dist/*.mjs                               linguist-generated
 **/dist/*.cjs                               linguist-generated
 **/dist/*.cjs.map                           linguist-generated
+
+## Codegen Models
+**/example/lib/models/**                          linguist-generated
+**/example/lib/models/gen2/Gen2ModelProvider.dart linguist-generated=false
