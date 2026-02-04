@@ -408,7 +408,7 @@ class StateMachineBloc
       }
     } on UserNotFoundException {
       _exceptionController.add(
-        const AuthenticatorException(
+        AuthenticatorException(
           'Incorrect username or password.',
           showBanner: true,
         ),
@@ -480,7 +480,7 @@ class StateMachineBloc
       // generic hint and route the user back to sign in so they can continue
       // via sign-in or reset-password flows.
       _exceptionController.add(
-        const AuthenticatorException(
+        AuthenticatorException(
           'An account may already exist for this email. Try signing in or resetting your password.',
           showBanner: true,
         ),
