@@ -68,6 +68,7 @@ void main() {
         emitsInOrder([
           UnauthenticatedState.signIn,
           UnauthenticatedState.resetPassword,
+          UnauthenticatedState.confirmResetPassword,
           emitsDone,
         ]),
       );
@@ -85,8 +86,10 @@ void main() {
       await forgotPasswordPage.enterUsername(username);
       await forgotPasswordPage.submitSendCode();
 
-      // Then I see "Username/client id combination not found."
-      forgotPasswordPage.expectCombinationNotFound();
+      // Then I am taken to the confirm reset password page without revealing
+      // whether the username exists.
+      forgotPasswordPage.expectStep(AuthenticatorStep.confirmResetPassword);
+      forgotPasswordPage.expectNoError();
 
       await tester.bloc.close();
     });

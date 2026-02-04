@@ -308,6 +308,12 @@ class StateMachineBloc
       final result = await _authService.resetPassword(data.username);
       _notifyCodeSent(result.nextStep.codeDeliveryDetails?.destination);
       yield UnauthenticatedState.confirmResetPassword;
+    } on UserNotFoundException {
+      // Avoid revealing whether the user exists. Always proceed with a
+      // generic success message so the UX remains consistent and prevents
+      // account enumeration.
+      _notifyCodeSent(null);
+      yield UnauthenticatedState.confirmResetPassword;
     } on Exception catch (e) {
       _exceptionController.add(AuthenticatorException(e));
     }

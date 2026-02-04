@@ -10,11 +10,11 @@ import 'package:amplify_auth_cognito_dart/src/jwt/jwt.dart';
 import 'package:amplify_core/amplify_core.dart';
 
 const usernameExistsException = UsernameExistsException(
-  'A user with this username already exists.',
+  'Incorrect username or password.',
 );
 
 const userNotFoundException = UserNotFoundException(
-  'The user does not exist.',
+  'Incorrect username or password.',
 );
 
 const codeMismatchException = CodeMismatchException(
