@@ -406,6 +406,13 @@ class StateMachineBloc
       } else {
         throw StateError('Bad sign in data: $data');
       }
+    } on UserNotFoundException {
+      _exceptionController.add(
+        const AuthenticatorException(
+          'Incorrect username or password.',
+          showBanner: true,
+        ),
+      );
     } on UserNotConfirmedException catch (e) {
       _exceptionController.add(
         AuthenticatorException(
@@ -468,6 +475,17 @@ class StateMachineBloc
 
           yield* _signIn(authSignInData);
       }
+    } on UsernameExistsException {
+      // Do not reveal that the email/username is already registered. Show a
+      // generic hint and route the user back to sign in so they can continue
+      // via sign-in or reset-password flows.
+      _exceptionController.add(
+        const AuthenticatorException(
+          'An account may already exist for this email. Try signing in or resetting your password.',
+          showBanner: true,
+        ),
+      );
+      yield* _changeScreen(initialStep);
     } on Exception catch (e) {
       _exceptionController.add(AuthenticatorException(e));
     }
