@@ -10,11 +10,12 @@ class AuthenticatorMessageLocalizationsEn
 
   @override
   String codeSent(String destination) {
-    return 'A confirmation code has been sent to $destination.';
+    return 'A confirmation code has been sent to the email if it exists within our records.';
   }
 
   @override
-  String get codeSentUnknown => 'A confirmation code has been sent.';
+  String get codeSentUnknown =>
+      'A confirmation code has been sent to the email if it exists within our records.';
 
   @override
   String get copySucceeded => 'Copied to clipboard!';

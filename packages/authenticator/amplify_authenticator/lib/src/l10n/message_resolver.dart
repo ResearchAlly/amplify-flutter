@@ -30,6 +30,8 @@ class MessageResolver extends Resolver<MessageResolverKey> {
   /// The message that is displayed after a new confirmation code is sent to
   /// [destination].
   String codeSent(BuildContext context, String destination) {
+    // Destination is intentionally ignored to avoid revealing whether the user
+    // exists. A generic message is used instead.
     return AuthenticatorLocalizations.messagesOf(context).codeSent(destination);
   }
 

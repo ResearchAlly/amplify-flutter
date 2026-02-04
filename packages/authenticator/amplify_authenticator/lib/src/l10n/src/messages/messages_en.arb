@@ -1,7 +1,7 @@
 {
     "@@locale": "en",
     "@@context": "amplify_authenticator:messages",
-    "codeSent": "A confirmation code has been sent to {destination}.",
+    "codeSent": "A confirmation code has been sent to the email if it exists within our records.",
     "@codeSent": {
         "description": "The message that is displayed after a new confirmation code is sent via Email/SMS.",
         "placeholders": {
@@ -12,7 +12,7 @@
             }
         }
     },
-    "codeSentUnknown": "A confirmation code has been sent.",
+    "codeSentUnknown": "A confirmation code has been sent to the email if it exists within our records.",
     "@codeSentUnknown": {
         "description": "The message that is displayed after a new confirmation code is sent via an unknown delivery medium"
     },
