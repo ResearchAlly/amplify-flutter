@@ -25,7 +25,7 @@
     "@changePassword": {
         "description": "Label of button to change a password"
     },
-    "sendCode": "Send Code",
+    "sendCode": "Send code",
     "@sendCode": {
         "description": "Label of button to send a verification code to the user's device"
     },
@@ -65,7 +65,7 @@
     "@signOut": {
         "description": "Label of button to sign out the user"
     },
-    "backTo": "Back to {previousStep, select, signUp{Sign Up} signIn{Sign In} confirmSignUp{Confirm Sign-up} confirmSignInMfa{Confirm Sign-in} confirmSignInNewPassword{Confirm Sign-in} sendCode{Send Code} resetPassword{Reset Password} verifyUser{Verify User} confirmVerifyUser{Confirm Verify User} other{ERROR}}",
+    "backTo": "Back to {previousStep, select, signUp{Sign Up} signIn{Sign In} confirmSignUp{Confirm Sign-up} confirmSignInMfa{Confirm Sign-in} confirmSignInNewPassword{Confirm Sign-in} sendCode{Send code} resetPassword{Reset Password} verifyUser{Verify User} confirmVerifyUser{Confirm Verify User} other{ERROR}}",
     "@backTo": {
         "description": "Label of button to return to the previous step",
         "placeholders": {

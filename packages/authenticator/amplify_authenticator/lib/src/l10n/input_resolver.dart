@@ -414,8 +414,9 @@ class InputResolver extends Resolver<InputResolverKey> {
       case InputField.newPassword:
         return AuthenticatorLocalizations.inputsOf(context).newPassword;
       case InputField.passwordConfirmation:
+        // Keep this label in sentence case: "Confirm password".
         final attributeName =
-            AuthenticatorLocalizations.inputsOf(context).password;
+            AuthenticatorLocalizations.inputsOf(context).password.toLowerCase();
         return AuthenticatorLocalizations.inputsOf(context)
             .confirmAttribute(attributeName);
       case InputField.verificationCode:

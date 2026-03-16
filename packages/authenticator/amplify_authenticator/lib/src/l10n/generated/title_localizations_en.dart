@@ -42,7 +42,7 @@ class AuthenticatorTitleLocalizationsEn
       'Choose your preferred two-factor authentication method to set up';
 
   @override
-  String get resetPassword => 'Send Code';
+  String get resetPassword => 'Send code';
 
   @override
   String get confirmResetPassword => 'Reset your password';

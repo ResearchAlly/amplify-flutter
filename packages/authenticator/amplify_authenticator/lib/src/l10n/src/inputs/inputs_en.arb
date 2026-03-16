@@ -23,7 +23,7 @@
         "description": "User's preferred telephone number.",
         "example": "+1 (888) 555-1234"
     },
-    "verificationCode": "Verification Code",
+    "verificationCode": "Verification code",
     "@verificationCode": {
         "description": "The code sent to the user's phone number or email address for verification.",
         "example": "123456"

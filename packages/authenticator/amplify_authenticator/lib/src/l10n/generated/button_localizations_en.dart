@@ -28,7 +28,7 @@ class AuthenticatorButtonLocalizationsEn
   String get changePassword => 'Change Password';
 
   @override
-  String get sendCode => 'Send Code';
+  String get sendCode => 'Send code';
 
   @override
   String get lostCode => 'Lost your code?';
@@ -67,7 +67,7 @@ class AuthenticatorButtonLocalizationsEn
         'confirmSignUp': 'Confirm Sign-up',
         'confirmSignInMfa': 'Confirm Sign-in',
         'confirmSignInNewPassword': 'Confirm Sign-in',
-        'sendCode': 'Send Code',
+        'sendCode': 'Send code',
         'resetPassword': 'Reset Password',
         'verifyUser': 'Verify User',
         'confirmVerifyUser': 'Confirm Verify User',

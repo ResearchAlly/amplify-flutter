@@ -83,7 +83,7 @@ void main() {
 
           final passwordConfirmationFieldError = find.descendant(
             of: signUpPage.confirmPasswordField,
-            matching: find.text('Confirm Password field must not be blank.'),
+            matching: find.text('Confirm password field must not be blank.'),
           );
 
           expect(passwordConfirmationFieldError, findsOneWidget);

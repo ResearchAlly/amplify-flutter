@@ -29,7 +29,7 @@
     "@confirmSignInWithTotpMfaCode": {
         "description": "Title of the Confirm Sign In with Totp MFA Code step and form"
     },
-    "resetPassword": "Send Code",
+    "resetPassword": "Send code",
     "@resetPassword": {
         "description": "Title of the Reset Password step and form"
     },
