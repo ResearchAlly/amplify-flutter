@@ -1,3 +1,32 @@
+## 2.7.0
+
+### Chores
+- chore(all): Bumped Flutter SDK to ^3.35.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped com.android.tools.build:gradle to 8.12.1 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(analytics, authenticator): Bumped package_info_plus to ^9.0.0 ([#6393](https://github.com/aws-amplify/amplify-flutter/pull/6393))
+- chore(analytics): Bumped device_info_plus to ^12.0.0 ([#6396](https://github.com/aws-amplify/amplify-flutter/pull/6396))
+
+## 2.6.5
+
+### Chores
+- chore(analytics): Bumped kotlin_version to 2.2.0 ([#6224](https://github.com/aws-amplify/amplify-flutter/pull/6224))
+- chore(analytics): Bumped com.android.tools.build:gradle to 8.11.0 ([#6203](https://github.com/aws-amplify/amplify-flutter/pull/6203))
+
+## 2.6.4
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 2.6.3
+
+- Minor bug fixes and improvements
+
+## 2.6.2
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
 ## 2.6.1
 
 - Minor bug fixes and improvements

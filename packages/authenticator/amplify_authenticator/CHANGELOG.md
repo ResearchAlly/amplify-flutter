@@ -1,3 +1,29 @@
+## 2.3.8
+
+### Chores
+- chore(all): Bumped Flutter SDK to ^3.35.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(authenticator): exported social_button ([#5880](https://github.com/aws-amplify/amplify-flutter/pull/5880))
+- chore(analytics, authenticator): Bumped package_info_plus to ^9.0.0 ([#6393](https://github.com/aws-amplify/amplify-flutter/pull/6393))
+
+## 2.3.7
+
+- Minor bug fixes and improvements
+
+## 2.3.6
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 2.3.5
+
+- Minor bug fixes and improvements
+
+## 2.3.4
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
 ## 2.3.3
 
 - Minor bug fixes and improvements

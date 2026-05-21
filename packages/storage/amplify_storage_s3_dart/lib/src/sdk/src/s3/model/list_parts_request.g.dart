@@ -28,36 +28,29 @@ class _$ListPartsRequest extends ListPartsRequest {
   @override
   final String? sseCustomerKeyMd5;
 
-  factory _$ListPartsRequest(
-          [void Function(ListPartsRequestBuilder)? updates]) =>
-      (new ListPartsRequestBuilder()..update(updates))._build();
+  factory _$ListPartsRequest([
+    void Function(ListPartsRequestBuilder)? updates,
+  ]) => (ListPartsRequestBuilder()..update(updates))._build();
 
-  _$ListPartsRequest._(
-      {required this.bucket,
-      required this.key,
-      this.maxParts,
-      this.partNumberMarker,
-      required this.uploadId,
-      this.requestPayer,
-      this.expectedBucketOwner,
-      this.sseCustomerAlgorithm,
-      this.sseCustomerKey,
-      this.sseCustomerKeyMd5})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        bucket, r'ListPartsRequest', 'bucket');
-    BuiltValueNullFieldError.checkNotNull(key, r'ListPartsRequest', 'key');
-    BuiltValueNullFieldError.checkNotNull(
-        uploadId, r'ListPartsRequest', 'uploadId');
-  }
-
+  _$ListPartsRequest._({
+    required this.bucket,
+    required this.key,
+    this.maxParts,
+    this.partNumberMarker,
+    required this.uploadId,
+    this.requestPayer,
+    this.expectedBucketOwner,
+    this.sseCustomerAlgorithm,
+    this.sseCustomerKey,
+    this.sseCustomerKeyMd5,
+  }) : super._();
   @override
   ListPartsRequest rebuild(void Function(ListPartsRequestBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   ListPartsRequestBuilder toBuilder() =>
-      new ListPartsRequestBuilder()..replace(this);
+      ListPartsRequestBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -165,7 +158,6 @@ class ListPartsRequestBuilder
 
   @override
   void replace(ListPartsRequest other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ListPartsRequest;
   }
 
@@ -178,16 +170,26 @@ class ListPartsRequestBuilder
   ListPartsRequest build() => _build();
 
   _$ListPartsRequest _build() {
-    final _$result = _$v ??
-        new _$ListPartsRequest._(
+    final _$result =
+        _$v ??
+        _$ListPartsRequest._(
           bucket: BuiltValueNullFieldError.checkNotNull(
-              bucket, r'ListPartsRequest', 'bucket'),
+            bucket,
+            r'ListPartsRequest',
+            'bucket',
+          ),
           key: BuiltValueNullFieldError.checkNotNull(
-              key, r'ListPartsRequest', 'key'),
+            key,
+            r'ListPartsRequest',
+            'key',
+          ),
           maxParts: maxParts,
           partNumberMarker: partNumberMarker,
           uploadId: BuiltValueNullFieldError.checkNotNull(
-              uploadId, r'ListPartsRequest', 'uploadId'),
+            uploadId,
+            r'ListPartsRequest',
+            'uploadId',
+          ),
           requestPayer: requestPayer,
           expectedBucketOwner: expectedBucketOwner,
           sseCustomerAlgorithm: sseCustomerAlgorithm,
@@ -200,20 +202,19 @@ class ListPartsRequestBuilder
 }
 
 class _$ListPartsRequestPayload extends ListPartsRequestPayload {
-  factory _$ListPartsRequestPayload(
-          [void Function(ListPartsRequestPayloadBuilder)? updates]) =>
-      (new ListPartsRequestPayloadBuilder()..update(updates))._build();
+  factory _$ListPartsRequestPayload([
+    void Function(ListPartsRequestPayloadBuilder)? updates,
+  ]) => (ListPartsRequestPayloadBuilder()..update(updates))._build();
 
   _$ListPartsRequestPayload._() : super._();
-
   @override
   ListPartsRequestPayload rebuild(
-          void Function(ListPartsRequestPayloadBuilder) updates) =>
-      (toBuilder()..update(updates)).build();
+    void Function(ListPartsRequestPayloadBuilder) updates,
+  ) => (toBuilder()..update(updates)).build();
 
   @override
   ListPartsRequestPayloadBuilder toBuilder() =>
-      new ListPartsRequestPayloadBuilder()..replace(this);
+      ListPartsRequestPayloadBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -236,7 +237,6 @@ class ListPartsRequestPayloadBuilder
 
   @override
   void replace(ListPartsRequestPayload other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ListPartsRequestPayload;
   }
 
@@ -249,7 +249,7 @@ class ListPartsRequestPayloadBuilder
   ListPartsRequestPayload build() => _build();
 
   _$ListPartsRequestPayload _build() {
-    final _$result = _$v ?? new _$ListPartsRequestPayload._();
+    final _$result = _$v ?? _$ListPartsRequestPayload._();
     replace(_$result);
     return _$result;
   }

@@ -12,20 +12,19 @@ class _$AliasExistsException extends AliasExistsException {
   @override
   final Map<String, String>? headers;
 
-  factory _$AliasExistsException(
-          [void Function(AliasExistsExceptionBuilder)? updates]) =>
-      (new AliasExistsExceptionBuilder()..update(updates))._build();
+  factory _$AliasExistsException([
+    void Function(AliasExistsExceptionBuilder)? updates,
+  ]) => (AliasExistsExceptionBuilder()..update(updates))._build();
 
   _$AliasExistsException._({this.message, this.headers}) : super._();
-
   @override
   AliasExistsException rebuild(
-          void Function(AliasExistsExceptionBuilder) updates) =>
-      (toBuilder()..update(updates)).build();
+    void Function(AliasExistsExceptionBuilder) updates,
+  ) => (toBuilder()..update(updates)).build();
 
   @override
   AliasExistsExceptionBuilder toBuilder() =>
-      new AliasExistsExceptionBuilder()..replace(this);
+      AliasExistsExceptionBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -68,7 +67,6 @@ class AliasExistsExceptionBuilder
 
   @override
   void replace(AliasExistsException other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AliasExistsException;
   }
 
@@ -81,11 +79,8 @@ class AliasExistsExceptionBuilder
   AliasExistsException build() => _build();
 
   _$AliasExistsException _build() {
-    final _$result = _$v ??
-        new _$AliasExistsException._(
-          message: message,
-          headers: headers,
-        );
+    final _$result =
+        _$v ?? _$AliasExistsException._(message: message, headers: headers);
     replace(_$result);
     return _$result;
   }

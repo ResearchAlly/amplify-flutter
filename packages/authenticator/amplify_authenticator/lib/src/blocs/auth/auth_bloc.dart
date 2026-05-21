@@ -335,9 +335,7 @@ class StateMachineBloc
         _emit(UnauthenticatedState.confirmSignInMfa);
       case AuthSignInStep.confirmSignInWithCustomChallenge:
         _emit(
-          ConfirmSignInCustom(
-            publicParameters: result.nextStep.additionalInfo,
-          ),
+          ConfirmSignInCustom(publicParameters: result.nextStep.additionalInfo),
         );
       case AuthSignInStep.confirmSignInWithNewPassword:
         _emit(UnauthenticatedState.confirmSignInNewPassword);
@@ -382,10 +380,7 @@ class StateMachineBloc
       }
 
       if (data is AuthUsernamePasswordSignInData) {
-        final result = await _authService.signIn(
-          data.username,
-          data.password,
-        );
+        final result = await _authService.signIn(data.username, data.password);
         await _processSignInResult(result, isSocialSignIn: false);
       } else if (data is AuthSocialSignInData) {
         // Do not await a social sign-in since multiple sign-in attempts
@@ -399,10 +394,11 @@ class StateMachineBloc
               (result) => _processSignInResult(result, isSocialSignIn: true),
             )
             .onError<Exception>((error, stackTrace) {
-          final log =
-              error is UserCancelledException ? logger.info : logger.error;
-          log('Error signing in', error, stackTrace);
-        });
+              final log = error is UserCancelledException
+                  ? logger.info
+                  : logger.error;
+              log('Error signing in', error, stackTrace);
+            });
       } else {
         throw StateError('Bad sign in data: $data');
       }
@@ -415,10 +411,7 @@ class StateMachineBloc
       );
     } on UserNotConfirmedException catch (e) {
       _exceptionController.add(
-        AuthenticatorException(
-          e.message,
-          showBanner: false,
-        ),
+        AuthenticatorException(e.message, showBanner: false),
       );
       yield UnauthenticatedState.confirmSignUp;
       if (data is AuthUsernamePasswordSignInData) {
@@ -438,8 +431,8 @@ class StateMachineBloc
 
   Stream<AuthState> _checkUserVerification() async* {
     try {
-      final attributeVerificationStatus =
-          await _authService.getAttributeVerificationStatus();
+      final attributeVerificationStatus = await _authService
+          .getAttributeVerificationStatus();
       final unverifiedAttributes =
           attributeVerificationStatus.unverifiedAttributes;
       final verifiedAttributes = attributeVerificationStatus.verifiedAttributes;

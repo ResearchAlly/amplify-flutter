@@ -50,13 +50,12 @@ void main() {
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
       final expectation = expectLater(
-        plugin.signInWithWebUI(
-          provider: AuthProvider.cognito,
-        ),
+        plugin.signInWithWebUI(provider: AuthProvider.cognito),
         throwsA(isA<UserCancelledException>()),
       );
-      final hostedUiMachine =
-          plugin.stateMachine.expect(HostedUiStateMachine.type);
+      final hostedUiMachine = plugin.stateMachine.expect(
+        HostedUiStateMachine.type,
+      );
       expect(
         hostedUiMachine.stream,
         emitsInOrder([

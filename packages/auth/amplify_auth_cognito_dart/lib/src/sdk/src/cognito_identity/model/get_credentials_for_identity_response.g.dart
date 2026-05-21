@@ -13,22 +13,20 @@ class _$GetCredentialsForIdentityResponse
   @override
   final Credentials? credentials;
 
-  factory _$GetCredentialsForIdentityResponse(
-          [void Function(GetCredentialsForIdentityResponseBuilder)? updates]) =>
-      (new GetCredentialsForIdentityResponseBuilder()..update(updates))
-          ._build();
+  factory _$GetCredentialsForIdentityResponse([
+    void Function(GetCredentialsForIdentityResponseBuilder)? updates,
+  ]) => (GetCredentialsForIdentityResponseBuilder()..update(updates))._build();
 
   _$GetCredentialsForIdentityResponse._({this.identityId, this.credentials})
-      : super._();
-
+    : super._();
   @override
   GetCredentialsForIdentityResponse rebuild(
-          void Function(GetCredentialsForIdentityResponseBuilder) updates) =>
-      (toBuilder()..update(updates)).build();
+    void Function(GetCredentialsForIdentityResponseBuilder) updates,
+  ) => (toBuilder()..update(updates)).build();
 
   @override
   GetCredentialsForIdentityResponseBuilder toBuilder() =>
-      new GetCredentialsForIdentityResponseBuilder()..replace(this);
+      GetCredentialsForIdentityResponseBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -50,8 +48,10 @@ class _$GetCredentialsForIdentityResponse
 
 class GetCredentialsForIdentityResponseBuilder
     implements
-        Builder<GetCredentialsForIdentityResponse,
-            GetCredentialsForIdentityResponseBuilder> {
+        Builder<
+          GetCredentialsForIdentityResponse,
+          GetCredentialsForIdentityResponseBuilder
+        > {
   _$GetCredentialsForIdentityResponse? _$v;
 
   String? _identityId;
@@ -60,7 +60,7 @@ class GetCredentialsForIdentityResponseBuilder
 
   CredentialsBuilder? _credentials;
   CredentialsBuilder get credentials =>
-      _$this._credentials ??= new CredentialsBuilder();
+      _$this._credentials ??= CredentialsBuilder();
   set credentials(CredentialsBuilder? credentials) =>
       _$this._credentials = credentials;
 
@@ -78,13 +78,13 @@ class GetCredentialsForIdentityResponseBuilder
 
   @override
   void replace(GetCredentialsForIdentityResponse other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$GetCredentialsForIdentityResponse;
   }
 
   @override
   void update(
-      void Function(GetCredentialsForIdentityResponseBuilder)? updates) {
+    void Function(GetCredentialsForIdentityResponseBuilder)? updates,
+  ) {
     if (updates != null) updates(this);
   }
 
@@ -94,8 +94,9 @@ class GetCredentialsForIdentityResponseBuilder
   _$GetCredentialsForIdentityResponse _build() {
     _$GetCredentialsForIdentityResponse _$result;
     try {
-      _$result = _$v ??
-          new _$GetCredentialsForIdentityResponse._(
+      _$result =
+          _$v ??
+          _$GetCredentialsForIdentityResponse._(
             identityId: identityId,
             credentials: _credentials?.build(),
           );
@@ -105,8 +106,11 @@ class GetCredentialsForIdentityResponseBuilder
         _$failedField = 'credentials';
         _credentials?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'GetCredentialsForIdentityResponse', _$failedField, e.toString());
+        throw BuiltValueNestedFieldError(
+          r'GetCredentialsForIdentityResponse',
+          _$failedField,
+          e.toString(),
+        );
       }
       rethrow;
     }

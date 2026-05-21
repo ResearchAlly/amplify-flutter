@@ -13,16 +13,15 @@ class _$NotFound extends NotFound {
   final Map<String, String>? headers;
 
   factory _$NotFound([void Function(NotFoundBuilder)? updates]) =>
-      (new NotFoundBuilder()..update(updates))._build();
+      (NotFoundBuilder()..update(updates))._build();
 
   _$NotFound._({this.statusCode, this.headers}) : super._();
-
   @override
   NotFound rebuild(void Function(NotFoundBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  NotFoundBuilder toBuilder() => new NotFoundBuilder()..replace(this);
+  NotFoundBuilder toBuilder() => NotFoundBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -61,7 +60,6 @@ class NotFoundBuilder implements Builder<NotFound, NotFoundBuilder> {
 
   @override
   void replace(NotFound other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$NotFound;
   }
 
@@ -74,11 +72,8 @@ class NotFoundBuilder implements Builder<NotFound, NotFoundBuilder> {
   NotFound build() => _build();
 
   _$NotFound _build() {
-    final _$result = _$v ??
-        new _$NotFound._(
-          statusCode: statusCode,
-          headers: headers,
-        );
+    final _$result =
+        _$v ?? _$NotFound._(statusCode: statusCode, headers: headers);
     replace(_$result);
     return _$result;
   }

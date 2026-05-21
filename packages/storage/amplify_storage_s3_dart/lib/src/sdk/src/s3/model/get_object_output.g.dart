@@ -81,56 +81,52 @@ class _$GetObjectOutput extends GetObjectOutput {
   final ObjectLockLegalHoldStatus? objectLockLegalHoldStatus;
 
   factory _$GetObjectOutput([void Function(GetObjectOutputBuilder)? updates]) =>
-      (new GetObjectOutputBuilder()..update(updates))._build();
+      (GetObjectOutputBuilder()..update(updates))._build();
 
-  _$GetObjectOutput._(
-      {required this.body,
-      this.deleteMarker,
-      this.acceptRanges,
-      this.expiration,
-      this.restore,
-      this.lastModified,
-      this.contentLength,
-      this.eTag,
-      this.checksumCrc32,
-      this.checksumCrc32C,
-      this.checksumSha1,
-      this.checksumSha256,
-      this.missingMeta,
-      this.versionId,
-      this.cacheControl,
-      this.contentDisposition,
-      this.contentEncoding,
-      this.contentLanguage,
-      this.contentRange,
-      this.contentType,
-      this.expires,
-      this.websiteRedirectLocation,
-      this.serverSideEncryption,
-      this.metadata,
-      this.sseCustomerAlgorithm,
-      this.sseCustomerKeyMd5,
-      this.ssekmsKeyId,
-      this.bucketKeyEnabled,
-      this.storageClass,
-      this.requestCharged,
-      this.replicationStatus,
-      this.partsCount,
-      this.tagCount,
-      this.objectLockMode,
-      this.objectLockRetainUntilDate,
-      this.objectLockLegalHoldStatus})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(body, r'GetObjectOutput', 'body');
-  }
-
+  _$GetObjectOutput._({
+    required this.body,
+    this.deleteMarker,
+    this.acceptRanges,
+    this.expiration,
+    this.restore,
+    this.lastModified,
+    this.contentLength,
+    this.eTag,
+    this.checksumCrc32,
+    this.checksumCrc32C,
+    this.checksumSha1,
+    this.checksumSha256,
+    this.missingMeta,
+    this.versionId,
+    this.cacheControl,
+    this.contentDisposition,
+    this.contentEncoding,
+    this.contentLanguage,
+    this.contentRange,
+    this.contentType,
+    this.expires,
+    this.websiteRedirectLocation,
+    this.serverSideEncryption,
+    this.metadata,
+    this.sseCustomerAlgorithm,
+    this.sseCustomerKeyMd5,
+    this.ssekmsKeyId,
+    this.bucketKeyEnabled,
+    this.storageClass,
+    this.requestCharged,
+    this.replicationStatus,
+    this.partsCount,
+    this.tagCount,
+    this.objectLockMode,
+    this.objectLockRetainUntilDate,
+    this.objectLockLegalHoldStatus,
+  }) : super._();
   @override
   GetObjectOutput rebuild(void Function(GetObjectOutputBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  GetObjectOutputBuilder toBuilder() =>
-      new GetObjectOutputBuilder()..replace(this);
+  GetObjectOutputBuilder toBuilder() => GetObjectOutputBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -327,7 +323,7 @@ class GetObjectOutputBuilder
 
   _i5.MapBuilder<String, String>? _metadata;
   _i5.MapBuilder<String, String> get metadata =>
-      _$this._metadata ??= new _i5.MapBuilder<String, String>();
+      _$this._metadata ??= _i5.MapBuilder<String, String>();
   set metadata(_i5.MapBuilder<String, String>? metadata) =>
       _$this._metadata = metadata;
 
@@ -387,8 +383,8 @@ class GetObjectOutputBuilder
   ObjectLockLegalHoldStatus? get objectLockLegalHoldStatus =>
       _$this._objectLockLegalHoldStatus;
   set objectLockLegalHoldStatus(
-          ObjectLockLegalHoldStatus? objectLockLegalHoldStatus) =>
-      _$this._objectLockLegalHoldStatus = objectLockLegalHoldStatus;
+    ObjectLockLegalHoldStatus? objectLockLegalHoldStatus,
+  ) => _$this._objectLockLegalHoldStatus = objectLockLegalHoldStatus;
 
   GetObjectOutputBuilder() {
     GetObjectOutput._init(this);
@@ -440,7 +436,6 @@ class GetObjectOutputBuilder
 
   @override
   void replace(GetObjectOutput other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$GetObjectOutput;
   }
 
@@ -455,10 +450,14 @@ class GetObjectOutputBuilder
   _$GetObjectOutput _build() {
     _$GetObjectOutput _$result;
     try {
-      _$result = _$v ??
-          new _$GetObjectOutput._(
+      _$result =
+          _$v ??
+          _$GetObjectOutput._(
             body: BuiltValueNullFieldError.checkNotNull(
-                body, r'GetObjectOutput', 'body'),
+              body,
+              r'GetObjectOutput',
+              'body',
+            ),
             deleteMarker: deleteMarker,
             acceptRanges: acceptRanges,
             expiration: expiration,
@@ -501,8 +500,11 @@ class GetObjectOutputBuilder
         _$failedField = 'metadata';
         _metadata?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'GetObjectOutput', _$failedField, e.toString());
+        throw BuiltValueNestedFieldError(
+          r'GetObjectOutput',
+          _$failedField,
+          e.toString(),
+        );
       }
       rethrow;
     }

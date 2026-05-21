@@ -55,9 +55,7 @@ void main() {
       bool forceRefresh = false,
       required bool willRefresh,
     }) async {
-      final sm = stateMachine.getOrCreate(
-        FetchAuthSessionStateMachine.type,
-      );
+      final sm = stateMachine.getOrCreate(FetchAuthSessionStateMachine.type);
       expect(
         sm.stream.startWith(sm.currentState),
         emitsInOrder(<Matcher>[
@@ -67,12 +65,12 @@ void main() {
           isA<FetchAuthSessionSuccess>(),
         ]),
       );
-      final sessionState =
-          await stateMachine.dispatchAndComplete<FetchAuthSessionSuccess>(
-        FetchAuthSessionEvent.fetch(
-          FetchAuthSessionOptions(forceRefresh: forceRefresh),
-        ),
-      );
+      final sessionState = await stateMachine
+          .dispatchAndComplete<FetchAuthSessionSuccess>(
+            FetchAuthSessionEvent.fetch(
+              FetchAuthSessionOptions(forceRefresh: forceRefresh),
+            ),
+          );
       return sessionState.session;
     }
 
@@ -82,32 +80,27 @@ void main() {
       String? developerProvidedIdentityId,
       required bool willRefresh,
     }) async {
-      final sm = stateMachine.getOrCreate(
-        FetchAuthSessionStateMachine.type,
-      );
+      final sm = stateMachine.getOrCreate(FetchAuthSessionStateMachine.type);
       final expectation = expectLater(
         sm.stream,
         emitsInOrder(<Matcher>[
           isA<FetchAuthSessionFetching>(),
           if (willRefresh) isA<FetchAuthSessionRefreshing>(),
-          anyOf(
-            isA<FetchAuthSessionSuccess>(),
-            isA<FetchAuthSessionFailure>(),
-          ),
+          anyOf(isA<FetchAuthSessionSuccess>(), isA<FetchAuthSessionFailure>()),
         ]),
       );
-      final sessionState =
-          await stateMachine.dispatchAndComplete<FetchAuthSessionSuccess>(
-        FetchAuthSessionEvent.federate(
-          FederateToIdentityPoolRequest(
-            provider: provider,
-            token: token,
-            options: FederateToIdentityPoolOptions(
-              developerProvidedIdentityId: developerProvidedIdentityId,
+      final sessionState = await stateMachine
+          .dispatchAndComplete<FetchAuthSessionSuccess>(
+            FetchAuthSessionEvent.federate(
+              FederateToIdentityPoolRequest(
+                provider: provider,
+                token: token,
+                options: FederateToIdentityPoolOptions(
+                  developerProvidedIdentityId: developerProvidedIdentityId,
+                ),
+              ),
             ),
-          ),
-        ),
-      );
+          );
       await expectation;
       final session = sessionState.session;
       return FederateToIdentityPoolResult(
@@ -279,9 +272,8 @@ void main() {
               stateMachine.addInstance<CognitoIdentityClient>(
                 MockCognitoIdentityClient(
                   getCredentialsForIdentity: expectAsync0(
-                    () async => throw AWSHttpException(
-                      AWSHttpRequest.get(Uri()),
-                    ),
+                    () async =>
+                        throw AWSHttpException(AWSHttpRequest.get(Uri())),
                   ),
                 ),
               );
@@ -388,15 +380,14 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => InitiateAuthResponse(
-                      authenticationResult: AuthenticationResultType(
-                        accessToken: newAccessToken.raw,
-                        refreshToken: refreshToken,
-                        idToken: newIdToken.raw,
+                  getTokensFromRefreshToken: () async =>
+                      GetTokensFromRefreshTokenResponse(
+                        authenticationResult: AuthenticationResultType(
+                          accessToken: newAccessToken.raw,
+                          refreshToken: refreshToken,
+                          idToken: newIdToken.raw,
+                        ),
                       ),
-                    ),
-                  ),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -433,11 +424,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw const AuthNotAuthorizedException(
-                      'Tokens expired',
-                    ),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw const AuthNotAuthorizedException('Tokens expired'),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -477,11 +465,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw AWSHttpException(
-                      AWSHttpRequest.get(Uri()),
-                    ),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw AWSHttpException(AWSHttpRequest.get(Uri())),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -521,9 +506,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw _ServiceException(),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw _ServiceException(),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -579,15 +563,14 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => InitiateAuthResponse(
-                      authenticationResult: AuthenticationResultType(
-                        accessToken: newAccessToken.raw,
-                        refreshToken: refreshToken,
-                        idToken: newIdToken.raw,
+                  getTokensFromRefreshToken: () async =>
+                      GetTokensFromRefreshTokenResponse(
+                        authenticationResult: AuthenticationResultType(
+                          accessToken: newAccessToken.raw,
+                          refreshToken: refreshToken,
+                          idToken: newIdToken.raw,
+                        ),
                       ),
-                    ),
-                  ),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -623,11 +606,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw AWSHttpException(
-                      AWSHttpRequest.get(Uri()),
-                    ),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw AWSHttpException(AWSHttpRequest.get(Uri())),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -667,9 +647,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw _ServiceException(),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw _ServiceException(),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -720,15 +699,14 @@ void main() {
             stateMachine
               ..addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => InitiateAuthResponse(
-                      authenticationResult: AuthenticationResultType(
-                        accessToken: newAccessToken.raw,
-                        refreshToken: refreshToken,
-                        idToken: newIdToken.raw,
+                  getTokensFromRefreshToken: () async =>
+                      GetTokensFromRefreshTokenResponse(
+                        authenticationResult: AuthenticationResultType(
+                          accessToken: newAccessToken.raw,
+                          refreshToken: refreshToken,
+                          idToken: newIdToken.raw,
+                        ),
                       ),
-                    ),
-                  ),
                 ),
               )
               ..addInstance<CognitoIdentityClient>(
@@ -775,17 +753,55 @@ void main() {
           });
         });
 
+        group('with new refresh token', () {
+          const newRefreshToken = 'new-refresh-token-rotated';
+          setUp(() async {
+            await configureAmplify(config);
+            stateMachine
+              ..addInstance<CognitoIdentityProviderClient>(
+                MockCognitoIdentityProviderClient(
+                  getTokensFromRefreshToken: () async =>
+                      GetTokensFromRefreshTokenResponse(
+                        authenticationResult: AuthenticationResultType(
+                          accessToken: newAccessToken.raw,
+                          refreshToken: newRefreshToken,
+                          idToken: newIdToken.raw,
+                        ),
+                      ),
+                ),
+              )
+              ..addInstance<CognitoIdentityClient>(
+                MockCognitoIdentityClient(
+                  getCredentialsForIdentity: expectAsync0(
+                    () async => GetCredentialsForIdentityResponse(
+                      credentials: Credentials(
+                        accessKeyId: newAccessKeyId,
+                        secretKey: newSecretAccessKey,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            session = await fetchAuthSession(
+              willRefresh: true,
+              forceRefresh: true,
+            );
+          });
+
+          test('should return new refresh token', () {
+            final userPoolTokens = session.userPoolTokensResult.value;
+            expect(userPoolTokens.refreshToken, newRefreshToken);
+          });
+        });
+
         group('expired', () {
           setUp(() async {
             await configureAmplify(config);
             stateMachine
               ..addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw const AuthNotAuthorizedException(
-                      'Tokens expired',
-                    ),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw const AuthNotAuthorizedException('Tokens expired'),
                 ),
               )
               ..addInstance<CognitoIdentityClient>(
@@ -842,19 +858,15 @@ void main() {
             stateMachine
               ..addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw AWSHttpException(
-                      AWSHttpRequest.get(Uri()),
-                    ),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw AWSHttpException(AWSHttpRequest.get(Uri())),
                 ),
               )
               ..addInstance<CognitoIdentityClient>(
                 MockCognitoIdentityClient(
                   getCredentialsForIdentity: expectAsync0(
-                    () async => throw AWSHttpException(
-                      AWSHttpRequest.get(Uri()),
-                    ),
+                    () async =>
+                        throw AWSHttpException(AWSHttpRequest.get(Uri())),
                   ),
                 ),
               );
@@ -903,9 +915,8 @@ void main() {
             stateMachine
               ..addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw _ServiceException(),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw _ServiceException(),
                 ),
               )
               ..addInstance<CognitoIdentityClient>(
@@ -1099,22 +1110,10 @@ void main() {
               willRefresh: false,
             );
             expect(session.identityId, identityId);
-            expect(
-              session.credentials.accessKeyId,
-              accessKeyId,
-            );
-            expect(
-              session.credentials.secretAccessKey,
-              secretAccessKey,
-            );
-            expect(
-              session.credentials.sessionToken,
-              sessionToken,
-            );
-            expect(
-              session.credentials.expiration,
-              isNotNull,
-            );
+            expect(session.credentials.accessKeyId, accessKeyId);
+            expect(session.credentials.secretAccessKey, secretAccessKey);
+            expect(session.credentials.sessionToken, sessionToken);
+            expect(session.credentials.expiration, isNotNull);
           });
 
           test('can refresh federation with same token', () async {
@@ -1129,10 +1128,7 @@ void main() {
               willRefresh: true,
             );
             expect(newSession.identityId, firstSession.identityId);
-            expect(
-              newSession.credentials,
-              isNot(firstSession.credentials),
-            );
+            expect(newSession.credentials, isNot(firstSession.credentials));
           });
 
           test('can refresh federation with new token', () async {
@@ -1147,10 +1143,7 @@ void main() {
               willRefresh: true,
             );
             expect(newSession.identityId, firstSession.identityId);
-            expect(
-              newSession.credentials,
-              isNot(firstSession.credentials),
-            );
+            expect(newSession.credentials, isNot(firstSession.credentials));
           });
 
           test('can refresh via refresh event', () async {
@@ -1171,24 +1164,16 @@ void main() {
               fail('Refresh failed: $completion');
             }
             final identityId = completion.session.identityIdResult.valueOrNull;
-            expect(
-              identityId,
-              session.identityId,
-            );
+            expect(identityId, session.identityId);
             final credentials =
                 completion.session.credentialsResult.valueOrNull;
-            expect(
-              credentials,
-              isNot(session.credentials),
-            );
+            expect(credentials, isNot(session.credentials));
           });
 
           test('can federate after failure', () async {
             final originalClient = stateMachine.expect<CognitoIdentityClient>();
             stateMachine.addInstance<CognitoIdentityClient>(
-              MockCognitoIdentityClient(
-                getId: () async => throw Exception(),
-              ),
+              MockCognitoIdentityClient(getId: () async => throw Exception()),
             );
             await expectLater(
               federateToIdentityPool(
@@ -1224,10 +1209,7 @@ void main() {
               willRefresh: true,
             );
             expect(newSession.identityId, firstSession.identityId);
-            expect(
-              newSession.credentials,
-              isNot(firstSession.credentials),
-            );
+            expect(newSession.credentials, isNot(firstSession.credentials));
           });
         });
 
@@ -1311,15 +1293,14 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => InitiateAuthResponse(
-                      authenticationResult: AuthenticationResultType(
-                        accessToken: newAccessToken.raw,
-                        refreshToken: refreshToken,
-                        idToken: newIdToken.raw,
+                  getTokensFromRefreshToken: () async =>
+                      GetTokensFromRefreshTokenResponse(
+                        authenticationResult: AuthenticationResultType(
+                          accessToken: newAccessToken.raw,
+                          refreshToken: refreshToken,
+                          idToken: newIdToken.raw,
+                        ),
                       ),
-                    ),
-                  ),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -1359,9 +1340,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw _ServiceException(),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw _ServiceException(),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -1416,15 +1396,14 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => InitiateAuthResponse(
-                      authenticationResult: AuthenticationResultType(
-                        accessToken: newAccessToken.raw,
-                        refreshToken: refreshToken,
-                        idToken: newIdToken.raw,
+                  getTokensFromRefreshToken: () async =>
+                      GetTokensFromRefreshTokenResponse(
+                        authenticationResult: AuthenticationResultType(
+                          accessToken: newAccessToken.raw,
+                          refreshToken: refreshToken,
+                          idToken: newIdToken.raw,
+                        ),
                       ),
-                    ),
-                  ),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -1464,9 +1443,8 @@ void main() {
               await configureAmplify(config);
               stateMachine.addInstance<CognitoIdentityProviderClient>(
                 MockCognitoIdentityProviderClient(
-                  initiateAuth: expectAsync1(
-                    (_) async => throw _ServiceException(),
-                  ),
+                  getTokensFromRefreshToken: () async =>
+                      throw _ServiceException(),
                 ),
               );
               session = await fetchAuthSession(willRefresh: true);
@@ -1519,15 +1497,14 @@ void main() {
             await configureAmplify(config);
             stateMachine.addInstance<CognitoIdentityProviderClient>(
               MockCognitoIdentityProviderClient(
-                initiateAuth: expectAsync1(
-                  (_) async => InitiateAuthResponse(
-                    authenticationResult: AuthenticationResultType(
-                      accessToken: newAccessToken.raw,
-                      refreshToken: refreshToken,
-                      idToken: newIdToken.raw,
+                getTokensFromRefreshToken: () async =>
+                    GetTokensFromRefreshTokenResponse(
+                      authenticationResult: AuthenticationResultType(
+                        accessToken: newAccessToken.raw,
+                        refreshToken: refreshToken,
+                        idToken: newIdToken.raw,
+                      ),
                     ),
-                  ),
-                ),
               ),
             );
             session = await fetchAuthSession(
@@ -1571,9 +1548,8 @@ void main() {
             await configureAmplify(config);
             stateMachine.addInstance<CognitoIdentityProviderClient>(
               MockCognitoIdentityProviderClient(
-                initiateAuth: expectAsync1(
-                  (_) async => throw _ServiceException(),
-                ),
+                getTokensFromRefreshToken: () async =>
+                    throw _ServiceException(),
               ),
             );
             session = await fetchAuthSession(
