@@ -1,3 +1,60 @@
+## 0.3.13
+
+### Fixes
+- fix(worker_bee): Coerce int-backed types for wasm ([#7082](https://github.com/aws-amplify/amplify-flutter/pull/7082))
+- fix(worker_bee): Exclude example from default build target ([#7071](https://github.com/aws-amplify/amplify-flutter/pull/7071))
+- fix(worker_bee): Fix loading wasm file ([#7094](https://github.com/aws-amplify/amplify-flutter/pull/7094))
+- fix(worker_bee): Point `fallbackUrls` at real filenames after `copy_builder` use ([#7111](https://github.com/aws-amplify/amplify-flutter/pull/7111))
+
+## 0.3.12
+
+### Features
+- feat(worker_bee): Improve wasm compatibility ([#7059](https://github.com/aws-amplify/amplify-flutter/pull/7059))
+
+## 0.3.11
+
+### Features
+- Add Web Assembly support ([#6613](https://github.com/aws-amplify/amplify-flutter/pull/6613))
+
+## 0.3.10
+
+- Minor bug fixes and improvements
+
+## 0.3.9
+
+- Minor bug fixes and improvements
+
+## 0.3.8
+
+### Chores
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 0.3.7
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 0.3.6
+
+- Minor bug fixes and improvements
+
+## 0.3.5
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 0.3.4
+
+- Minor bug fixes and improvements
+
+## 0.3.3
+
+- Minor bug fixes and improvements
+
+## 0.3.2
+
+- Minor bug fixes and improvements
+
 ## 0.3.1
 
 - Minor bug fixes and improvements

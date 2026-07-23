@@ -22,22 +22,14 @@ import 'package:stream_transform/stream_transform.dart';
 class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
   GenerateSdkCommand() {
     argParser
-      ..addOption(
-        'models',
-        abbr: 'm',
-        help: 'The path to the AWS JS V3 repo',
-      )
+      ..addOption('models', abbr: 'm', help: 'The path to the AWS JS V3 repo')
       ..addOption(
         'output',
         abbr: 'o',
         help: 'The lib/-relative output directory for the SDK',
         defaultsTo: 'src/sdk',
       )
-      ..addOption(
-        'package',
-        abbr: 'p',
-        help: 'The name of the package',
-      );
+      ..addOption('package', abbr: 'p', help: 'The name of the package');
   }
 
   @override
@@ -67,33 +59,33 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
 
   /// Downloads AWS models from GitHub into a temporary directory.
   Future<Directory> _downloadModels() => _cloneMemo.runOnce(() async {
-        final cloneDir = await Directory.systemTemp.createTemp('models');
-        logger
-          ..info('Downloading models...')
-          ..verbose('Cloning models to ${cloneDir.path}');
-        await runGit(
-          [
-            'clone',
-            // https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/
-            '--filter=tree:0',
-            'https://github.com/aws/aws-sdk-js-v3.git',
-            cloneDir.path,
-          ],
-          echoOutput: verbose,
-        );
-        logger.info('Successfully cloned models');
-        return cloneDir;
-      });
+    final cloneDir = await Directory.systemTemp.createTemp('models');
+    logger
+      ..info('Downloading models...')
+      ..verbose('Cloning models to ${cloneDir.path}');
+    await runGit([
+      'clone',
+      // https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone/
+      '--filter=tree:0',
+      'https://github.com/aws/aws-sdk-js-v3.git',
+      cloneDir.path,
+    ], echoOutput: verbose);
+    logger.info('Successfully cloned models');
+    return cloneDir;
+  });
 
   /// Checks out [ref] in [modelsDir].
   Future<Directory> _checkoutModelsRef(Directory modelsDir, String ref) async {
-    final worktreeDir =
-        await Directory.systemTemp.createTemp('models_worktree_');
+    final worktreeDir = await Directory.systemTemp.createTemp(
+      'models_worktree_',
+    );
     try {
-      await runGit(
-        ['worktree', 'add', worktreeDir.path, ref],
-        processWorkingDir: modelsDir.path,
-      );
+      await runGit([
+        'worktree',
+        'add',
+        worktreeDir.path,
+        ref,
+      ], processWorkingDir: modelsDir.path);
     } on Exception catch (e) {
       if (e.toString().contains('already checked out')) {
         return modelsDir;
@@ -160,8 +152,11 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
     await for (final model in models) {
       final astJson = await model.readAsString();
       final ast = parseAstJson(astJson);
-      final serviceNamespace =
-          ast.shapes.values.whereType<ServiceShape>().single.shapeId.namespace;
+      final serviceNamespace = ast.shapes.values
+          .whereType<ServiceShape>()
+          .single
+          .shapeId
+          .namespace;
       if (!config.apis.containsKey(serviceNamespace)) {
         continue;
       }
@@ -187,8 +182,8 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
       final allOperations = serviceShape.operations.map((op) => op.target);
       final includeOperations = switch (operations) {
         List<String> _ when operations.isNotEmpty => operations.map(
-            (op) => ShapeId(namespace: namespace, shape: op),
-          ),
+          (op) => ShapeId(namespace: namespace, shape: op),
+        ),
         _ => allOperations,
       };
       for (final operation in includeOperations) {
@@ -241,11 +236,9 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
           ..metadata.replace(smithyAst.metadata)
           ..version = smithyAst.version,
       );
-      final pluginCmd = await Process.start(
-        'dart',
-        [plugin],
-        workingDirectory: package.path,
-      );
+      final pluginCmd = await Process.start('dart', [
+        plugin,
+      ], workingDirectory: package.path);
       pluginCmd
         ..stdin.writeln(jsonEncode(generatedAst))
         ..captureStdout()
@@ -258,12 +251,16 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
 
     // Run built_value generator
     logger.info('Running build_runner...');
+    // `--force-jit`: see https://github.com/dart-lang/build/issues/4343
+    // AOT compile fails on Dart 3.10.x when native-assets build hooks are
+    // present in the package graph. Fixed in Dart 3.11+.
     final buildRunnerCmd = await Process.start(
       'dart',
       [
         'run',
         'build_runner',
         'build',
+        '--force-jit',
         '--delete-conflicting-outputs',
       ],
       mode: verbose ? ProcessStartMode.inheritStdio : ProcessStartMode.normal,
@@ -337,9 +334,9 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
             ..modifier = FieldModifier.constant
             ..docs.addAll([if (title != null) '/// $title'])
             ..name = serviceName
-            ..assignment = refer('AWSService').constInstance([
-              literalString(sigV4Service),
-            ]).code,
+            ..assignment = refer(
+              'AWSService',
+            ).constInstance([literalString(sigV4Service)]).code,
         ),
       );
     }
@@ -355,7 +352,8 @@ class GenerateSdkCommand extends AmplifyCommand with GlobOptions {
       orderDirectives: true,
       useNullSafetySyntax: true,
     );
-    final code = '''
+    final code =
+        '''
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -365,20 +363,13 @@ ${library.accept(emitter)}
 ''';
 
     final output = File(
-      p.join(
-        awsCommon.path,
-        'lib',
-        'src',
-        'config',
-        'aws_service.dart',
-      ),
+      p.join(awsCommon.path, 'lib', 'src', 'config', 'aws_service.dart'),
     );
     await output.writeAsString(code);
-    await Process.run(
-      'dart',
-      ['format', output.path],
-      workingDirectory: awsCommon.path,
-    );
+    await Process.run('dart', [
+      'format',
+      output.path,
+    ], workingDirectory: awsCommon.path);
   }
 
   @override

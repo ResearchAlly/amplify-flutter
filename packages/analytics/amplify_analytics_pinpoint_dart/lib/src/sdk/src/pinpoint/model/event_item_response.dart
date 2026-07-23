@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.event_item_response; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -15,24 +15,19 @@ abstract class EventItemResponse
     with _i1.AWSEquatable<EventItemResponse>
     implements Built<EventItemResponse, EventItemResponseBuilder> {
   /// Provides the status code and message that result from processing an event.
-  factory EventItemResponse({
-    String? message,
-    int? statusCode,
-  }) {
-    return _$EventItemResponse._(
-      message: message,
-      statusCode: statusCode,
-    );
+  factory EventItemResponse({String? message, int? statusCode}) {
+    return _$EventItemResponse._(message: message, statusCode: statusCode);
   }
 
   /// Provides the status code and message that result from processing an event.
-  factory EventItemResponse.build(
-      [void Function(EventItemResponseBuilder) updates]) = _$EventItemResponse;
+  factory EventItemResponse.build([
+    void Function(EventItemResponseBuilder) updates,
+  ]) = _$EventItemResponse;
 
   const EventItemResponse._();
 
   static const List<_i2.SmithySerializer<EventItemResponse>> serializers = [
-    EventItemResponseRestJson1Serializer()
+    EventItemResponseRestJson1Serializer(),
   ];
 
   /// A custom message that's returned in the response as a result of processing the event.
@@ -41,21 +36,13 @@ abstract class EventItemResponse
   /// The status code that's returned in the response as a result of processing the event. Possible values are: 202, for events that were accepted; and, 400, for events that weren't valid.
   int? get statusCode;
   @override
-  List<Object?> get props => [
-        message,
-        statusCode,
-      ];
+  List<Object?> get props => [message, statusCode];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('EventItemResponse')
-      ..add(
-        'message',
-        message,
-      )
-      ..add(
-        'statusCode',
-        statusCode,
-      );
+      ..add('message', message)
+      ..add('statusCode', statusCode);
     return helper.toString();
   }
 }
@@ -65,17 +52,13 @@ class EventItemResponseRestJson1Serializer
   const EventItemResponseRestJson1Serializer() : super('EventItemResponse');
 
   @override
-  Iterable<Type> get types => const [
-        EventItemResponse,
-        _$EventItemResponse,
-      ];
+  Iterable<Type> get types => const [EventItemResponse, _$EventItemResponse];
+
   @override
   Iterable<_i2.ShapeId> get supportedProtocols => const [
-        _i2.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i2.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   EventItemResponse deserialize(
     Serializers serializers,
@@ -93,15 +76,19 @@ class EventItemResponseRestJson1Serializer
       }
       switch (key) {
         case 'Message':
-          result.message = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.message =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
         case 'StatusCode':
-          result.statusCode = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int);
+          result.statusCode =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(int),
+                  )
+                  as int);
       }
     }
 
@@ -119,18 +106,16 @@ class EventItemResponseRestJson1Serializer
     if (message != null) {
       result$
         ..add('Message')
-        ..add(serializers.serialize(
-          message,
-          specifiedType: const FullType(String),
-        ));
+        ..add(
+          serializers.serialize(message, specifiedType: const FullType(String)),
+        );
     }
     if (statusCode != null) {
       result$
         ..add('StatusCode')
-        ..add(serializers.serialize(
-          statusCode,
-          specifiedType: const FullType(int),
-        ));
+        ..add(
+          serializers.serialize(statusCode, specifiedType: const FullType(int)),
+        );
     }
     return result$;
   }

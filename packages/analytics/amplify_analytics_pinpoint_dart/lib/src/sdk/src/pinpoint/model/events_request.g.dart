@@ -8,22 +8,18 @@ part of 'events_request.dart';
 
 class _$EventsRequest extends EventsRequest {
   @override
-  final _i2.BuiltMap<String, EventsBatch> batchItem;
+  final _i2.BuiltMap<String, EventsBatch>? batchItem;
 
   factory _$EventsRequest([void Function(EventsRequestBuilder)? updates]) =>
-      (new EventsRequestBuilder()..update(updates))._build();
+      (EventsRequestBuilder()..update(updates))._build();
 
-  _$EventsRequest._({required this.batchItem}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        batchItem, r'EventsRequest', 'batchItem');
-  }
-
+  _$EventsRequest._({this.batchItem}) : super._();
   @override
   EventsRequest rebuild(void Function(EventsRequestBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  EventsRequestBuilder toBuilder() => new EventsRequestBuilder()..replace(this);
+  EventsRequestBuilder toBuilder() => EventsRequestBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -46,7 +42,7 @@ class EventsRequestBuilder
 
   _i2.MapBuilder<String, EventsBatch>? _batchItem;
   _i2.MapBuilder<String, EventsBatch> get batchItem =>
-      _$this._batchItem ??= new _i2.MapBuilder<String, EventsBatch>();
+      _$this._batchItem ??= _i2.MapBuilder<String, EventsBatch>();
   set batchItem(_i2.MapBuilder<String, EventsBatch>? batchItem) =>
       _$this._batchItem = batchItem;
 
@@ -55,7 +51,7 @@ class EventsRequestBuilder
   EventsRequestBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _batchItem = $v.batchItem.toBuilder();
+      _batchItem = $v.batchItem?.toBuilder();
       _$v = null;
     }
     return this;
@@ -63,7 +59,6 @@ class EventsRequestBuilder
 
   @override
   void replace(EventsRequest other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$EventsRequest;
   }
 
@@ -78,15 +73,18 @@ class EventsRequestBuilder
   _$EventsRequest _build() {
     _$EventsRequest _$result;
     try {
-      _$result = _$v ?? new _$EventsRequest._(batchItem: batchItem.build());
+      _$result = _$v ?? _$EventsRequest._(batchItem: _batchItem?.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'batchItem';
-        batchItem.build();
+        _batchItem?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'EventsRequest', _$failedField, e.toString());
+        throw BuiltValueNestedFieldError(
+          r'EventsRequest',
+          _$failedField,
+          e.toString(),
+        );
       }
       rethrow;
     }

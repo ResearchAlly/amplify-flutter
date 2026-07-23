@@ -1,13 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-library authenticator.form_field;
+library;
 
 import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:amplify_authenticator/src/constants/authenticator_constants.dart';
 import 'package:amplify_authenticator/src/enums/enums.dart';
 import 'package:amplify_authenticator/src/keys.dart';
-import 'package:amplify_authenticator/src/l10n/instructions_resolver.dart';
 import 'package:amplify_authenticator/src/mixins/authenticator_date_field.dart';
 import 'package:amplify_authenticator/src/mixins/authenticator_phone_field.dart';
 import 'package:amplify_authenticator/src/mixins/authenticator_radio_field.dart';
@@ -29,7 +28,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 part 'form_fields/confirm_sign_in_form_field.dart';
 part 'form_fields/confirm_sign_up_form_field.dart';
+part 'form_fields/email_setup_form_field.dart';
 part 'form_fields/mfa_selection_form_field.dart';
+part 'form_fields/mfa_setup_selection_form_field.dart';
 part 'form_fields/phone_number_field.dart';
 part 'form_fields/reset_password_form_field.dart';
 part 'form_fields/sign_in_form_field.dart';
@@ -48,10 +49,12 @@ part 'form_fields/verify_user_form_field.dart';
 /// - [TotpSetupFormField]
 /// - [VerifyUserFormField]
 /// {@endtemplate}
-abstract class AuthenticatorFormField<FieldType extends Enum,
-        FieldValue extends Object>
-    extends AuthenticatorComponent<
-        AuthenticatorFormField<FieldType, FieldValue>> {
+abstract class AuthenticatorFormField<
+  FieldType extends Enum,
+  FieldValue extends Object
+>
+    extends
+        AuthenticatorComponent<AuthenticatorFormField<FieldType, FieldValue>> {
   /// {@macro amplify_authenticator.authenticator_form_field}
   const AuthenticatorFormField._({
     super.key,
@@ -63,6 +66,8 @@ abstract class AuthenticatorFormField<FieldType extends Enum,
     FormFieldValidator<FieldValue>? validator,
     this.requiredOverride,
     this.autofillHints,
+    this.enabledOverride,
+    this.visible = true,
   }) : validatorOverride = validator;
 
   /// Resolver key for the title
@@ -93,6 +98,21 @@ abstract class AuthenticatorFormField<FieldType extends Enum,
   /// Autocomplete hints to override the default value
   final Iterable<String>? autofillHints;
 
+  /// Optional text controller exposed by text-driven form fields.
+  AuthenticatorTextFieldController? get authenticatorTextFieldController =>
+      null;
+
+  /// Whether the field can receive manual input.
+  ///
+  /// When `null`, the widget decides its enabled state.
+  final AuthenticatorTextEnabledOverride? enabledOverride;
+
+  /// Whether the field should be rendered.
+  ///
+  /// When `false`, the field stays offstage so programmatic updates can still
+  /// run without occupying layout space.
+  final bool visible;
+
   /// Whether the field is required in the form.
   ///
   /// Defaults to `false`.
@@ -122,14 +142,28 @@ abstract class AuthenticatorFormField<FieldType extends Enum,
       ..add(DiagnosticsProperty<bool>('required', required))
       ..add(DiagnosticsProperty<bool?>('requiredOverride', requiredOverride))
       ..add(EnumProperty<UsernameType?>('usernameType', usernameType))
-      ..add(IterableProperty<String>('autofillHints', autofillHints));
+      ..add(IterableProperty<String>('autofillHints', autofillHints))
+      ..add(
+        DiagnosticsProperty<AuthenticatorTextFieldController?>(
+          'authenticatorTextFieldController',
+          authenticatorTextFieldController,
+        ),
+      )
+      ..add(
+        EnumProperty<AuthenticatorTextEnabledOverride?>(
+          'enabledOverride',
+          enabledOverride,
+        ),
+      )
+      ..add(DiagnosticsProperty<bool>('visible', visible));
   }
 }
 
 abstract class AuthenticatorFormFieldState<
-        FieldType extends Enum,
-        FieldValue extends Object,
-        T extends AuthenticatorFormField<FieldType, FieldValue>>
+  FieldType extends Enum,
+  FieldValue extends Object,
+  T extends AuthenticatorFormField<FieldType, FieldValue>
+>
     extends AuthenticatorComponentState<T> {
   @nonVirtual
   Widget get visibilityToggle =>
@@ -149,7 +183,8 @@ abstract class AuthenticatorFormFieldState<
   /// Validates inputs of this form field.
   ///
   /// By default, this validates all inputs.
-  FormFieldValidator<FieldValue> get validator => (_) => null;
+  FormFieldValidator<FieldValue> get validator =>
+      (_) => null;
 
   /// Whether to hide input.
   bool get obscureText => false;
@@ -162,6 +197,22 @@ abstract class AuthenticatorFormFieldState<
 
   /// Whether the form field accepts input.
   bool get enabled => true;
+
+  /// Effective enabled state that combines [enabled] with
+  /// [AuthenticatorFormField.enabledOverride].
+  ///
+  /// Subclasses can override [enabled] to provide custom logic for determining
+  /// the default enabled state. This property ensures the override is respected.
+  @nonVirtual
+  bool get effectiveEnabled {
+    switch (widget.enabledOverride) {
+      case AuthenticatorTextEnabledOverride.disabled:
+        return false;
+      case AuthenticatorTextEnabledOverride.defaultSetting:
+      case null:
+        return enabled;
+    }
+  }
 
   /// Widget to show at leading end, typically an [Icon].
   Widget? get prefix => null;
@@ -184,8 +235,9 @@ abstract class AuthenticatorFormFieldState<
     var labelText =
         widget.title ?? widget.titleKey?.resolve(context, inputResolver);
     if (labelText != null) {
-      labelText =
-          isOptional ? inputResolver.optional(context, labelText) : labelText;
+      labelText = isOptional
+          ? inputResolver.optional(context, labelText)
+          : labelText;
     }
     return labelText;
   }
@@ -230,11 +282,17 @@ abstract class AuthenticatorFormFieldState<
         state.confirmSignInCustomAuth();
       case AuthenticatorStep.confirmSignInMfa:
         state.confirmSignInMFA();
+      case AuthenticatorStep.confirmSignInWithOtpCode:
+        state.confirmEmailMfa();
       case AuthenticatorStep.confirmSignInNewPassword:
         state.confirmSignInNewPassword();
       case AuthenticatorStep.confirmSignInWithTotpMfaCode:
       case AuthenticatorStep.continueSignInWithTotpSetup:
         state.confirmTotp();
+      case AuthenticatorStep.continueSignInWithEmailMfaSetup:
+        state.continueEmailMfaSetup();
+      case AuthenticatorStep.continueSignInWithMfaSetupSelection:
+        state.continueSignInWithMfaSetupSelection();
       case AuthenticatorStep.resetPassword:
         state.resetPassword();
       case AuthenticatorStep.confirmResetPassword:
@@ -252,21 +310,32 @@ abstract class AuthenticatorFormFieldState<
   @nonVirtual
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final field = Container(
       margin: EdgeInsets.only(bottom: marginBottom ?? 0),
       child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (surlabel != null) surlabel!,
+              ?surlabel,
               SizedBox(height: labelGap),
               buildFormField(context),
-              if (companionWidget != null) companionWidget!,
+              ?companionWidget,
             ],
           ),
         ],
       ),
+    );
+    if (widget.visible) {
+      return field;
+    }
+    return Visibility(
+      visible: false,
+      maintainState: true,
+      maintainAnimation: true,
+      maintainSemantics: false,
+      maintainInteractivity: false,
+      child: field,
     );
   }
 
@@ -303,6 +372,7 @@ abstract class AuthenticatorFormFieldState<
       ..add(StringProperty('labelText', labelText))
       ..add(DiagnosticsProperty<double?>('marginBottom', marginBottom))
       ..add(DoubleProperty('labelGap', labelGap))
-      ..add(IterableProperty<String>('autofillHints', autofillHints));
+      ..add(IterableProperty<String>('autofillHints', autofillHints))
+      ..add(DiagnosticsProperty<bool>('effectiveEnabled', effectiveEnabled));
   }
 }

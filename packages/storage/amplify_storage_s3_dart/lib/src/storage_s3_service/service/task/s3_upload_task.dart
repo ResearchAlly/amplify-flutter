@@ -48,9 +48,10 @@ const fallbackContentType = 'application/octet-stream';
 class S3UploadTask {
   S3UploadTask._({
     required s3.S3Client s3Client,
-    required smithy_aws.S3ClientConfig defaultS3ClientConfig,
+    required smithy_aws.S3ClientConfig s3ClientConfig,
     required S3PathResolver pathResolver,
     required String bucket,
+    required String awsRegion,
     required StoragePath path,
     required StorageUploadDataOptions options,
     S3DataPayload? dataPayload,
@@ -58,20 +59,21 @@ class S3UploadTask {
     void Function(S3TransferProgress)? onProgress,
     required AWSLogger logger,
     required transfer.TransferDatabase transferDatabase,
-  })  : _s3Client = s3Client,
-        _defaultS3ClientConfig = defaultS3ClientConfig,
-        _pathResolver = pathResolver,
-        _bucket = bucket,
-        _path = path,
-        _options = options,
-        _dataPayload = dataPayload,
-        _localFile = localFile,
-        _onProgress = onProgress,
-        _logger = logger,
-        _transferDatabase = transferDatabase,
-        _s3PluginOptions =
-            options.pluginOptions as S3UploadDataPluginOptions? ??
-                const S3UploadDataPluginOptions();
+  }) : _s3Client = s3Client,
+       _s3ClientConfig = s3ClientConfig,
+       _pathResolver = pathResolver,
+       _bucket = bucket,
+       _awsRegion = awsRegion,
+       _path = path,
+       _options = options,
+       _dataPayload = dataPayload,
+       _localFile = localFile,
+       _onProgress = onProgress,
+       _logger = logger,
+       _transferDatabase = transferDatabase,
+       _s3PluginOptions =
+           options.pluginOptions as S3UploadDataPluginOptions? ??
+           const S3UploadDataPluginOptions();
 
   /// Initiates an upload task for a [S3DataPayload].
   ///
@@ -81,26 +83,28 @@ class S3UploadTask {
   S3UploadTask.fromDataPayload(
     S3DataPayload dataPayload, {
     required s3.S3Client s3Client,
-    required smithy_aws.S3ClientConfig defaultS3ClientConfig,
+    required smithy_aws.S3ClientConfig s3ClientConfig,
     required S3PathResolver pathResolver,
     required String bucket,
+    required String awsRegion,
     required StoragePath path,
     required StorageUploadDataOptions options,
     void Function(S3TransferProgress)? onProgress,
     required AWSLogger logger,
     required transfer.TransferDatabase transferDatabase,
   }) : this._(
-          s3Client: s3Client,
-          defaultS3ClientConfig: defaultS3ClientConfig,
-          pathResolver: pathResolver,
-          bucket: bucket,
-          path: path,
-          dataPayload: dataPayload,
-          options: options,
-          onProgress: onProgress,
-          logger: logger,
-          transferDatabase: transferDatabase,
-        );
+         s3Client: s3Client,
+         s3ClientConfig: s3ClientConfig,
+         pathResolver: pathResolver,
+         bucket: bucket,
+         awsRegion: awsRegion,
+         path: path,
+         dataPayload: dataPayload,
+         options: options,
+         onProgress: onProgress,
+         logger: logger,
+         transferDatabase: transferDatabase,
+       );
 
   /// Initiates an upload task for a [AWSFile].
   ///
@@ -108,26 +112,28 @@ class S3UploadTask {
   S3UploadTask.fromAWSFile(
     AWSFile localFile, {
     required s3.S3Client s3Client,
-    required smithy_aws.S3ClientConfig defaultS3ClientConfig,
+    required smithy_aws.S3ClientConfig s3ClientConfig,
     required S3PathResolver pathResolver,
     required String bucket,
+    required String awsRegion,
     required StoragePath path,
     required StorageUploadDataOptions options,
     void Function(S3TransferProgress)? onProgress,
     required AWSLogger logger,
     required transfer.TransferDatabase transferDatabase,
   }) : this._(
-          s3Client: s3Client,
-          defaultS3ClientConfig: defaultS3ClientConfig,
-          pathResolver: pathResolver,
-          bucket: bucket,
-          path: path,
-          localFile: localFile,
-          options: options,
-          onProgress: onProgress,
-          logger: logger,
-          transferDatabase: transferDatabase,
-        );
+         s3Client: s3Client,
+         s3ClientConfig: s3ClientConfig,
+         pathResolver: pathResolver,
+         bucket: bucket,
+         awsRegion: awsRegion,
+         path: path,
+         localFile: localFile,
+         options: options,
+         onProgress: onProgress,
+         logger: logger,
+         transferDatabase: transferDatabase,
+       );
 
   // Took reference from amplify-js
   static const _maxNumParallelTasks = 4;
@@ -135,9 +141,10 @@ class S3UploadTask {
   final Completer<S3Item> _uploadCompleter = Completer();
 
   final s3.S3Client _s3Client;
-  final smithy_aws.S3ClientConfig _defaultS3ClientConfig;
+  final smithy_aws.S3ClientConfig _s3ClientConfig;
   final S3PathResolver _pathResolver;
   final String _bucket;
+  final String _awsRegion;
   final StoragePath _path;
   final StorageUploadDataOptions _options;
   final void Function(S3TransferProgress)? _onProgress;
@@ -191,7 +198,7 @@ class S3UploadTask {
   /// Should be used only internally.
   Future<void> start() async {
     if (_s3PluginOptions.useAccelerateEndpoint &&
-        _defaultS3ClientConfig.usePathStyle) {
+        _s3ClientConfig.usePathStyle) {
       _completeUploadWithError(s3_exception.accelerateEndpointUnusable);
       return;
     }
@@ -328,7 +335,7 @@ class S3UploadTask {
     try {
       _putObjectOperation = _s3Client.putObject(
         putObjectRequest,
-        s3ClientConfig: _defaultS3ClientConfig.copyWith(
+        s3ClientConfig: _s3ClientConfig.copyWith(
           useAcceleration: _s3PluginOptions.useAccelerateEndpoint,
         ),
       );
@@ -358,31 +365,22 @@ class S3UploadTask {
       // CancellationException is expected when the operation is paused. The
       // exception should be swallowed in this case.
       if (_state == StorageTransferState.paused) {
-        _logger.debug(
-          'PutObject HTTP operation has been paused.',
-        );
+        _logger.debug('PutObject HTTP operation has been paused.');
         return;
       }
       _uploadCompleter.completeError(
         s3_exception.s3ControllableOperationCanceledException,
       );
     } on smithy.UnknownSmithyHttpException catch (error, stackTrace) {
-      _completeUploadWithError(
-        error.toStorageException(),
-        stackTrace,
-      );
+      _completeUploadWithError(error.toStorageException(), stackTrace);
     } on AWSHttpException catch (error) {
-      _completeUploadWithError(
-        error.toNetworkException(),
-      );
+      _completeUploadWithError(error.toNetworkException());
     } finally {
       _emitTransferProgress();
     }
   }
 
-  Future<void> _startMultipartUpload(
-    AWSFile localFile,
-  ) async {
+  Future<void> _startMultipartUpload(AWSFile localFile) async {
     _state = StorageTransferState.inProgress;
     // 1. check if can initiate multipart upload with the given file size
     // and create a multipart upload and set its id to _multipartUploadId
@@ -434,43 +432,42 @@ class S3UploadTask {
 
     _subtasksStreamSubscription =
         _subtasksStreamController.stream.listen((completedSubtask) {
-      _completedSubtasks.add(completedSubtask);
-      _transferredBytes += completedSubtask.transferredBytes;
-      _emitTransferProgress();
-      _ongoingSubtasks.remove(completedSubtask.partNumber);
+          _completedSubtasks.add(completedSubtask);
+          _transferredBytes += completedSubtask.transferredBytes;
+          _emitTransferProgress();
+          _ongoingSubtasks.remove(completedSubtask.partNumber);
 
-      // close the stream if all subtasks are done
-      if (_numOfCompletedSubtasks == _expectedNumOfSubtasks) {
-        _subtasksStreamController.close();
-        return;
-      }
+          // close the stream if all subtasks are done
+          if (_numOfCompletedSubtasks == _expectedNumOfSubtasks) {
+            _subtasksStreamController.close();
+            return;
+          }
 
-      // start next part upload if there are more parts to upload
-      if (_state == StorageTransferState.inProgress) {
-        _startNextUploadPartsBatch();
-      }
-    })
-          ..onDone(() async {
-            try {
-              await _completeMultipartUpload();
-              _uploadCompleter.complete(
-                _s3PluginOptions.getProperties
-                    ? S3Item.fromHeadObjectOutput(
-                        await StorageS3Service.headObject(
-                          s3client: _s3Client,
-                          bucket: _bucket,
-                          key: _resolvedPath,
-                        ),
-                        path: _resolvedPath,
-                      )
-                    : S3Item(path: _resolvedPath),
-              );
-              _state = StorageTransferState.success;
-              _emitTransferProgress();
-            } on Exception catch (error, stackTrace) {
-              _completeUploadWithError(error, stackTrace);
-            }
-          });
+          // start next part upload if there are more parts to upload
+          if (_state == StorageTransferState.inProgress) {
+            _startNextUploadPartsBatch();
+          }
+        })..onDone(() async {
+          try {
+            await _completeMultipartUpload();
+            _uploadCompleter.complete(
+              _s3PluginOptions.getProperties
+                  ? S3Item.fromHeadObjectOutput(
+                      await StorageS3Service.headObject(
+                        s3client: _s3Client,
+                        bucket: _bucket,
+                        key: _resolvedPath,
+                      ),
+                      path: _resolvedPath,
+                    )
+                  : S3Item(path: _resolvedPath),
+            );
+            _state = StorageTransferState.success;
+            _emitTransferProgress();
+          } on Exception catch (error, stackTrace) {
+            _completeUploadWithError(error, stackTrace);
+          }
+        });
   }
 
   Future<void> _createMultiPartUpload(AWSFile localFile) async {
@@ -497,6 +494,8 @@ class S3UploadTask {
           TransferRecord(
             uploadId: uploadId,
             objectKey: _resolvedPath,
+            bucketName: _bucket,
+            awsRegion: _awsRegion,
             createdAt: DateTime.now(),
           ),
         );
@@ -526,12 +525,11 @@ class S3UploadTask {
         ..key = _resolvedPath
         ..uploadId = _multipartUploadId
         ..multipartUpload = s3.CompletedMultipartUpload(
-          parts: (_completedSubtasks
-                ..sort(
-                  (a, b) => a.partNumber.compareTo(b.partNumber),
-                ))
-              .map((e) => e.completedPart)
-              .toList(),
+          parts:
+              (_completedSubtasks
+                    ..sort((a, b) => a.partNumber.compareTo(b.partNumber)))
+                  .map((e) => e.completedPart)
+                  .toList(),
         ).toBuilder();
     });
 
@@ -547,11 +545,15 @@ class S3UploadTask {
     }
   }
 
+  bool _isNextBatchWaiting = false;
   Future<void> _startNextUploadPartsBatch({
     bool resumingFromPause = false,
   }) async {
     // await for previous batching to complete (if any)
+    if (_isNextBatchWaiting) return;
+    _isNextBatchWaiting = true;
     await _uploadPartBatchingCompleted;
+    _isNextBatchWaiting = false;
 
     if (_state != StorageTransferState.inProgress) {
       return;
@@ -565,12 +567,12 @@ class S3UploadTask {
     // Otherwise maximum 4 parts of the file can uploaded in parallel.
     final numToBatch =
         _isAWSFileStream && _optimalPartSize > part_size_util.minPartSize
-            ? 1
-            : min(
-                _maxNumParallelTasks - _numOfOngoingSubtasks,
-                _expectedNumOfSubtasks -
-                    (_numOfCompletedSubtasks + _numOfOngoingSubtasks),
-              );
+        ? 1
+        : min(
+            _maxNumParallelTasks - _numOfOngoingSubtasks,
+            _expectedNumOfSubtasks -
+                (_numOfCompletedSubtasks + _numOfOngoingSubtasks),
+          );
 
     _state = StorageTransferState.inProgress;
 
@@ -601,9 +603,7 @@ class S3UploadTask {
     _uploadPartBatchingCompleter?.complete();
   }
 
-  Future<void> _startNextUploadPart({
-    required int partNumber,
-  }) async {
+  Future<void> _startNextUploadPart({required int partNumber}) async {
     late Stream<List<int>> Function() chunkGetter;
 
     // If the AWSFile is backed by a stream of bytes, read chunks one by one
@@ -615,11 +615,11 @@ class S3UploadTask {
     // otherwise allow reading parts in parallel
     else {
       chunkGetter = () => _localFile!.openRead(
-            (partNumber - 1) * _optimalPartSize,
-            partNumber == _expectedNumOfSubtasks
-                ? _fileSize
-                : partNumber * _optimalPartSize,
-          );
+        (partNumber - 1) * _optimalPartSize,
+        partNumber == _expectedNumOfSubtasks
+            ? _fileSize
+            : partNumber * _optimalPartSize,
+      );
     }
 
     _ongoingSubtasks[partNumber] = _OngoingSubtask(
@@ -651,15 +651,15 @@ class S3UploadTask {
     try {
       final operation = _s3Client.uploadPart(
         request,
-        s3ClientConfig: _defaultS3ClientConfig.copyWith(
+        s3ClientConfig: _s3ClientConfig.copyWith(
           useAcceleration: _s3PluginOptions.useAccelerateEndpoint,
         ),
       );
       _ongoingUploadPartHttpOperations[partNumber] =
           _OngoingUploadPartOperation(
-        partNumber: partNumber,
-        smithyOperation: operation,
-      );
+            partNumber: partNumber,
+            smithyOperation: operation,
+          );
 
       final result = await operation.result;
       _ongoingUploadPartHttpOperations.remove(partNumber);
@@ -758,10 +758,7 @@ class S3UploadTask {
     }
   }
 
-  void _completeUploadWithError(
-    Object error, [
-    StackTrace? stackTrace,
-  ]) {
+  void _completeUploadWithError(Object error, [StackTrace? stackTrace]) {
     _state = StorageTransferState.failure;
     _emitTransferProgress();
     _uploadCompleter.completeError(error, stackTrace);
@@ -803,10 +800,7 @@ class _OngoingSubtask {
 
   Stream<List<int>> get partBody => _partBodyGetter();
 
-  _OngoingSubtask copyWith({
-    int? partNumber,
-    Future<void>? request,
-  }) {
+  _OngoingSubtask copyWith({int? partNumber, Future<void>? request}) {
     return _OngoingSubtask(
       partBodyGetter: _partBodyGetter,
       partNumber: partNumber ?? this.partNumber,

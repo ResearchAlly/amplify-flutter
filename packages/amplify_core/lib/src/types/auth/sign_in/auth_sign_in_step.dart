@@ -10,9 +10,19 @@ enum AuthSignInStep {
   /// an MFA method.
   continueSignInWithMfaSelection,
 
+  /// The sign-in is not complete and the user must select an MFA method to setup.
+  continueSignInWithMfaSetupSelection,
+
   /// The sign-in is not complete and a TOTP authenticator app must be
   /// registered before continuing.
   continueSignInWithTotpSetup,
+
+  /// The sign-in is not complete and an Email MFA must be set up before
+  /// continuing.
+  continueSignInWithEmailMfaSetup,
+
+  /// The sign-in is not complete and the user must select a first factor method.
+  continueSignInWithFirstFactorSelection,
 
   /// The sign-in is not complete and must be confirmed with an SMS code.
   confirmSignInWithSmsMfaCode,
@@ -21,6 +31,9 @@ enum AuthSignInStep {
   /// from a registered authenticator app.
   confirmSignInWithTotpMfaCode,
 
+  /// The sign-in is not complete and must be confirmed with an email code.
+  confirmSignInWithOtpCode,
+
   /// The sign-in is not complete and must be confirmed with the user's new
   /// password.
   confirmSignInWithNewPassword,
@@ -28,6 +41,12 @@ enum AuthSignInStep {
   /// The sign-in is not complete and must be confirmed with the answer to a
   /// custom challenge.
   confirmSignInWithCustomChallenge,
+
+  /// The sign-in is not complete and must be confirmed with an one time password code.
+  confirmSignInWithOtp,
+
+  /// The sign-in is not complete and must be confirmed with a password.
+  confirmSignInWithPassword,
 
   /// The sign-in is not complete and the user must reset their password before
   /// proceeding.

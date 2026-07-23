@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-library amplify_core;
+library;
 
 import 'package:amplify_core/src/amplify_class.dart';
 
@@ -64,7 +64,9 @@ export 'src/state_machine/transition.dart';
 export 'src/types/analytics/analytics_types.dart';
 
 /// API
-export 'src/types/api/api_types.dart';
+export 'src/types/api/api_types.dart' hide WebSocketOptions;
+// ignore: invalid_export_of_internal_element
+export 'src/types/api/api_types.dart' show WebSocketOptions;
 
 /// App path provider
 export 'src/types/app_path_provider/app_path_provider.dart';
@@ -119,6 +121,11 @@ export 'src/types/temporal/temporal_timestamp.dart';
 
 /// Util
 export 'src/util/parsers.dart';
+// `zAmplifyOutputsSerializable` and `zConfigMapSerializable` are `@internal`
+// codegen annotations that are consumed across this package via this barrel,
+// so they must stay exported here. They are intentionally not part of the
+// supported public API (note the `z` prefix and `@internal` annotation).
+// ignore: invalid_export_of_internal_element
 export 'src/util/serializable.dart';
 export 'src/util/uuid.dart';
 

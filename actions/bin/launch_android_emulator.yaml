@@ -3,7 +3,7 @@ description: Launches an Android emulator and caches it for further action runs
 inputs:
   api-level:
     description: "API level of the platform and system image - e.g. 23 for Android Marshmallow, 29 for Android 10"
-    default: "33"
+    default: "35"
   target:
     description: "target of the system image - default, google_apis, google_apis_playstore, aosp_atd, google_atd, android-wear, android-wear-cn, android-tv or google-tv"
     default: google_apis
@@ -13,6 +13,12 @@ inputs:
   script:
     required: true
     description: The script to run once the emulator is booted.
+  max-retries:
+    description: "Maximum number of retry attempts for the entire emulator launch and script execution. Defaults to 1 (no retries)."
+    default: "1"
+  retry-timeout-minutes:
+    description: "Timeout in minutes for each individual retry attempt. If an attempt exceeds this timeout, it will be killed and retried. Defaults to 30 minutes."
+    default: "90"
 runs:
   using: "node16"
   main: "dist/index.mjs"

@@ -1,36 +1,20 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.button_action; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
 import 'package:smithy/smithy.dart' as _i1;
 
 class ButtonAction extends _i1.SmithyEnum<ButtonAction> {
-  const ButtonAction._(
-    super.index,
-    super.name,
-    super.value,
-  );
+  const ButtonAction._(super.index, super.name, super.value);
 
   const ButtonAction._sdkUnknown(super.value) : super.sdkUnknown();
 
-  static const close = ButtonAction._(
-    0,
-    'CLOSE',
-    'CLOSE',
-  );
+  static const close = ButtonAction._(0, 'CLOSE', 'CLOSE');
 
-  static const deepLink = ButtonAction._(
-    1,
-    'DEEP_LINK',
-    'DEEP_LINK',
-  );
+  static const deepLink = ButtonAction._(1, 'DEEP_LINK', 'DEEP_LINK');
 
-  static const link = ButtonAction._(
-    2,
-    'LINK',
-    'LINK',
-  );
+  static const link = ButtonAction._(2, 'LINK', 'LINK');
 
   /// All values of [ButtonAction].
   static const values = <ButtonAction>[
@@ -45,12 +29,9 @@ class ButtonAction extends _i1.SmithyEnum<ButtonAction> {
       values: values,
       sdkUnknown: ButtonAction._sdkUnknown,
       supportedProtocols: [
-        _i1.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
+        _i1.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
       ],
-    )
+    ),
   ];
 }
 

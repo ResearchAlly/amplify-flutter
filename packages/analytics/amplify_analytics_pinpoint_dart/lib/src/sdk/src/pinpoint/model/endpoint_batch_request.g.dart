@@ -8,25 +8,21 @@ part of 'endpoint_batch_request.dart';
 
 class _$EndpointBatchRequest extends EndpointBatchRequest {
   @override
-  final _i2.BuiltList<EndpointBatchItem> item;
+  final _i2.BuiltList<EndpointBatchItem>? item;
 
-  factory _$EndpointBatchRequest(
-          [void Function(EndpointBatchRequestBuilder)? updates]) =>
-      (new EndpointBatchRequestBuilder()..update(updates))._build();
+  factory _$EndpointBatchRequest([
+    void Function(EndpointBatchRequestBuilder)? updates,
+  ]) => (EndpointBatchRequestBuilder()..update(updates))._build();
 
-  _$EndpointBatchRequest._({required this.item}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        item, r'EndpointBatchRequest', 'item');
-  }
-
+  _$EndpointBatchRequest._({this.item}) : super._();
   @override
   EndpointBatchRequest rebuild(
-          void Function(EndpointBatchRequestBuilder) updates) =>
-      (toBuilder()..update(updates)).build();
+    void Function(EndpointBatchRequestBuilder) updates,
+  ) => (toBuilder()..update(updates)).build();
 
   @override
   EndpointBatchRequestBuilder toBuilder() =>
-      new EndpointBatchRequestBuilder()..replace(this);
+      EndpointBatchRequestBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -49,7 +45,7 @@ class EndpointBatchRequestBuilder
 
   _i2.ListBuilder<EndpointBatchItem>? _item;
   _i2.ListBuilder<EndpointBatchItem> get item =>
-      _$this._item ??= new _i2.ListBuilder<EndpointBatchItem>();
+      _$this._item ??= _i2.ListBuilder<EndpointBatchItem>();
   set item(_i2.ListBuilder<EndpointBatchItem>? item) => _$this._item = item;
 
   EndpointBatchRequestBuilder();
@@ -57,7 +53,7 @@ class EndpointBatchRequestBuilder
   EndpointBatchRequestBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _item = $v.item.toBuilder();
+      _item = $v.item?.toBuilder();
       _$v = null;
     }
     return this;
@@ -65,7 +61,6 @@ class EndpointBatchRequestBuilder
 
   @override
   void replace(EndpointBatchRequest other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$EndpointBatchRequest;
   }
 
@@ -80,15 +75,18 @@ class EndpointBatchRequestBuilder
   _$EndpointBatchRequest _build() {
     _$EndpointBatchRequest _$result;
     try {
-      _$result = _$v ?? new _$EndpointBatchRequest._(item: item.build());
+      _$result = _$v ?? _$EndpointBatchRequest._(item: _item?.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'item';
-        item.build();
+        _item?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'EndpointBatchRequest', _$failedField, e.toString());
+        throw BuiltValueNestedFieldError(
+          r'EndpointBatchRequest',
+          _$failedField,
+          e.toString(),
+        );
       }
       rethrow;
     }

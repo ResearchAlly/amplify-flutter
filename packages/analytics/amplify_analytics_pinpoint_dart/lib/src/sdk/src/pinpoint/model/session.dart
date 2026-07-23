@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.session; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -17,8 +17,8 @@ abstract class Session
   /// Provides information about a session.
   factory Session({
     int? duration,
-    required String id,
-    required String startTimestamp,
+    String? id,
+    String? startTimestamp,
     String? stopTimestamp,
   }) {
     return _$Session._(
@@ -35,46 +35,30 @@ abstract class Session
   const Session._();
 
   static const List<_i2.SmithySerializer<Session>> serializers = [
-    SessionRestJson1Serializer()
+    SessionRestJson1Serializer(),
   ];
 
   /// The duration of the session, in milliseconds.
   int? get duration;
 
   /// The unique identifier for the session.
-  String get id;
+  String? get id;
 
   /// The date and time when the session began.
-  String get startTimestamp;
+  String? get startTimestamp;
 
   /// The date and time when the session ended.
   String? get stopTimestamp;
   @override
-  List<Object?> get props => [
-        duration,
-        id,
-        startTimestamp,
-        stopTimestamp,
-      ];
+  List<Object?> get props => [duration, id, startTimestamp, stopTimestamp];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('Session')
-      ..add(
-        'duration',
-        duration,
-      )
-      ..add(
-        'id',
-        id,
-      )
-      ..add(
-        'startTimestamp',
-        startTimestamp,
-      )
-      ..add(
-        'stopTimestamp',
-        stopTimestamp,
-      );
+      ..add('duration', duration)
+      ..add('id', id)
+      ..add('startTimestamp', startTimestamp)
+      ..add('stopTimestamp', stopTimestamp);
     return helper.toString();
   }
 }
@@ -84,17 +68,13 @@ class SessionRestJson1Serializer
   const SessionRestJson1Serializer() : super('Session');
 
   @override
-  Iterable<Type> get types => const [
-        Session,
-        _$Session,
-      ];
+  Iterable<Type> get types => const [Session, _$Session];
+
   @override
   Iterable<_i2.ShapeId> get supportedProtocols => const [
-        _i2.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i2.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   Session deserialize(
     Serializers serializers,
@@ -112,25 +92,33 @@ class SessionRestJson1Serializer
       }
       switch (key) {
         case 'Duration':
-          result.duration = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(int),
-          ) as int);
+          result.duration =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(int),
+                  )
+                  as int);
         case 'Id':
-          result.id = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.id =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
         case 'StartTimestamp':
-          result.startTimestamp = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.startTimestamp =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
         case 'StopTimestamp':
-          result.stopTimestamp = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.stopTimestamp =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
       }
     }
 
@@ -145,33 +133,37 @@ class SessionRestJson1Serializer
   }) {
     final result$ = <Object?>[];
     final Session(:duration, :id, :startTimestamp, :stopTimestamp) = object;
-    result$.addAll([
-      'Id',
-      serializers.serialize(
-        id,
-        specifiedType: const FullType(String),
-      ),
-      'StartTimestamp',
-      serializers.serialize(
-        startTimestamp,
-        specifiedType: const FullType(String),
-      ),
-    ]);
     if (duration != null) {
       result$
         ..add('Duration')
-        ..add(serializers.serialize(
-          duration,
-          specifiedType: const FullType(int),
-        ));
+        ..add(
+          serializers.serialize(duration, specifiedType: const FullType(int)),
+        );
+    }
+    if (id != null) {
+      result$
+        ..add('Id')
+        ..add(serializers.serialize(id, specifiedType: const FullType(String)));
+    }
+    if (startTimestamp != null) {
+      result$
+        ..add('StartTimestamp')
+        ..add(
+          serializers.serialize(
+            startTimestamp,
+            specifiedType: const FullType(String),
+          ),
+        );
     }
     if (stopTimestamp != null) {
       result$
         ..add('StopTimestamp')
-        ..add(serializers.serialize(
-          stopTimestamp,
-          specifiedType: const FullType(String),
-        ));
+        ..add(
+          serializers.serialize(
+            stopTimestamp,
+            specifiedType: const FullType(String),
+          ),
+        );
     }
     return result$;
   }

@@ -1,3 +1,84 @@
+## 2.13.0
+
+- Minor bug fixes and improvements
+
+## 2.12.1
+
+- Minor bug fixes and improvements
+
+## 2.12.0
+
+- Minor bug fixes and improvements
+
+## 2.11.0
+
+### Features
+- feat(storage): Support pre-signed upload URLs ([#6673](https://github.com/aws-amplify/amplify-flutter/pull/6673))
+
+### Fixes
+- fix(storage): Resolve flutter analyze error in amplify_storage_s3 example ([#6853](https://github.com/aws-amplify/amplify-flutter/pull/6853))
+
+## 2.10.0
+
+- Minor bug fixes and improvements
+
+## 2.9.0
+
+- Minor bug fixes and improvements
+
+## 2.8.0
+
+- Minor bug fixes and improvements
+
+## 2.7.0
+
+### Chores
+- chore(all): Bumped Flutter SDK to ^3.35.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 2.6.5
+
+- Minor bug fixes and improvements
+
+## 2.6.4
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 2.6.3
+
+- Minor bug fixes and improvements
+
+## 2.6.2
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 2.6.1
+
+- Minor bug fixes and improvements
+
+## 2.6.0
+
+### Features
+- feat(storage): add multi-bucket feature support  ([#5681](https://github.com/aws-amplify/amplify-flutter/pull/5681))
+
+## 2.5.1
+
+- Minor bug fixes and improvements
+
+## 2.5.0
+
+- Minor bug fixes and improvements
+
+## 2.4.1
+
+- Minor bug fixes and improvements
+
+## 2.4.0
+
+- Minor bug fixes and improvements
+
 ## 2.3.0
 
 - Minor bug fixes and improvements

@@ -23,10 +23,10 @@ abstract class SignUpFormField<FieldValue extends Object>
     CognitoUserAttributeKey? customAttributeKey,
     bool? required,
     super.autofillHints,
-  })  : _customAttributeKey = customAttributeKey,
-        super._(
-          requiredOverride: required,
-        );
+    super.enabledOverride,
+    super.visible,
+  }) : _customAttributeKey = customAttributeKey,
+       super._(requiredOverride: required);
 
   /// {@template amplify_authenticator.username_form_field}
   /// Creates a username component based on your app's configuration.
@@ -42,42 +42,75 @@ abstract class SignUpFormField<FieldValue extends Object>
     Key? key,
     FormFieldValidator<UsernameInput>? validator,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpUsernameField(
-        key: key ?? keyUsernameSignUpFormField,
-        validator: validator,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` to lock the field when its value should come from
+    /// background work or autocomplete instead of manual edits.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to keep the field hidden while still allowing the app to
+    /// supply data programmatically (e.g., legacy or system-managed fields).
+    bool visible = true,
+  }) => _SignUpUsernameField(
+    key: key ?? keyUsernameSignUpFormField,
+    validator: validator,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a password component.
   static SignUpFormField<String> password({
     Key? key,
     FormFieldValidator<String>? validator,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyPasswordSignUpFormField,
-        titleKey: InputResolverKey.passwordTitle,
-        hintTextKey: InputResolverKey.passwordHint,
-        field: SignUpField.password,
-        validator: validator,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` to lock the field while values are supplied
+    /// automatically (e.g., when generating passwords in the background).
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field when credentials are handled outside
+    /// of the UI but still need to sync with the form state.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyPasswordSignUpFormField,
+    titleKey: InputResolverKey.passwordTitle,
+    hintTextKey: InputResolverKey.passwordHint,
+    field: SignUpField.password,
+    validator: validator,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a passwordConfirmation component.
   static SignUpFormField<String> passwordConfirmation({
     Key? key,
     FormFieldValidator<String>? validator,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyPasswordConfirmationSignUpFormField,
-        titleKey: InputResolverKey.passwordConfirmationTitle,
-        hintTextKey: InputResolverKey.passwordConfirmationHint,
-        field: SignUpField.passwordConfirmation,
-        validator: validator,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` to keep the confirmation read-only while values are
+    /// synced from elsewhere (e.g., mirror updates from a generated password).
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the confirmation when credentials are managed
+    /// outside of the UI but still need validation.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyPasswordConfirmationSignUpFormField,
+    titleKey: InputResolverKey.passwordConfirmationTitle,
+    hintTextKey: InputResolverKey.passwordConfirmationHint,
+    field: SignUpField.passwordConfirmation,
+    validator: validator,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates an address component.
   static SignUpFormField<String> address({
@@ -85,16 +118,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyAddressSignUpFormField,
-        titleKey: InputResolverKey.addressTitle,
-        hintTextKey: InputResolverKey.addressHint,
-        field: SignUpField.address,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when the address is auto-derived (e.g., GPS lookup)
+    /// and should stay read-only for the user.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to keep the field hidden while still syncing backend-only
+    /// attributes such as generated addresses.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyAddressSignUpFormField,
+    titleKey: InputResolverKey.addressTitle,
+    hintTextKey: InputResolverKey.addressHint,
+    field: SignUpField.address,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a birthdate component.
   static SignUpFormField<String> birthdate({
@@ -102,16 +146,25 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpDateField(
-        key: key ?? keyBirthdateSignUpFormField,
-        titleKey: InputResolverKey.birthdateTitle,
-        hintTextKey: InputResolverKey.birthdateHint,
-        field: SignUpField.birthdate,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+
+    /// Provide `false` to prevent edits when birthdates are sourced from a
+    /// trusted system record instead of the user.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to quietly retain legacy birthdate attributes that are
+    /// no longer presented to the user.
+    bool visible = true,
+  }) => _SignUpDateField(
+    key: key ?? keyBirthdateSignUpFormField,
+    titleKey: InputResolverKey.birthdateTitle,
+    hintTextKey: InputResolverKey.birthdateHint,
+    field: SignUpField.birthdate,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates an email component.
   static SignUpFormField<String> email({
@@ -119,16 +172,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyEmailSignUpFormField,
-        titleKey: InputResolverKey.emailTitle,
-        hintTextKey: InputResolverKey.emailHint,
-        field: SignUpField.email,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when emails are pre-filled or synced from identity
+    /// providers and should remain read-only.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while continuing to supply values for
+    /// federated or system-managed email attributes.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyEmailSignUpFormField,
+    titleKey: InputResolverKey.emailTitle,
+    hintTextKey: InputResolverKey.emailHint,
+    field: SignUpField.email,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a familyName component.
   static SignUpFormField<String> familyName({
@@ -136,16 +200,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyFamilyNameSignUpFormField,
-        titleKey: InputResolverKey.familyNameTitle,
-        hintTextKey: InputResolverKey.familyNameHint,
-        field: SignUpField.familyName,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when last names are sourced from another system and
+    /// should not be edited by the user.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while the app populates the value for
+    /// legacy or backend-only requirements.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyFamilyNameSignUpFormField,
+    titleKey: InputResolverKey.familyNameTitle,
+    hintTextKey: InputResolverKey.familyNameHint,
+    field: SignUpField.familyName,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a gender component.
   static SignUpFormField<String> gender({
@@ -153,16 +228,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyGenderSignUpFormField,
-        titleKey: InputResolverKey.genderTitle,
-        hintTextKey: InputResolverKey.genderHint,
-        field: SignUpField.gender,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when gender is pulled from an external profile and
+    /// should stay read-only in the form.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while continuing to update backend
+    /// attributes without user interaction.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyGenderSignUpFormField,
+    titleKey: InputResolverKey.genderTitle,
+    hintTextKey: InputResolverKey.genderHint,
+    field: SignUpField.gender,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a givenName component.
   static SignUpFormField<String> givenName({
@@ -170,16 +256,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyGivenNameSignUpFormField,
-        titleKey: InputResolverKey.givenNameTitle,
-        hintTextKey: InputResolverKey.givenNameHint,
-        field: SignUpField.givenName,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when first names are sourced from a profile service and
+    /// should stay read-only.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while still syncing attributes that
+    /// are set elsewhere.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyGivenNameSignUpFormField,
+    titleKey: InputResolverKey.givenNameTitle,
+    hintTextKey: InputResolverKey.givenNameHint,
+    field: SignUpField.givenName,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a middleName component.
   static SignUpFormField<String> middleName({
@@ -187,16 +284,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyMiddleNameSignUpFormField,
-        titleKey: InputResolverKey.middleNameTitle,
-        hintTextKey: InputResolverKey.middleNameHint,
-        field: SignUpField.middleName,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when middle names should reflect external records and
+    /// must remain read-only.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while keeping system-provided values
+    /// in sync.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyMiddleNameSignUpFormField,
+    titleKey: InputResolverKey.middleNameTitle,
+    hintTextKey: InputResolverKey.middleNameHint,
+    field: SignUpField.middleName,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a name component.
   static SignUpFormField<String> name({
@@ -204,16 +312,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyNameSignUpFormField,
-        titleKey: InputResolverKey.nameTitle,
-        hintTextKey: InputResolverKey.nameHint,
-        field: SignUpField.name,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when display names are computed or imported and should
+    /// not be edited manually.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while still satisfying backend
+    /// requirements for a name attribute.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyNameSignUpFormField,
+    titleKey: InputResolverKey.nameTitle,
+    hintTextKey: InputResolverKey.nameHint,
+    field: SignUpField.name,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a nickname component.
   static SignUpFormField<String> nickname({
@@ -221,16 +340,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyNicknameSignUpFormField,
-        titleKey: InputResolverKey.nicknameTitle,
-        hintTextKey: InputResolverKey.nicknameHint,
-        field: SignUpField.nickname,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when nicknames are generated automatically and the user
+    /// should not edit them.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide nickname inputs while still populating values
+    /// behind the scenes.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyNicknameSignUpFormField,
+    titleKey: InputResolverKey.nicknameTitle,
+    hintTextKey: InputResolverKey.nicknameHint,
+    field: SignUpField.nickname,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a phoneNumber component.
   static SignUpFormField<String> phoneNumber({
@@ -238,16 +368,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpPhoneField(
-        key: key ?? keyPhoneNumberSignUpFormField,
-        titleKey: InputResolverKey.phoneNumberTitle,
-        hintTextKey: InputResolverKey.phoneNumberHint,
-        field: SignUpField.phoneNumber,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` to keep the phone field read-only when values are
+    /// imported (e.g., from contacts or device settings).
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the phone field while still syncing values for
+    /// legacy Cognito setups that require it.
+    bool visible = true,
+  }) => _SignUpPhoneField(
+    key: key ?? keyPhoneNumberSignUpFormField,
+    titleKey: InputResolverKey.phoneNumberTitle,
+    hintTextKey: InputResolverKey.phoneNumberHint,
+    field: SignUpField.phoneNumber,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a preferredUsername component.
   static SignUpFormField<String> preferredUsername({
@@ -255,16 +396,27 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key ?? keyPreferredUsernameSignUpFormField,
-        titleKey: InputResolverKey.preferredUsernameTitle,
-        hintTextKey: InputResolverKey.preferredUsernameHint,
-        field: SignUpField.preferredUsername,
-        validator: validator,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when preferred usernames are handled automatically and
+    /// should not be altered by the user.
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the preferred username input while keeping the
+    /// backing attribute synchronized.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key ?? keyPreferredUsernameSignUpFormField,
+    titleKey: InputResolverKey.preferredUsernameTitle,
+    hintTextKey: InputResolverKey.preferredUsernameHint,
+    field: SignUpField.preferredUsername,
+    validator: validator,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a custom attribute component.
   static SignUpFormField<String> custom({
@@ -275,17 +427,28 @@ abstract class SignUpFormField<FieldValue extends Object>
     FormFieldValidator<String>? validator,
     bool? required,
     Iterable<String>? autofillHints,
-  }) =>
-      _SignUpTextField(
-        key: key,
-        title: title,
-        hintText: hintText,
-        field: SignUpField.custom,
-        validator: validator,
-        attributeKey: attributeKey,
-        required: required,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+
+    /// Provide `false` when the custom attribute should be supplied by the app
+    /// rather than the end user (e.g., tokens or IDs).
+    AuthenticatorTextEnabledOverride? enabledOverride,
+
+    /// Set to `false` to hide the field while still letting the app populate
+    /// Cognito attributes that users should not see.
+    bool visible = true,
+  }) => _SignUpTextField(
+    key: key,
+    title: title,
+    hintText: hintText,
+    field: SignUpField.custom,
+    validator: validator,
+    attributeKey: attributeKey,
+    required: required,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Custom Cognito attribute key.
   final CognitoUserAttributeKey? _customAttributeKey;
@@ -365,8 +528,12 @@ abstract class SignUpFormField<FieldValue extends Object>
 }
 
 abstract class _SignUpFormFieldState<FieldValue extends Object>
-    extends AuthenticatorFormFieldState<SignUpField, FieldValue,
-        SignUpFormField<FieldValue>> {
+    extends
+        AuthenticatorFormFieldState<
+          SignUpField,
+          FieldValue,
+          SignUpFormField<FieldValue>
+        > {
   @override
   bool get obscureText {
     switch (widget.field) {
@@ -424,57 +591,31 @@ abstract class _SignUpFormFieldState<FieldValue extends Object>
     switch (widget.field) {
       case SignUpField.password:
       case SignUpField.passwordConfirmation:
-        return const [
-          AutofillHints.newPassword,
-        ];
+        return const [AutofillHints.newPassword];
       case SignUpField.address:
-        return const [
-          AutofillHints.fullStreetAddress,
-        ];
+        return const [AutofillHints.fullStreetAddress];
       case SignUpField.email:
-        return const [
-          AutofillHints.email,
-        ];
+        return const [AutofillHints.email];
       case SignUpField.name:
-        return const [
-          AutofillHints.name,
-        ];
+        return const [AutofillHints.name];
       case SignUpField.phoneNumber:
-        return const [
-          AutofillHints.telephoneNumber,
-        ];
+        return const [AutofillHints.telephoneNumber];
       case SignUpField.username:
-        return const [
-          AutofillHints.newUsername,
-        ];
+        return const [AutofillHints.newUsername];
       case SignUpField.birthdate:
-        return const [
-          AutofillHints.birthday,
-        ];
+        return const [AutofillHints.birthday];
       case SignUpField.familyName:
-        return const [
-          AutofillHints.familyName,
-        ];
+        return const [AutofillHints.familyName];
       case SignUpField.gender:
-        return const [
-          AutofillHints.gender,
-        ];
+        return const [AutofillHints.gender];
       case SignUpField.givenName:
-        return const [
-          AutofillHints.givenName,
-        ];
+        return const [AutofillHints.givenName];
       case SignUpField.middleName:
-        return const [
-          AutofillHints.middleName,
-        ];
+        return const [AutofillHints.middleName];
       case SignUpField.nickname:
-        return const [
-          AutofillHints.nickname,
-        ];
+        return const [AutofillHints.nickname];
       case SignUpField.preferredUsername:
-        return const [
-          AutofillHints.newUsername,
-        ];
+        return const [AutofillHints.newUsername];
       case SignUpField.custom:
         return null;
     }
@@ -493,12 +634,27 @@ class _SignUpTextField extends SignUpFormField<String> {
     super.validator,
     super.required,
     super.autofillHints,
-  }) : super._(
-          customAttributeKey: attributeKey,
-        );
+    super.enabledOverride,
+    super.visible,
+    this.authenticatorTextFieldController,
+  }) : super._(customAttributeKey: attributeKey);
+
+  @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
 
   @override
   _SignUpTextFieldState createState() => _SignUpTextFieldState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AuthenticatorTextFieldController?>(
+        'authenticatorTextFieldController',
+        authenticatorTextFieldController,
+      ),
+    );
+  }
 }
 
 class _SignUpTextFieldState extends _SignUpFormFieldState<String>
@@ -565,10 +721,8 @@ class _SignUpTextFieldState extends _SignUpFormFieldState<String>
       case SignUpField.preferredUsername:
         return (v) => state.preferredUsername = v;
       case SignUpField.custom:
-        return (String value) => state.setCustomAttribute(
-              widget._customAttributeKey!,
-              value,
-            );
+        return (String value) =>
+            state.setCustomAttribute(widget._customAttributeKey!, value);
       default:
         return super.onChanged;
     }
@@ -604,10 +758,7 @@ class _SignUpTextFieldState extends _SignUpFormFieldState<String>
         );
       case SignUpField.address:
         return simpleValidator(
-          stringResolver.inputs.resolve(
-            context,
-            InputResolverKey.addressEmpty,
-          ),
+          stringResolver.inputs.resolve(context, InputResolverKey.addressEmpty),
           isOptional: isOptional,
         );
       case SignUpField.birthdate:
@@ -628,10 +779,7 @@ class _SignUpTextFieldState extends _SignUpFormFieldState<String>
         );
       case SignUpField.gender:
         return simpleValidator(
-          stringResolver.inputs.resolve(
-            context,
-            InputResolverKey.genderEmpty,
-          ),
+          stringResolver.inputs.resolve(context, InputResolverKey.genderEmpty),
           isOptional: isOptional,
         );
       case SignUpField.givenName:
@@ -652,10 +800,7 @@ class _SignUpTextFieldState extends _SignUpFormFieldState<String>
         );
       case SignUpField.name:
         return simpleValidator(
-          stringResolver.inputs.resolve(
-            context,
-            InputResolverKey.nameEmpty,
-          ),
+          stringResolver.inputs.resolve(context, InputResolverKey.nameEmpty),
           isOptional: isOptional,
         );
       case SignUpField.nickname:
@@ -685,14 +830,31 @@ class _SignUpUsernameField extends SignUpFormField<UsernameInput> {
     super.key,
     super.validator,
     super.autofillHints,
+    super.enabledOverride,
+    super.visible,
+    this.authenticatorTextFieldController,
   }) : super._(
-          field: SignUpField.username,
-          titleKey: InputResolverKey.usernameTitle,
-          hintTextKey: InputResolverKey.usernameHint,
-        );
+         field: SignUpField.username,
+         titleKey: InputResolverKey.usernameTitle,
+         hintTextKey: InputResolverKey.usernameHint,
+       );
+
+  @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
 
   @override
   _SignUpUsernameFieldState createState() => _SignUpUsernameFieldState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AuthenticatorTextFieldController?>(
+        'authenticatorTextFieldController',
+        authenticatorTextFieldController,
+      ),
+    );
+  }
 }
 
 class _SignUpUsernameFieldState extends _SignUpFormFieldState<UsernameInput>
@@ -708,12 +870,27 @@ class _SignUpPhoneField extends SignUpFormField<String> {
     super.validator,
     super.required,
     super.autofillHints,
-  }) : super._(
-          customAttributeKey: attributeKey,
-        );
+    super.enabledOverride,
+    super.visible,
+    this.authenticatorTextFieldController,
+  }) : super._(customAttributeKey: attributeKey);
+
+  @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
 
   @override
   _SignUpPhoneFieldState createState() => _SignUpPhoneFieldState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AuthenticatorTextFieldController?>(
+        'authenticatorTextFieldController',
+        authenticatorTextFieldController,
+      ),
+    );
+  }
 }
 
 class _SignUpPhoneFieldState extends _SignUpTextFieldState
@@ -758,9 +935,9 @@ class _SignUpDateField extends SignUpFormField<String> {
     super.validator,
     super.required,
     super.autofillHints,
-  }) : super._(
-          customAttributeKey: attributeKey,
-        );
+    super.enabledOverride,
+    super.visible,
+  }) : super._(customAttributeKey: attributeKey);
 
   @override
   _SignUpDateFieldState createState() => _SignUpDateFieldState();
@@ -784,10 +961,7 @@ class _SignUpDateFieldState extends _SignUpFormFieldState<String>
       return widget.validatorOverride!;
     }
     return simpleValidator(
-      stringResolver.inputs.resolve(
-        context,
-        InputResolverKey.birthdateEmpty,
-      ),
+      stringResolver.inputs.resolve(context, InputResolverKey.birthdateEmpty),
       isOptional: isOptional,
     );
   }

@@ -33,12 +33,7 @@ class JsGenerator extends ImplGenerator {
 
   @override
   Library generate() {
-    return Library(
-      (b) => b
-        ..body.addAll([
-          _workerClass,
-        ]),
-    );
+    return Library((b) => b..body.addAll([_workerClass]));
   }
 
   late final _packageName = hiveEntrypointId.package;
@@ -46,8 +41,9 @@ class JsGenerator extends ImplGenerator {
   late final _workersJs = hiveEntrypointId.changeExtension('.js');
   late final _workersJsPath =
       'packages/$_packageName/${_workersJs.path.replaceFirst('lib/', '')}';
-  late final _debugWorkersJs =
-      hiveEntrypointId.changeExtension('.debug.dart.js');
+  late final _debugWorkersJs = hiveEntrypointId.changeExtension(
+    '.debug.dart.js',
+  );
   late final _debugWorkersJsPath =
       'packages/$_packageName/${_debugWorkersJs.path.replaceFirst('lib/', '')}';
 
@@ -55,8 +51,9 @@ class JsGenerator extends ImplGenerator {
   late final _minifiedWorkersJsPath =
       'packages/$_packageName/${_minifiedWorkersJs.path.replaceFirst('lib/', '')}';
 
-  late final _releaseWorkersJs =
-      hiveEntrypointId.changeExtension('.release.dart.js');
+  late final _releaseWorkersJs = hiveEntrypointId.changeExtension(
+    '.release.dart.js',
+  );
   late final _releaseWorkersJsPath =
       'packages/$_packageName/${_releaseWorkersJs.path.replaceFirst('lib/', '')}';
 
@@ -66,80 +63,84 @@ class JsGenerator extends ImplGenerator {
         'assets/packages/$_packageName/${_minifiedWorkersJs.path}';
 
     return Code.scope(
-      (allocate) => '''
-// Flutter web release builds must use the bundled asset.
-if (${allocate(DartTypes.awsCommon.zIsFlutter)} && !${allocate(DartTypes.awsCommon.zDebugMode)}) {
+      (allocate) =>
+          '''
+// Flutter web builds must use the bundled asset. The minified worker is used
+// in both debug and release modes so that only a single asset needs to be
+// declared and shipped (see each package's `pubspec.yaml`).
+if (${allocate(DartTypes.awsCommon.zIsFlutter)}) {
   return '$flutterUrl';
 }
-    // Default to the compiled, published worker.
+    // Default to the compiled, published worker (pure Dart / build_runner).
 return ${allocate(DartTypes.awsCommon.zDebugMode)} ? '$_workersJsPath' : '$_minifiedWorkersJsPath';
 ''',
     );
   }
 
   Code get _fallbackUrls {
-    return Block.of([
-      const Code('''
-    // When running in a test, we need to find the `packages` directory which
-    // is symlinked in the root `test/` directory.
-    final baseUri = Uri.base;
-    final basePath = baseUri.pathSegments
-        .takeWhile((segment) => segment != 'test')
-        .map(Uri.encodeComponent)
-        .join('/');'''),
-      declareConst('relativePath')
-          .assign(
-            DartTypes.awsCommon.zDebugMode.conditional(
-              literalString(_debugWorkersJsPath),
-              literalString(_releaseWorkersJsPath),
-            ),
-          )
-          .statement,
-      const Code(r'''
-    final testRelativePath = Uri(
+    // Offer both the copy-builder output names (`workers.js` / `workers.min.js`)
+    // and the raw build_web_compilers names (`*.debug.dart.js` /
+    // `*.release.dart.js`), each also under the `test/` symlink used by tests.
+    return Code.scope(
+      (allocate) =>
+          '''
+// When running in a test, we need to find the `packages` directory which
+// is symlinked in the root `test/` directory.
+final baseUri = Uri.base;
+final basePath = baseUri.pathSegments
+    .takeWhile((segment) => segment != 'test')
+    .map(Uri.encodeComponent)
+    .join('/');
+const relativePaths = ${allocate(DartTypes.awsCommon.zDebugMode)}
+    ? ['$_workersJsPath', '$_debugWorkersJsPath']
+    : ['$_minifiedWorkersJsPath', '$_releaseWorkersJsPath'];
+return [
+  for (final relativePath in relativePaths) ...[
+    relativePath,
+    Uri(
       scheme: baseUri.scheme,
       host: baseUri.host,
       port: baseUri.port,
-      path: '$basePath/test/$relativePath',
-    ).toString();'''),
-      literalList([refer('relativePath'), refer('testRelativePath')])
-          .returned
-          .statement,
-    ]);
+      path: '\$basePath/test/\$relativePath',
+    ).toString(),
+  ],
+];
+''',
+    );
   }
 
   Class get _workerClass => Class(
-        (c) => c
-          ..name = workerImplName
-          ..docs.add('/// The JS implementation of [${workerType.symbol}].')
-          ..extend = workerType
-          ..methods.addAll([
-            Method(
-              (m) => m
-                ..annotations.add(DartTypes.core.override)
-                ..returns = DartTypes.core.string
-                ..type = MethodType.getter
-                ..name = 'name'
-                ..body = literalString(workerName).code,
-            ),
-            if (!declaresJsEntrypoint)
-              Method(
-                (m) => m
-                  ..annotations.add(DartTypes.core.override)
-                  ..returns = DartTypes.core.string
-                  ..type = MethodType.getter
-                  ..name = 'jsEntrypoint'
-                  ..body = _jsEntrypoint,
-              ),
-            if (!declaresFallbackUrls)
-              Method(
-                (m) => m
-                  ..annotations.add(DartTypes.core.override)
-                  ..returns = DartTypes.core.list(DartTypes.core.string)
-                  ..type = MethodType.getter
-                  ..name = 'fallbackUrls'
-                  ..body = _fallbackUrls,
-              ),
-          ]),
-      );
+    (c) => c
+      ..name = workerImplName
+      ..docs.add('/// The JS implementation of [${workerType.symbol}].')
+      ..extend = workerType
+      ..methods.addAll([
+        Method(
+          (m) => m
+            ..annotations.add(DartTypes.core.override)
+            ..returns = DartTypes.core.string
+            ..type = MethodType.getter
+            ..name = 'name'
+            ..body = literalString(workerName).code,
+        ),
+        if (!declaresJsEntrypoint)
+          Method(
+            (m) => m
+              ..annotations.add(DartTypes.core.override)
+              ..returns = DartTypes.core.string
+              ..type = MethodType.getter
+              ..name = 'jsEntrypoint'
+              ..body = _jsEntrypoint,
+          ),
+        if (!declaresFallbackUrls)
+          Method(
+            (m) => m
+              ..annotations.add(DartTypes.core.override)
+              ..returns = DartTypes.core.list(DartTypes.core.string)
+              ..type = MethodType.getter
+              ..name = 'fallbackUrls'
+              ..body = _fallbackUrls,
+          ),
+      ]),
+  );
 }

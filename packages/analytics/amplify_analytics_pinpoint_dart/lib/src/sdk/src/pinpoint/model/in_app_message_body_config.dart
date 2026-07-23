@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.in_app_message_body_config; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -17,9 +17,9 @@ abstract class InAppMessageBodyConfig
     implements Built<InAppMessageBodyConfig, InAppMessageBodyConfigBuilder> {
   /// Text config for Message Body.
   factory InAppMessageBodyConfig({
-    required Alignment alignment,
-    required String body,
-    required String textColor,
+    Alignment? alignment,
+    String? body,
+    String? textColor,
   }) {
     return _$InAppMessageBodyConfig._(
       alignment: alignment,
@@ -29,9 +29,9 @@ abstract class InAppMessageBodyConfig
   }
 
   /// Text config for Message Body.
-  factory InAppMessageBodyConfig.build(
-          [void Function(InAppMessageBodyConfigBuilder) updates]) =
-      _$InAppMessageBodyConfig;
+  factory InAppMessageBodyConfig.build([
+    void Function(InAppMessageBodyConfigBuilder) updates,
+  ]) = _$InAppMessageBodyConfig;
 
   const InAppMessageBodyConfig._();
 
@@ -39,34 +39,22 @@ abstract class InAppMessageBodyConfig
       [InAppMessageBodyConfigRestJson1Serializer()];
 
   /// The alignment of the text. Valid values: LEFT, CENTER, RIGHT.
-  Alignment get alignment;
+  Alignment? get alignment;
 
   /// Message Body.
-  String get body;
+  String? get body;
 
   /// The text color.
-  String get textColor;
+  String? get textColor;
   @override
-  List<Object?> get props => [
-        alignment,
-        body,
-        textColor,
-      ];
+  List<Object?> get props => [alignment, body, textColor];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('InAppMessageBodyConfig')
-      ..add(
-        'alignment',
-        alignment,
-      )
-      ..add(
-        'body',
-        body,
-      )
-      ..add(
-        'textColor',
-        textColor,
-      );
+      ..add('alignment', alignment)
+      ..add('body', body)
+      ..add('textColor', textColor);
     return helper.toString();
   }
 }
@@ -74,20 +62,19 @@ abstract class InAppMessageBodyConfig
 class InAppMessageBodyConfigRestJson1Serializer
     extends _i2.StructuredSmithySerializer<InAppMessageBodyConfig> {
   const InAppMessageBodyConfigRestJson1Serializer()
-      : super('InAppMessageBodyConfig');
+    : super('InAppMessageBodyConfig');
 
   @override
   Iterable<Type> get types => const [
-        InAppMessageBodyConfig,
-        _$InAppMessageBodyConfig,
-      ];
+    InAppMessageBodyConfig,
+    _$InAppMessageBodyConfig,
+  ];
+
   @override
   Iterable<_i2.ShapeId> get supportedProtocols => const [
-        _i2.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i2.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   InAppMessageBodyConfig deserialize(
     Serializers serializers,
@@ -105,20 +92,26 @@ class InAppMessageBodyConfigRestJson1Serializer
       }
       switch (key) {
         case 'Alignment':
-          result.alignment = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(Alignment),
-          ) as Alignment);
+          result.alignment =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(Alignment),
+                  )
+                  as Alignment);
         case 'Body':
-          result.body = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.body =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
         case 'TextColor':
-          result.textColor = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.textColor =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
       }
     }
 
@@ -133,23 +126,33 @@ class InAppMessageBodyConfigRestJson1Serializer
   }) {
     final result$ = <Object?>[];
     final InAppMessageBodyConfig(:alignment, :body, :textColor) = object;
-    result$.addAll([
-      'Alignment',
-      serializers.serialize(
-        alignment,
-        specifiedType: const FullType(Alignment),
-      ),
-      'Body',
-      serializers.serialize(
-        body,
-        specifiedType: const FullType(String),
-      ),
-      'TextColor',
-      serializers.serialize(
-        textColor,
-        specifiedType: const FullType(String),
-      ),
-    ]);
+    if (alignment != null) {
+      result$
+        ..add('Alignment')
+        ..add(
+          serializers.serialize(
+            alignment,
+            specifiedType: const FullType(Alignment),
+          ),
+        );
+    }
+    if (body != null) {
+      result$
+        ..add('Body')
+        ..add(
+          serializers.serialize(body, specifiedType: const FullType(String)),
+        );
+    }
+    if (textColor != null) {
+      result$
+        ..add('TextColor')
+        ..add(
+          serializers.serialize(
+            textColor,
+            specifiedType: const FullType(String),
+          ),
+        );
+    }
     return result$;
   }
 }

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'dart:async';
-import 'dart:io';
 
 // ignore: implementation_imports
 import 'package:amplify_analytics_pinpoint/src/flutter_endpoint_info_store_manager.dart';
@@ -15,7 +14,7 @@ import 'package:amplify_auth_cognito_dart/amplify_auth_cognito_dart.dart';
 import 'package:amplify_auth_cognito_dart/src/credentials/legacy_credential_provider.dart';
 // ignore: implementation_imports
 import 'package:amplify_auth_cognito_dart/src/flows/hosted_ui/hosted_ui_platform_stub.dart'
-    if (dart.library.html) 'package:amplify_auth_cognito_dart/src/flows/hosted_ui/hosted_ui_platform_html.dart'
+    if (dart.library.js_interop) 'package:amplify_auth_cognito_dart/src/flows/hosted_ui/hosted_ui_platform_html.dart'
     if (dart.library.ui) 'flows/hosted_ui/hosted_ui_platform_flutter.dart';
 // ignore: implementation_imports
 import 'package:amplify_auth_cognito_dart/src/model/hosted_ui/oauth_parameters.dart';
@@ -25,6 +24,7 @@ import 'package:amplify_auth_cognito_dart/src/state/cognito_state_machine.dart';
 import 'package:amplify_auth_cognito_dart/src/state/state.dart';
 import 'package:amplify_core/amplify_core.dart';
 import 'package:amplify_secure_storage/amplify_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 
 /// {@template amplify_auth_cognito.amplify_auth_cognito}
 /// The AWS Cognito implementation of the Amplify Auth category.
@@ -35,13 +35,12 @@ class AmplifyAuthCognito extends AmplifyAuthCognitoDart with AWSDebuggable {
   /// To change the default behavior of credential storage,
   /// provide a [SecureStorageFactory] value. If no value is provided,
   /// storage will be configured with default [AmplifySecureStorageConfig] values.
-  AmplifyAuthCognito({
-    SecureStorageFactory? secureStorageFactory,
-  }) : super(
-          secureStorageFactory:
-              secureStorageFactory ?? AmplifySecureStorage.factoryFrom(),
-          hostedUiPlatformFactory: HostedUiPlatformImpl.new,
-        );
+  AmplifyAuthCognito({SecureStorageFactory? secureStorageFactory})
+    : super(
+        secureStorageFactory:
+            secureStorageFactory ?? AmplifySecureStorage.factoryFrom(),
+        hostedUiPlatformFactory: HostedUiPlatformImpl.new,
+      );
 
   /// A plugin key which can be used with `Amplify.Auth.getPlugin` to retrieve
   /// a Cognito-specific Auth category interface.
@@ -54,13 +53,13 @@ class AmplifyAuthCognito extends AmplifyAuthCognitoDart with AWSDebuggable {
   }) async {
     await super.addPlugin(authProviderRepo: authProviderRepo);
 
-    if (zIsWeb || !(Platform.isAndroid || Platform.isIOS)) {
+    if (zIsWeb || !_isMobile) {
       return;
     }
 
     // Configure this plugin to act as a native iOS/Android plugin.
     final nativePlugin = _NativeAmplifyAuthCognito(stateMachine);
-    NativeAuthPlugin.setup(nativePlugin);
+    NativeAuthPlugin.setUp(nativePlugin);
 
     final nativeBridge = NativeAuthBridge();
     stateMachine
@@ -85,16 +84,13 @@ class AmplifyAuthCognito extends AmplifyAuthCognitoDart with AWSDebuggable {
       FlutterEndpointInfoStoreManager(),
     );
 
-    await super.configure(
-      config: config,
-      authProviderRepo: authProviderRepo,
-    );
+    await super.configure(config: config, authProviderRepo: authProviderRepo);
   }
 
   @override
   Future<CognitoSignUpResult> signUp({
     required String username,
-    required String password,
+    String? password,
     SignUpOptions? options,
   }) async {
     options ??= const SignUpOptions();
@@ -103,19 +99,17 @@ class AmplifyAuthCognito extends AmplifyAuthCognitoDart with AWSDebuggable {
       defaultPluginOptions: const CognitoSignUpPluginOptions(),
     );
     Map<String, String>? validationData;
-    if (!zIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      final nativeValidationData =
-          await stateMachine.expect<NativeAuthBridge>().getValidationData();
+    if (!zIsWeb && _isMobile) {
+      final nativeValidationData = await stateMachine
+          .expect<NativeAuthBridge>()
+          .getValidationData();
       validationData = nativeValidationData.cast();
     }
     options = SignUpOptions(
       userAttributes: options.userAttributes,
       pluginOptions: CognitoSignUpPluginOptions(
         clientMetadata: pluginOptions.clientMetadata,
-        validationData: {
-          ...pluginOptions.validationData,
-          ...?validationData,
-        },
+        validationData: {...pluginOptions.validationData, ...?validationData},
       ),
     );
     return super.signUp(
@@ -184,3 +178,8 @@ class _AmplifyAuthCognitoPluginKey extends AuthPluginKey<AmplifyAuthCognito> {
   @override
   String get runtimeTypeName => 'AmplifyAuthCognito';
 }
+
+// WASM-safe iOS/Android check
+bool get _isMobile =>
+    defaultTargetPlatform == TargetPlatform.android ||
+    defaultTargetPlatform == TargetPlatform.iOS;

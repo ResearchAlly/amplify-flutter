@@ -1,3 +1,57 @@
+## 0.5.12
+
+### Features
+- feat(auth): Add wasm support ([#7094](https://github.com/aws-amplify/amplify-flutter/pull/7094))
+- feat(secure_storage): Add wasm support ([#7094](https://github.com/aws-amplify/amplify-flutter/pull/7094))
+
+### Fixes
+- fix(worker_bee): Fix loading wasm file ([#7094](https://github.com/aws-amplify/amplify-flutter/pull/7094))
+- fix(worker_bee): Point `fallbackUrls` at real filenames after `copy_builder` use ([#7111](https://github.com/aws-amplify/amplify-flutter/pull/7111))
+
+## 0.5.11
+
+- Minor bug fixes and improvements
+
+## 0.5.10
+
+- Minor bug fixes and improvements
+
+## 0.5.9
+
+- Minor bug fixes and improvements
+
+## 0.5.8
+
+### Chores
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 0.5.7
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 0.5.6
+
+- Minor bug fixes and improvements
+
+## 0.5.5
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 0.5.4
+
+- Minor bug fixes and improvements
+
+## 0.5.3
+
+- Minor bug fixes and improvements
+
+## 0.5.2
+
+### Fixes
+- fix(secure_storage): process file system operations one at a time on Windows ([#5195](https://github.com/aws-amplify/amplify-flutter/pull/5195))
+
 ## 0.5.1
 
 - Minor bug fixes and improvements

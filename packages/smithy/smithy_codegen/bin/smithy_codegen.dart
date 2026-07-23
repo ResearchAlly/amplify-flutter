@@ -65,10 +65,7 @@ void main(List<String> args) async {
   final dependencies = <String>{};
   for (final library in outputs.values.expand((out) => out.libraries)) {
     final smithyLibrary = library.smithyLibrary;
-    final outPath = path.join(
-      outputPath,
-      smithyLibrary.projectRelativePath,
-    );
+    final outPath = path.join(outputPath, smithyLibrary.projectRelativePath);
     final output = library.emit();
     dependencies.addAll(library.dependencies);
     final outFile = File(outPath);
@@ -108,10 +105,7 @@ analyzer:
   // Run `dart pub get`
   final pubGetRes = await Process.run(
     'dart',
-    [
-      'pub',
-      'upgrade',
-    ],
+    ['pub', 'upgrade'],
     workingDirectory: outputPath,
     stdoutEncoding: utf8,
     stderrEncoding: utf8,
@@ -125,16 +119,17 @@ analyzer:
   }
 
   // Run built_value generator
-  final buildRunnerCmd = await Process.start(
-    'dart',
-    [
-      'run',
-      'build_runner',
-      'build',
-      '--delete-conflicting-outputs',
-    ],
-    workingDirectory: outputPath,
-  );
+  // `--force-jit` avoids a Dart 3.10.x regression where AOT compilation of the
+  // build_runner entrypoint fails when the package graph contains native-assets
+  // build hooks. Fixed in Dart 3.11+; see
+  // https://github.com/dart-lang/build/issues/4343.
+  final buildRunnerCmd = await Process.start('dart', [
+    'run',
+    'build_runner',
+    'build',
+    '--force-jit',
+    '--delete-conflicting-outputs',
+  ], workingDirectory: outputPath);
   buildRunnerCmd.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())

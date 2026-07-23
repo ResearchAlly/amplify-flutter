@@ -28,11 +28,15 @@ void main() {
   late String phoneNumber;
   late String name;
 
-  Future<void> createAndLoginUser() async {
-    username = generateUsername();
+  Future<void> createAndLoginUser([EnvironmentInfo? environment]) async {
+    username = environment?.generateUsername() ?? generateUsername();
     password = generatePassword();
-    email = generateEmail();
-    phoneNumber = generatePhoneNumber();
+    email = environment?.loginMethod == LoginMethod.email
+        ? username
+        : generateEmail();
+    phoneNumber = environment?.loginMethod == LoginMethod.phone
+        ? username
+        : generatePhoneNumber();
     name = generateNameAttribute();
 
     await adminCreateUser(
@@ -40,10 +44,15 @@ void main() {
       password,
       autoConfirm: true,
       verifyAttributes: true,
-      attributes: {
-        AuthUserAttributeKey.name: name,
-        AuthUserAttributeKey.email: email,
-        AuthUserAttributeKey.phoneNumber: phoneNumber,
+      autoFillAttributes: false,
+      attributes: switch (environment?.loginMethod) {
+        LoginMethod.email => {AuthUserAttributeKey.name: name},
+        LoginMethod.phone => {AuthUserAttributeKey.name: name},
+        _ => {
+          AuthUserAttributeKey.email: email,
+          AuthUserAttributeKey.phoneNumber: phoneNumber,
+          AuthUserAttributeKey.name: name,
+        },
       },
     );
 
@@ -67,14 +76,15 @@ void main() {
   }
 
   group('User Attributes', () {
-    for (final environmentName in userPoolEnvironments) {
-      group(environmentName, () {
+    for (final environment in userPoolEnvironments) {
+      group(environment.name, () {
         setUp(() async {
           await testRunner.configure(
-            environmentName: environmentName,
+            environmentName: environment.name,
+            useAmplifyOutputs: environment.useAmplifyOutputs,
           );
 
-          await createAndLoginUser();
+          await createAndLoginUser(environment);
         });
 
         group('fetchUserAttributes', () {
@@ -84,15 +94,14 @@ void main() {
             expect(
               userAttributes.valueOf(AuthUserAttributeKey.email),
               email,
+              skip: environment.loginMethod.isPhone,
             );
             expect(
               userAttributes.valueOf(AuthUserAttributeKey.phoneNumber),
               phoneNumber,
+              skip: environment.loginMethod.isEmail,
             );
-            expect(
-              userAttributes.valueOf(AuthUserAttributeKey.name),
-              name,
-            );
+            expect(userAttributes.valueOf(AuthUserAttributeKey.name), name);
           });
         });
 
@@ -116,35 +125,30 @@ void main() {
             );
           });
 
-          asyncTest(
-            'should throw an InvalidParameterException for an invalid '
-            'attribute key',
-            (_) async {
-              await expectLater(
-                Amplify.Auth.updateUserAttribute(
-                  userAttributeKey:
-                      CognitoUserAttributeKey.parse('fake-key-name'),
-                  value: 'mock-value',
+          asyncTest('should throw an InvalidParameterException for an invalid '
+              'attribute key', (_) async {
+            await expectLater(
+              Amplify.Auth.updateUserAttribute(
+                userAttributeKey: CognitoUserAttributeKey.parse(
+                  'fake-key-name',
                 ),
-                throwsA(isA<InvalidParameterException>()),
-              );
-            },
-          );
+                value: 'mock-value',
+              ),
+              throwsA(isA<InvalidParameterException>()),
+            );
+          });
 
-          asyncTest(
-            'should throw an InvalidParameterException for an invalid '
-            'attribute value',
-            (_) async {
-              const invalidEmailAddress = 'invalidEmailFormat.com';
-              await expectLater(
-                Amplify.Auth.updateUserAttribute(
-                  userAttributeKey: AuthUserAttributeKey.email,
-                  value: invalidEmailAddress,
-                ),
-                throwsA(isA<InvalidParameterException>()),
-              );
-            },
-          );
+          asyncTest('should throw an InvalidParameterException for an invalid '
+              'attribute value', (_) async {
+            const invalidEmailAddress = 'invalidEmailFormat.com';
+            await expectLater(
+              Amplify.Auth.updateUserAttribute(
+                userAttributeKey: AuthUserAttributeKey.email,
+                value: invalidEmailAddress,
+              ),
+              throwsA(isA<InvalidParameterException>()),
+            );
+          });
         });
 
         group('updateUserAttributes', () {
@@ -225,9 +229,7 @@ void main() {
     ]) {
       group(environmentName, () {
         setUp(() async {
-          await testRunner.configure(
-            environmentName: environmentName,
-          );
+          await testRunner.configure(environmentName: environmentName);
 
           await createAndLoginUser();
         });
@@ -280,8 +282,8 @@ void main() {
             );
             final resendResult =
                 await Amplify.Auth.sendUserAttributeVerificationCode(
-              userAttributeKey: AuthUserAttributeKey.email,
-            );
+                  userAttributeKey: AuthUserAttributeKey.email,
+                );
             expect(
               resendResult.codeDeliveryDetails.attributeKey,
               AuthUserAttributeKey.email,
@@ -290,10 +292,7 @@ void main() {
               resendResult.codeDeliveryDetails.deliveryMedium,
               DeliveryMedium.email,
             );
-            expect(
-              resendResult.codeDeliveryDetails.destination,
-              isNotNull,
-            );
+            expect(resendResult.codeDeliveryDetails.destination, isNotNull);
 
             await expectLater(
               Amplify.Auth.confirmUserAttribute(
@@ -351,8 +350,8 @@ void main() {
             );
             final resendResult =
                 await Amplify.Auth.sendUserAttributeVerificationCode(
-              userAttributeKey: AuthUserAttributeKey.phoneNumber,
-            );
+                  userAttributeKey: AuthUserAttributeKey.phoneNumber,
+                );
             expect(
               resendResult.codeDeliveryDetails.attributeKey,
               AuthUserAttributeKey.phoneNumber,
@@ -361,10 +360,7 @@ void main() {
               resendResult.codeDeliveryDetails.deliveryMedium,
               DeliveryMedium.sms,
             );
-            expect(
-              resendResult.codeDeliveryDetails.destination,
-              isNotNull,
-            );
+            expect(resendResult.codeDeliveryDetails.destination, isNotNull);
 
             await expectLater(
               Amplify.Auth.confirmUserAttribute(

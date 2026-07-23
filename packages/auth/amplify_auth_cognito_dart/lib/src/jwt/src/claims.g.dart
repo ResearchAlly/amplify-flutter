@@ -17,21 +17,13 @@ JsonWebClaims _$JsonWebClaimsFromJson(Map<String, dynamic> json) =>
       jwtId: json['jti'] as String?,
     );
 
-Map<String, dynamic> _$JsonWebClaimsToJson(JsonWebClaims instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('iss', instance.issuer);
-  writeNotNull('sub', instance.subject);
-  writeNotNull('aud', instance.audience);
-  writeNotNull('exp', encodeDateTime(instance.expiration));
-  writeNotNull('nbf', encodeDateTime(instance.notBefore));
-  writeNotNull('iat', encodeDateTime(instance.issuedAt));
-  writeNotNull('jti', instance.jwtId);
-  return val;
-}
+Map<String, dynamic> _$JsonWebClaimsToJson(JsonWebClaims instance) =>
+    <String, dynamic>{
+      'iss': ?instance.issuer,
+      'sub': ?instance.subject,
+      'aud': ?instance.audience,
+      'exp': ?encodeDateTime(instance.expiration),
+      'nbf': ?encodeDateTime(instance.notBefore),
+      'iat': ?encodeDateTime(instance.issuedAt),
+      'jti': ?instance.jwtId,
+    };

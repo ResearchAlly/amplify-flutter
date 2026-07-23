@@ -14,13 +14,18 @@ on:
         description: Whether the E2E workflow needs configuration pulled from AWS
         required: true
         type: boolean
-      needs-gen2-config:
-        required: true
-        description: Whether the E2E workflow needs amplify_outputs from AWS
+      run-wasm:
+        description: >-
+          Whether to additionally run the E2E suite compiled to WebAssembly.
+          Opted into by packages whose test package has a
+          `test/wasm_smoke_test.dart`; defaults to off.
+        required: false
+        default: false
         type: boolean
 
 jobs:
   e2e-test-web:
+    name: e2e-test-web (${{ matrix.compiler }}, ${{ matrix.channel }})
     runs-on: ubuntu-latest
     strategy:
       # Allows other matrix items to run if one fails
@@ -29,16 +34,21 @@ jobs:
         channel:
           - beta
           - stable
-        # Skips e2e tests against beta on PRs
+        compiler:
+          - js
+          - wasm
+        # Skips e2e tests against beta on PRs, and skips the wasm compiler
+        # unless the caller opted in via `run-wasm`.
         exclude:
           - channel: ${{ (github.event_name == 'pull_request' && 'beta') || 'NONE' }}
+          - compiler: ${{ inputs.run-wasm && 'NONE' || 'wasm' }}
 
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # 3.5.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # 7.0.0
         with:
           persist-credentials: false
           submodules: true
@@ -59,15 +69,19 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           scope: ${{ inputs.package-name }}
           secret-identifier: ${{ secrets.AWS_SECRET_IDENTIFIER }}
-          needs-gen2-config: ${{ inputs.needs-gen2-config }}
 
       - uses: ./.github/composite_actions/setup_chromedriver
 
       - name: Run integration tests
-        timeout-minutes: 60
+        timeout-minutes: 320
+        env:
+          # Appends `--wasm` to the flutter drive runs on the wasm matrix leg.
+          WASM_FLAG: ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
         run: |
+          # 5 attemps
+          # 60 minutes timeout each
           chromedriver --port=4444 &
-          aft exec --include=${{ inputs.package-name }} -- "<AFT_ROOT>/build-support/integ_test.sh" -d web-server
+          "${{ github.workspace }}/build-support/linux_timeout_attempts.sh" 5 60 "aft exec --include=${{ inputs.package-name }} -- ${{ github.workspace }}/build-support/integ_test.sh -d web-server $WASM_FLAG"
 
       - name: Log success/failure
         if: always()

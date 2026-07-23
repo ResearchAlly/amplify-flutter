@@ -10,13 +10,20 @@ import 'package:crclib/catalog.dart';
 import 'package:crclib/crclib.dart';
 import 'package:crypto/crypto.dart';
 import 'package:smithy/smithy.dart';
+import 'package:smithy_aws/src/http/interceptors/crc64nvme.dart';
 
 class _CrcValueToHeaderConverter extends Converter<CrcValue, String> {
   const _CrcValueToHeaderConverter();
 
   @override
   String convert(CrcValue input) {
-    return base64Encode(hex.decode(input.toRadixString(16)));
+    // Convert to BigInt to ensure unsigned representation
+    final bigIntValue = input.toBigInt();
+    final hexString = bigIntValue.toRadixString(16);
+
+    // Pad with leading zero if odd length (hex.decode requires even length)
+    final paddedHex = hexString.length.isOdd ? '0$hexString' : hexString;
+    return base64Encode(hex.decode(paddedHex));
   }
 
   @override
@@ -60,34 +67,33 @@ class WithChecksum extends HttpRequestInterceptor {
 
   // https://awslabs.github.io/smithy/2.0/aws/aws-core.html#resolving-checksum-name
   String get _header => switch (_algorithm) {
-        'CRC32C' ||
-        'CRC32' ||
-        'SHA1' ||
-        'SHA256' =>
-          'x-amz-checksum-${_algorithm.toLowerCase()}',
-        'MD5' || _ => 'Content-MD5',
-      };
+    'CRC32C' ||
+    'CRC32' ||
+    'SHA1' ||
+    'SHA256' ||
+    'CRC64NVME' => 'x-amz-checksum-${_algorithm.toLowerCase()}',
+    'MD5' || _ => 'Content-MD5',
+  };
 
   static Converter<List<int>, String> _converterForAlgorithm(
     String algorithm,
-  ) =>
-      switch (algorithm) {
-        'CRC32C' => Crc32C().fuse(const _CrcValueToHeaderConverter()),
-        'CRC32' => Crc32().fuse(const _CrcValueToHeaderConverter()),
-        'SHA1' => sha1.fuse(const _DigestToHeaderConverter()),
-        'SHA256' => sha256.fuse(const _DigestToHeaderConverter()),
-        'MD5' || _ => md5.fuse(const _DigestToHeaderConverter()),
-      };
+  ) => switch (algorithm) {
+    'CRC32C' => Crc32C().fuse(const _CrcValueToHeaderConverter()),
+    'CRC32' => Crc32().fuse(const _CrcValueToHeaderConverter()),
+    'SHA1' => sha1.fuse(const _DigestToHeaderConverter()),
+    'SHA256' => sha256.fuse(const _DigestToHeaderConverter()),
+    'CRC64NVME' => Crc64Nvme().fuse(const _CrcValueToHeaderConverter()),
+    'MD5' || _ => md5.fuse(const _DigestToHeaderConverter()),
+  };
 
   @override
-  Future<AWSBaseHttpRequest> intercept(
-    AWSBaseHttpRequest request,
-  ) async {
+  Future<AWSBaseHttpRequest> intercept(AWSBaseHttpRequest request) async {
     if (request.headers.containsKey(_header)) {
       return request;
     }
-    final digest =
-        await _converterForAlgorithm(_algorithm).bind(request.split()).last;
+    final digest = await _converterForAlgorithm(
+      _algorithm,
+    ).bind(request.split()).last;
     request.headers[_header] = digest;
     return request;
   }

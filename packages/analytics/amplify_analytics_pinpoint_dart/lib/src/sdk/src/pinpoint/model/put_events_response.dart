@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.put_events_response; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -16,41 +16,42 @@ abstract class PutEventsResponse
     implements
         Built<PutEventsResponse, PutEventsResponseBuilder>,
         _i2.HasPayload<EventsResponse> {
-  factory PutEventsResponse({required EventsResponse eventsResponse}) {
+  factory PutEventsResponse({EventsResponse? eventsResponse}) {
     return _$PutEventsResponse._(eventsResponse: eventsResponse);
   }
 
-  factory PutEventsResponse.build(
-      [void Function(PutEventsResponseBuilder) updates]) = _$PutEventsResponse;
+  factory PutEventsResponse.build([
+    void Function(PutEventsResponseBuilder) updates,
+  ]) = _$PutEventsResponse;
 
   const PutEventsResponse._();
 
   /// Constructs a [PutEventsResponse] from a [payload] and [response].
   factory PutEventsResponse.fromResponse(
-    EventsResponse payload,
+    EventsResponse? payload,
     _i1.AWSBaseHttpResponse response,
-  ) =>
-      PutEventsResponse.build((b) {
-        b.eventsResponse.replace(payload);
-      });
+  ) => PutEventsResponse.build((b) {
+    if (payload != null) {
+      b.eventsResponse.replace(payload);
+    }
+  });
 
-  static const List<_i2.SmithySerializer<EventsResponse>> serializers = [
-    PutEventsResponseRestJson1Serializer()
+  static const List<_i2.SmithySerializer<EventsResponse?>> serializers = [
+    PutEventsResponseRestJson1Serializer(),
   ];
 
   /// Provides information about endpoints and the events that they're associated with.
-  EventsResponse get eventsResponse;
+  EventsResponse? get eventsResponse;
   @override
-  EventsResponse getPayload() => eventsResponse;
+  EventsResponse? getPayload() => eventsResponse ?? EventsResponse();
+
   @override
   List<Object?> get props => [eventsResponse];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('PutEventsResponse')
-      ..add(
-        'eventsResponse',
-        eventsResponse,
-      );
+      ..add('eventsResponse', eventsResponse);
     return helper.toString();
   }
 }
@@ -60,17 +61,13 @@ class PutEventsResponseRestJson1Serializer
   const PutEventsResponseRestJson1Serializer() : super('PutEventsResponse');
 
   @override
-  Iterable<Type> get types => const [
-        PutEventsResponse,
-        _$PutEventsResponse,
-      ];
+  Iterable<Type> get types => const [PutEventsResponse, _$PutEventsResponse];
+
   @override
   Iterable<_i2.ShapeId> get supportedProtocols => const [
-        _i2.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i2.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   EventsResponse deserialize(
     Serializers serializers,
@@ -78,9 +75,10 @@ class PutEventsResponseRestJson1Serializer
     FullType specifiedType = FullType.unspecified,
   }) {
     return (serializers.deserialize(
-      serialized,
-      specifiedType: const FullType(EventsResponse),
-    ) as EventsResponse);
+          serialized,
+          specifiedType: const FullType(EventsResponse),
+        )
+        as EventsResponse);
   }
 
   @override

@@ -9,7 +9,12 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:worker_bee/src/exception/worker_bee_exception.dart';
 import 'package:worker_bee/worker_bee.dart';
 
-export 'vm/preamble.dart' if (dart.library.js) 'js/preamble.dart';
+export 'vm/preamble.dart' if (dart.library.js_interop) 'js/preamble.dart';
+
+/// Posted by a worker once it's listening, so the spawner knows when to send
+/// the assignment. A `Worker` drops messages sent before a listener exists.
+@internal
+const String workerOnlineSignal = '__worker_bee_online__';
 
 /// {@template worker_bee.worker_assignment}
 /// The worker bee assignment sent from the main thread.
@@ -26,8 +31,8 @@ class WorkerAssignment {
 }
 
 /// Factory for a worker bee.
-typedef WorkerBeeBuilder<W extends WorkerBeeBase<Object, dynamic>> = W
-    Function();
+typedef WorkerBeeBuilder<W extends WorkerBeeBase<Object, dynamic>> =
+    W Function();
 
 /// Initializes worker bees by checking if running in a web worker, and awaiting
 /// the assigned role if so.
@@ -67,10 +72,7 @@ R runTraced<R>(
   }
 
   if (zDebugMode) {
-    return Chain.capture(
-      action,
-      onError: wrappedOnError,
-    );
+    return Chain.capture(action, onError: wrappedOnError);
   }
   return runZonedGuarded(action, wrappedOnError) as R;
 }

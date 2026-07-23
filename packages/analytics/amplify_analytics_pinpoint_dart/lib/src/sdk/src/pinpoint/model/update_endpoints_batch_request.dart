@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.update_endpoints_batch_request; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -20,7 +20,7 @@ abstract class UpdateEndpointsBatchRequest
         _i1.HasPayload<EndpointBatchRequest> {
   factory UpdateEndpointsBatchRequest({
     required String applicationId,
-    required EndpointBatchRequest endpointBatchRequest,
+    EndpointBatchRequest? endpointBatchRequest,
   }) {
     return _$UpdateEndpointsBatchRequest._(
       applicationId: applicationId,
@@ -28,63 +28,55 @@ abstract class UpdateEndpointsBatchRequest
     );
   }
 
-  factory UpdateEndpointsBatchRequest.build(
-          [void Function(UpdateEndpointsBatchRequestBuilder) updates]) =
-      _$UpdateEndpointsBatchRequest;
+  factory UpdateEndpointsBatchRequest.build([
+    void Function(UpdateEndpointsBatchRequestBuilder) updates,
+  ]) = _$UpdateEndpointsBatchRequest;
 
   const UpdateEndpointsBatchRequest._();
 
   factory UpdateEndpointsBatchRequest.fromRequest(
-    EndpointBatchRequest payload,
+    EndpointBatchRequest? payload,
     _i2.AWSBaseHttpRequest request, {
     Map<String, String> labels = const {},
-  }) =>
-      UpdateEndpointsBatchRequest.build((b) {
-        b.endpointBatchRequest.replace(payload);
-        if (labels['applicationId'] != null) {
-          b.applicationId = labels['applicationId']!;
-        }
-      });
+  }) => UpdateEndpointsBatchRequest.build((b) {
+    if (payload != null) {
+      b.endpointBatchRequest.replace(payload);
+    }
+    if (labels['applicationId'] != null) {
+      b.applicationId = labels['applicationId']!;
+    }
+  });
 
-  static const List<_i1.SmithySerializer<EndpointBatchRequest>> serializers = [
-    UpdateEndpointsBatchRequestRestJson1Serializer()
+  static const List<_i1.SmithySerializer<EndpointBatchRequest?>> serializers = [
+    UpdateEndpointsBatchRequestRestJson1Serializer(),
   ];
 
   /// The unique identifier for the application. This identifier is displayed as the **Project ID** on the Amazon Pinpoint console.
   String get applicationId;
 
   /// Specifies a batch of endpoints to create or update and the settings and attributes to set or change for each endpoint.
-  EndpointBatchRequest get endpointBatchRequest;
+  EndpointBatchRequest? get endpointBatchRequest;
   @override
   String labelFor(String key) {
     switch (key) {
       case 'ApplicationId':
         return applicationId;
     }
-    throw _i1.MissingLabelException(
-      this,
-      key,
-    );
+    throw _i1.MissingLabelException(this, key);
   }
 
   @override
-  EndpointBatchRequest getPayload() => endpointBatchRequest;
+  EndpointBatchRequest? getPayload() =>
+      endpointBatchRequest ?? EndpointBatchRequest();
+
   @override
-  List<Object?> get props => [
-        applicationId,
-        endpointBatchRequest,
-      ];
+  List<Object?> get props => [applicationId, endpointBatchRequest];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('UpdateEndpointsBatchRequest')
-      ..add(
-        'applicationId',
-        applicationId,
-      )
-      ..add(
-        'endpointBatchRequest',
-        endpointBatchRequest,
-      );
+      ..add('applicationId', applicationId)
+      ..add('endpointBatchRequest', endpointBatchRequest);
     return helper.toString();
   }
 }
@@ -92,20 +84,19 @@ abstract class UpdateEndpointsBatchRequest
 class UpdateEndpointsBatchRequestRestJson1Serializer
     extends _i1.PrimitiveSmithySerializer<EndpointBatchRequest> {
   const UpdateEndpointsBatchRequestRestJson1Serializer()
-      : super('UpdateEndpointsBatchRequest');
+    : super('UpdateEndpointsBatchRequest');
 
   @override
   Iterable<Type> get types => const [
-        UpdateEndpointsBatchRequest,
-        _$UpdateEndpointsBatchRequest,
-      ];
+    UpdateEndpointsBatchRequest,
+    _$UpdateEndpointsBatchRequest,
+  ];
+
   @override
   Iterable<_i1.ShapeId> get supportedProtocols => const [
-        _i1.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i1.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   EndpointBatchRequest deserialize(
     Serializers serializers,
@@ -113,9 +104,10 @@ class UpdateEndpointsBatchRequestRestJson1Serializer
     FullType specifiedType = FullType.unspecified,
   }) {
     return (serializers.deserialize(
-      serialized,
-      specifiedType: const FullType(EndpointBatchRequest),
-    ) as EndpointBatchRequest);
+          serialized,
+          specifiedType: const FullType(EndpointBatchRequest),
+        )
+        as EndpointBatchRequest);
   }
 
   @override

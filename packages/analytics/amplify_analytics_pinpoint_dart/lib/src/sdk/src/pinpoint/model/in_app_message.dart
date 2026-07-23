@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.in_app_message; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -37,7 +37,7 @@ abstract class InAppMessage
   const InAppMessage._();
 
   static const List<_i3.SmithySerializer<InAppMessage>> serializers = [
-    InAppMessageRestJson1Serializer()
+    InAppMessageRestJson1Serializer(),
   ];
 
   /// In-app message content.
@@ -49,26 +49,14 @@ abstract class InAppMessage
   /// The layout of the message.
   Layout? get layout;
   @override
-  List<Object?> get props => [
-        content,
-        customConfig,
-        layout,
-      ];
+  List<Object?> get props => [content, customConfig, layout];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('InAppMessage')
-      ..add(
-        'content',
-        content,
-      )
-      ..add(
-        'customConfig',
-        customConfig,
-      )
-      ..add(
-        'layout',
-        layout,
-      );
+      ..add('content', content)
+      ..add('customConfig', customConfig)
+      ..add('layout', layout);
     return helper.toString();
   }
 }
@@ -78,17 +66,13 @@ class InAppMessageRestJson1Serializer
   const InAppMessageRestJson1Serializer() : super('InAppMessage');
 
   @override
-  Iterable<Type> get types => const [
-        InAppMessage,
-        _$InAppMessage,
-      ];
+  Iterable<Type> get types => const [InAppMessage, _$InAppMessage];
+
   @override
   Iterable<_i3.ShapeId> get supportedProtocols => const [
-        _i3.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i3.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   InAppMessage deserialize(
     Serializers serializers,
@@ -106,29 +90,33 @@ class InAppMessageRestJson1Serializer
       }
       switch (key) {
         case 'Content':
-          result.content.replace((serializers.deserialize(
-            value,
-            specifiedType: const FullType(
-              _i2.BuiltList,
-              [FullType(InAppMessageContent)],
-            ),
-          ) as _i2.BuiltList<InAppMessageContent>));
+          result.content.replace(
+            (serializers.deserialize(
+                  value,
+                  specifiedType: const FullType(_i2.BuiltList, [
+                    FullType(InAppMessageContent),
+                  ]),
+                )
+                as _i2.BuiltList<InAppMessageContent>),
+          );
         case 'CustomConfig':
-          result.customConfig.replace((serializers.deserialize(
-            value,
-            specifiedType: const FullType(
-              _i2.BuiltMap,
-              [
-                FullType(String),
-                FullType(String),
-              ],
-            ),
-          ) as _i2.BuiltMap<String, String>));
+          result.customConfig.replace(
+            (serializers.deserialize(
+                  value,
+                  specifiedType: const FullType(_i2.BuiltMap, [
+                    FullType(String),
+                    FullType(String),
+                  ]),
+                )
+                as _i2.BuiltMap<String, String>),
+          );
         case 'Layout':
-          result.layout = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(Layout),
-          ) as Layout);
+          result.layout =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(Layout),
+                  )
+                  as Layout);
       }
     }
 
@@ -146,35 +134,34 @@ class InAppMessageRestJson1Serializer
     if (content != null) {
       result$
         ..add('Content')
-        ..add(serializers.serialize(
-          content,
-          specifiedType: const FullType(
-            _i2.BuiltList,
-            [FullType(InAppMessageContent)],
+        ..add(
+          serializers.serialize(
+            content,
+            specifiedType: const FullType(_i2.BuiltList, [
+              FullType(InAppMessageContent),
+            ]),
           ),
-        ));
+        );
     }
     if (customConfig != null) {
       result$
         ..add('CustomConfig')
-        ..add(serializers.serialize(
-          customConfig,
-          specifiedType: const FullType(
-            _i2.BuiltMap,
-            [
+        ..add(
+          serializers.serialize(
+            customConfig,
+            specifiedType: const FullType(_i2.BuiltMap, [
               FullType(String),
               FullType(String),
-            ],
+            ]),
           ),
-        ));
+        );
     }
     if (layout != null) {
       result$
         ..add('Layout')
-        ..add(serializers.serialize(
-          layout,
-          specifiedType: const FullType(Layout),
-        ));
+        ..add(
+          serializers.serialize(layout, specifiedType: const FullType(Layout)),
+        );
     }
     return result$;
   }

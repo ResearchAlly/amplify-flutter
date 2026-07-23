@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_auth_cognito_dart.cognito_identity_provider.common.serializers; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -25,9 +25,11 @@ import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/confirm_sign_up_response.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/delete_user_request.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/delivery_medium_type.dart';
+import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/device_key_exists_exception.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/device_remembered_status_type.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/device_secret_verifier_config_type.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/device_type.dart';
+import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/email_mfa_settings_type.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/enable_software_token_mfa_exception.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/expired_code_exception.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/forbidden_exception.dart';
@@ -36,6 +38,8 @@ import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/forgot_password_response.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_device_request.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_device_response.dart';
+import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_tokens_from_refresh_token_request.dart';
+import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_tokens_from_refresh_token_response.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_user_attribute_verification_code_request.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_user_attribute_verification_code_response.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/get_user_request.dart';
@@ -59,7 +63,9 @@ import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/mfa_option_type.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/new_device_metadata_type.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/not_authorized_exception.dart';
+import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/password_history_policy_violation_exception.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/password_reset_required_exception.dart';
+import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/refresh_token_reuse_exception.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/resend_confirmation_code_request.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/resend_confirmation_code_response.dart';
 import 'package:amplify_auth_cognito_dart/src/sdk/src/cognito_identity_provider/model/resource_not_found_exception.dart';
@@ -112,6 +118,7 @@ const List<_i1.SmithySerializer> serializers = [
   ...ChangePasswordResponse.serializers,
   ...InvalidPasswordException.serializers,
   ...LimitExceededException.serializers,
+  ...PasswordHistoryPolicyViolationException.serializers,
   ...PasswordResetRequiredException.serializers,
   ...TooManyRequestsException.serializers,
   ...UserNotConfirmedException.serializers,
@@ -119,6 +126,7 @@ const List<_i1.SmithySerializer> serializers = [
   ...DeviceSecretVerifierConfigType.serializers,
   ...ConfirmDeviceRequest.serializers,
   ...ConfirmDeviceResponse.serializers,
+  ...DeviceKeyExistsException.serializers,
   ...InvalidLambdaResponseException.serializers,
   ...InvalidUserPoolConfigurationException.serializers,
   ...UsernameExistsException.serializers,
@@ -148,6 +156,11 @@ const List<_i1.SmithySerializer> serializers = [
   ...AttributeType.serializers,
   ...DeviceType.serializers,
   ...GetDeviceResponse.serializers,
+  ...GetTokensFromRefreshTokenRequest.serializers,
+  ...NewDeviceMetadataType.serializers,
+  ...AuthenticationResultType.serializers,
+  ...GetTokensFromRefreshTokenResponse.serializers,
+  ...RefreshTokenReuseException.serializers,
   ...GetUserRequest.serializers,
   ...MfaOptionType.serializers,
   ...GetUserResponse.serializers,
@@ -158,9 +171,8 @@ const List<_i1.SmithySerializer> serializers = [
   ...AuthFlowType.serializers,
   ...InitiateAuthRequest.serializers,
   ...ChallengeNameType.serializers,
-  ...NewDeviceMetadataType.serializers,
-  ...AuthenticationResultType.serializers,
   ...InitiateAuthResponse.serializers,
+  ...UnsupportedOperationException.serializers,
   ...ListDevicesRequest.serializers,
   ...ListDevicesResponse.serializers,
   ...ResendConfirmationCodeRequest.serializers,
@@ -171,10 +183,10 @@ const List<_i1.SmithySerializer> serializers = [
   ...RevokeTokenRequest.serializers,
   ...RevokeTokenResponse.serializers,
   ...UnauthorizedException.serializers,
-  ...UnsupportedOperationException.serializers,
   ...UnsupportedTokenTypeException.serializers,
   ...SmsMfaSettingsType.serializers,
   ...SoftwareTokenMfaSettingsType.serializers,
+  ...EmailMfaSettingsType.serializers,
   ...SetUserMfaPreferenceRequest.serializers,
   ...SetUserMfaPreferenceResponse.serializers,
   ...SignUpRequest.serializers,
@@ -192,38 +204,20 @@ const List<_i1.SmithySerializer> serializers = [
   ...VerifyUserAttributeResponse.serializers,
 ];
 final Map<FullType, Function> builderFactories = {
-  const FullType(
-    _i2.BuiltMap,
-    [
-      FullType(String),
-      FullType(String),
-    ],
-  ): _i2.MapBuilder<String, String>.new,
-  const FullType(
-    _i2.BuiltList,
-    [FullType(AttributeType)],
-  ): _i2.ListBuilder<AttributeType>.new,
-  const FullType(
-    _i2.BuiltList,
-    [FullType(MfaOptionType)],
-  ): _i2.ListBuilder<MfaOptionType>.new,
-  const FullType(
-    _i2.BuiltList,
-    [FullType(String)],
-  ): _i2.ListBuilder<String>.new,
-  const FullType(
-    _i2.BuiltMap,
-    [
-      FullType(String),
-      FullType.nullable(String),
-    ],
-  ): _i2.MapBuilder<String, String?>.new,
-  const FullType(
-    _i2.BuiltList,
-    [FullType(DeviceType)],
-  ): _i2.ListBuilder<DeviceType>.new,
-  const FullType(
-    _i2.BuiltList,
-    [FullType(CodeDeliveryDetailsType)],
-  ): _i2.ListBuilder<CodeDeliveryDetailsType>.new,
+  const FullType(_i2.BuiltMap, [FullType(String), FullType(String)]):
+      _i2.MapBuilder<String, String>.new,
+  const FullType(_i2.BuiltList, [FullType(AttributeType)]):
+      _i2.ListBuilder<AttributeType>.new,
+  const FullType(_i2.BuiltList, [FullType(MfaOptionType)]):
+      _i2.ListBuilder<MfaOptionType>.new,
+  const FullType(_i2.BuiltList, [FullType(String)]):
+      _i2.ListBuilder<String>.new,
+  const FullType(_i2.BuiltMap, [FullType(String), FullType.nullable(String)]):
+      _i2.MapBuilder<String, String?>.new,
+  const FullType(_i2.BuiltList, [FullType(ChallengeNameType)]):
+      _i2.ListBuilder<ChallengeNameType>.new,
+  const FullType(_i2.BuiltList, [FullType(DeviceType)]):
+      _i2.ListBuilder<DeviceType>.new,
+  const FullType(_i2.BuiltList, [FullType(CodeDeliveryDetailsType)]):
+      _i2.ListBuilder<CodeDeliveryDetailsType>.new,
 };

@@ -6,6 +6,7 @@ import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:amplify_authenticator/src/services/amplify_auth_service.dart';
 import 'package:amplify_authenticator_test/amplify_authenticator_test.dart';
 import 'package:amplify_integration_test/amplify_integration_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -68,33 +69,49 @@ void main() {
       });
     });
 
-    group('form validation', () {
+    group('autofill', () {
       testWidgets(
-        'displays message when submitted without any data',
+        'form is wrapped in AutofillGroup for password manager support',
         (tester) async {
           await tester.pumpWidget(const MockAuthenticatorApp());
           await tester.pumpAndSettle();
 
-          final signInPage = SignInPage(tester: tester);
-          // ignore: cascade_invocations
-          signInPage.expectStep(AuthenticatorStep.signIn);
-          await signInPage.submitSignIn();
+          SignInPage(tester: tester).expectStep(AuthenticatorStep.signIn);
 
-          final usernameFieldError = find.descendant(
-            of: signInPage.usernameField,
-            matching: find.text('Email field must not be blank.'),
-          );
-
-          expect(usernameFieldError, findsOneWidget);
-
-          final passwordFieldError = find.descendant(
-            of: signInPage.passwordField,
-            matching: find.text('Password field must not be blank.'),
-          );
-
-          expect(passwordFieldError, findsOneWidget);
+          // Verify that an AutofillGroup exists in the widget tree.
+          // This ensures password managers can properly recognize and autofill
+          // credentials.
+          expect(find.byType(AutofillGroup), findsOneWidget);
         },
       );
+    });
+
+    group('form validation', () {
+      testWidgets('displays message when submitted without any data', (
+        tester,
+      ) async {
+        await tester.pumpWidget(const MockAuthenticatorApp());
+        await tester.pumpAndSettle();
+
+        final signInPage = SignInPage(tester: tester);
+        // ignore: cascade_invocations
+        signInPage.expectStep(AuthenticatorStep.signIn);
+        await signInPage.submitSignIn();
+
+        final usernameFieldError = find.descendant(
+          of: signInPage.usernameField,
+          matching: find.text('Email field must not be blank.'),
+        );
+
+        expect(usernameFieldError, findsOneWidget);
+
+        final passwordFieldError = find.descendant(
+          of: signInPage.passwordField,
+          matching: find.text('Password field must not be blank.'),
+        );
+
+        expect(passwordFieldError, findsOneWidget);
+      });
 
       testWidgets(
         'displays message when submitted with invalid email address',
@@ -118,51 +135,45 @@ void main() {
         },
       );
 
-      testWidgets(
-        'trims the username field before validation',
-        (tester) async {
-          await tester.pumpWidget(const MockAuthenticatorApp());
-          await tester.pumpAndSettle();
+      testWidgets('trims the username field before validation', (tester) async {
+        await tester.pumpWidget(const MockAuthenticatorApp());
+        await tester.pumpAndSettle();
 
-          final signInPage = SignInPage(tester: tester);
+        final signInPage = SignInPage(tester: tester);
 
-          await signInPage.enterUsername('user@example.com ');
-          await signInPage.enterPassword('Password123');
+        await signInPage.enterUsername('user@example.com ');
+        await signInPage.enterPassword('Password123');
 
-          await signInPage.submitSignIn();
+        await signInPage.submitSignIn();
 
-          final usernameFieldError = find.descendant(
-            of: signInPage.usernameField,
-            matching: find.text('Invalid email format.'),
-          );
+        final usernameFieldError = find.descendant(
+          of: signInPage.usernameField,
+          matching: find.text('Invalid email format.'),
+        );
 
-          expect(usernameFieldError, findsNothing);
-        },
-      );
+        expect(usernameFieldError, findsNothing);
+      });
 
-      testWidgets(
-        'ensures email passed to the API is trimmed',
-        (tester) async {
-          final mockAuthService = MockAuthService();
-          final mockAuthPlugin = MockAuthPlugin(mockAuthService);
-          final app = MockAuthenticatorApp(authPlugin: mockAuthPlugin);
+      testWidgets('ensures email passed to the API is trimmed', (tester) async {
+        final mockAuthService = MockAuthService();
+        final mockAuthPlugin = MockAuthPlugin(mockAuthService);
+        final app = MockAuthenticatorApp(authPlugin: mockAuthPlugin);
 
-          await tester.pumpWidget(app);
-          await tester.pumpAndSettle();
+        await tester.pumpWidget(app);
+        await tester.pumpAndSettle();
 
-          final signInPage = SignInPage(tester: tester);
+        final signInPage = SignInPage(tester: tester);
 
-          // Enter email with trailing space and a valid password
-          await signInPage.enterUsername('user@example.com ');
-          await signInPage.enterPassword('Password123');
+        // Enter email with trailing space and a valid password
+        await signInPage.enterUsername('user@example.com ');
+        await signInPage.enterPassword('Password123');
 
-          await signInPage.submitSignIn();
-          await tester.pumpAndSettle();
+        await signInPage.submitSignIn();
+        await tester.pumpAndSettle();
 
-          // Verify the email was trimmed before being passed to the signIn method
-          expect(mockAuthService.capturedUsername, 'user@example.com');
-        },
-      );
+        // Verify the email was trimmed before being passed to the signIn method
+        expect(mockAuthService.capturedUsername, 'user@example.com');
+      });
     });
   });
 }

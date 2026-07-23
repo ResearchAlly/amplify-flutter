@@ -1,60 +1,28 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.attribute_type; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
 import 'package:smithy/smithy.dart' as _i1;
 
 class AttributeType extends _i1.SmithyEnum<AttributeType> {
-  const AttributeType._(
-    super.index,
-    super.name,
-    super.value,
-  );
+  const AttributeType._(super.index, super.name, super.value);
 
   const AttributeType._sdkUnknown(super.value) : super.sdkUnknown();
 
-  static const after = AttributeType._(
-    0,
-    'AFTER',
-    'AFTER',
-  );
+  static const after = AttributeType._(0, 'AFTER', 'AFTER');
 
-  static const before = AttributeType._(
-    1,
-    'BEFORE',
-    'BEFORE',
-  );
+  static const before = AttributeType._(1, 'BEFORE', 'BEFORE');
 
-  static const between = AttributeType._(
-    2,
-    'BETWEEN',
-    'BETWEEN',
-  );
+  static const between = AttributeType._(2, 'BETWEEN', 'BETWEEN');
 
-  static const contains = AttributeType._(
-    3,
-    'CONTAINS',
-    'CONTAINS',
-  );
+  static const contains = AttributeType._(3, 'CONTAINS', 'CONTAINS');
 
-  static const exclusive = AttributeType._(
-    4,
-    'EXCLUSIVE',
-    'EXCLUSIVE',
-  );
+  static const exclusive = AttributeType._(4, 'EXCLUSIVE', 'EXCLUSIVE');
 
-  static const inclusive = AttributeType._(
-    5,
-    'INCLUSIVE',
-    'INCLUSIVE',
-  );
+  static const inclusive = AttributeType._(5, 'INCLUSIVE', 'INCLUSIVE');
 
-  static const on = AttributeType._(
-    6,
-    'ON',
-    'ON',
-  );
+  static const on = AttributeType._(6, 'ON', 'ON');
 
   /// All values of [AttributeType].
   static const values = <AttributeType>[
@@ -73,12 +41,9 @@ class AttributeType extends _i1.SmithyEnum<AttributeType> {
       values: values,
       sdkUnknown: AttributeType._sdkUnknown,
       supportedProtocols: [
-        _i1.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
+        _i1.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
       ],
-    )
+    ),
   ];
 }
 

@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import 'dart:convert';
+
 import 'package:amplify_core/amplify_core.dart';
 import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:amplify_datastore/src/types/observe_query_executor.dart';
@@ -31,7 +33,8 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
         String? id = call.arguments;
         if (id == null) {
           throw ArgumentError(
-              'resolveQueryPredicate must be called with an id');
+            'resolveQueryPredicate must be called with an id',
+          );
         }
         return _syncExpressions!
             .firstWhere((syncExpression) => syncExpression.id == id)
@@ -42,26 +45,29 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
         if (errorHandler == null)
           throw StateError("Native calling non existent ErrorHandler in Dart");
 
-        Map<String, dynamic> arguments =
-            Map<String, dynamic>.from(call.arguments);
+        Map<String, dynamic> arguments = Map<String, dynamic>.from(
+          call.arguments,
+        );
         errorHandler!(_deserializeExceptionFromMap(arguments));
         break;
 
       case 'conflictHandler':
         if (conflictHandler == null)
           throw StateError(
-              "Native calling non existent ConflictHandler in Dart");
+            "Native calling non existent ConflictHandler in Dart",
+          );
 
-        Map<String, dynamic> arguments =
-            (call.arguments as Map).cast<String, dynamic>();
+        Map<String, dynamic> arguments = (call.arguments as Map)
+            .cast<String, dynamic>();
 
         final modelName = arguments["__modelName"] as String;
         final modelType = modelProvider!.getModelTypeByModelName(modelName);
 
         ConflictData conflictData = ConflictData.fromJson(
-            modelType,
-            (arguments["local"] as Map).cast<String, dynamic>(),
-            (arguments["remote"] as Map).cast<String, dynamic>());
+          modelType,
+          (arguments["local"] as Map).cast<String, dynamic>(),
+          (arguments["remote"] as Map).cast<String, dynamic>(),
+        );
 
         ConflictResolutionDecision decision = conflictHandler!(conflictData);
         return decision.toJson();
@@ -93,29 +99,30 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
 
       return await _channel
           .invokeMethod('configureDataStore', <String, dynamic>{
-        'modelSchemas': modelProvider?.modelSchemas
-            .map((schema) => schema.toMap())
-            .toList(),
-        'customTypeSchemas': modelProvider?.customTypeSchemas
-            .map((schema) => schema.toMap())
-            .toList(),
-        'hasErrorHandler': errorHandler != null,
-        'hasConflictHandler': conflictHandler != null,
-        'modelProviderVersion': modelProvider?.version,
-        'syncExpressions': syncExpressions!
-            .map((syncExpression) => syncExpression.toMap())
-            .toList(),
-        'syncInterval': syncInterval,
-        'syncMaxRecords': syncMaxRecords,
-        'syncPageSize': syncPageSize,
-        'authModeStrategy': authModeStrategy.rawValue,
-      });
+            'modelSchemas': modelProvider?.modelSchemas
+                .map((schema) => schema.toMap())
+                .toList(),
+            'customTypeSchemas': modelProvider?.customTypeSchemas
+                .map((schema) => schema.toMap())
+                .toList(),
+            'hasErrorHandler': errorHandler != null,
+            'hasConflictHandler': conflictHandler != null,
+            'modelProviderVersion': modelProvider?.version,
+            'syncExpressions': syncExpressions!
+                .map((syncExpression) => syncExpression.toMap())
+                .toList(),
+            'syncInterval': syncInterval,
+            'syncMaxRecords': syncMaxRecords,
+            'syncPageSize': syncPageSize,
+            'authModeStrategy': authModeStrategy.rawValue,
+          });
     } on PlatformException catch (e) {
       if (e.code == "AmplifyAlreadyConfiguredException") {
         throw AmplifyAlreadyConfiguredException(
-            AmplifyExceptionMessages.alreadyConfiguredDefaultMessage,
-            recoverySuggestion:
-                AmplifyExceptionMessages.alreadyConfiguredDefaultSuggestion);
+          AmplifyExceptionMessages.alreadyConfiguredDefaultMessage,
+          recoverySuggestion:
+              AmplifyExceptionMessages.alreadyConfiguredDefaultSuggestion,
+        );
       } else {
         throw _deserializeException(e);
       }
@@ -123,35 +130,43 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
   }
 
   @override
-  Future<List<T>> query<T extends Model>(ModelType<T> modelType,
-      {QueryPredicate? where,
-      QueryPagination? pagination,
-      List<QuerySortBy>? sortBy}) async {
+  Future<List<T>> query<T extends Model>(
+    ModelType<T> modelType, {
+    QueryPredicate? where,
+    QueryPagination? pagination,
+    List<QuerySortBy>? sortBy,
+  }) async {
     try {
       await _setUpObserveIfNeeded();
-      final List<Map<dynamic, dynamic>>? serializedResults =
-          await (_channel.invokeListMethod('query', <String, dynamic>{
-        'modelName': modelType.modelName(),
-        'queryPredicate': where?.serializeAsMap(),
-        'queryPagination': pagination?.serializeAsMap(),
-        'querySort': sortBy?.map((element) => element.serializeAsMap()).toList()
-      }));
+      final List<Map<dynamic, dynamic>>? serializedResults = await (_channel
+          .invokeListMethod('query', <String, dynamic>{
+            'modelName': modelType.modelName(),
+            'queryPredicate': where?.serializeAsMap(),
+            'queryPagination': pagination?.serializeAsMap(),
+            'querySort': sortBy
+                ?.map((element) => element.serializeAsMap())
+                .toList(),
+          }));
       if (serializedResults == null)
         throw DataStoreException(
-            AmplifyExceptionMessages.nullReturnedFromMethodChannel);
+          AmplifyExceptionMessages.nullReturnedFromMethodChannel,
+        );
       return serializedResults
-          .map((serializedResult) => modelType
-              .fromJson(new Map<String, dynamic>.from(serializedResult)))
+          .map(
+            (serializedResult) => modelType.fromJson(
+              new Map<String, dynamic>.from(serializedResult),
+            ),
+          )
           .toList();
     } on PlatformException catch (e) {
       throw _deserializeException(e);
     } on TypeError catch (e) {
       throw DataStoreException(
-          "An unrecognized exception has happened while Serialization/de-serialization." +
-              " Please see underlyingException for more details.",
-          recoverySuggestion:
-              AmplifyExceptionMessages.missingRecoverySuggestion,
-          underlyingException: e.toString());
+        "An unrecognized exception has happened while Serialization/de-serialization." +
+            " Please see underlyingException for more details.",
+        recoverySuggestion: AmplifyExceptionMessages.missingRecoverySuggestion,
+        underlyingException: e.toString(),
+      );
     }
   }
 
@@ -159,10 +174,12 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
   Future<void> delete<T extends Model>(T model, {QueryPredicate? where}) async {
     try {
       await _setUpObserveIfNeeded();
+      final serializedModel = model.toJson();
+      _validateModelJson(serializedModel);
       var methodChannelDeleteInput = <String, dynamic>{
         'modelName': model.getInstanceType().modelName(),
         if (where != null) 'queryPredicate': where.serializeAsMap(),
-        'serializedModel': model.toJson(),
+        'serializedModel': serializedModel,
       };
       await _channel.invokeMethod('delete', methodChannelDeleteInput);
     } on PlatformException catch (e) {
@@ -174,10 +191,12 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
   Future<void> save<T extends Model>(T model, {QueryPredicate? where}) async {
     try {
       await _setUpObserveIfNeeded();
+      final serializedModel = model.toJson();
+      _validateModelJson(serializedModel);
       var methodChannelSaveInput = <String, dynamic>{
         'modelName': model.getInstanceType().modelName(),
         if (where != null) 'queryPredicate': where.serializeAsMap(),
-        'serializedModel': model.toJson(),
+        'serializedModel': serializedModel,
       };
       await _channel.invokeMethod('save', methodChannelSaveInput);
     } on PlatformException catch (e) {
@@ -185,22 +204,62 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
     }
   }
 
+  /// Validates that a model's serialized JSON map can be encoded to JSON.
+  ///
+  /// This catches values that are not representable in JSON (e.g. NaN,
+  /// Infinity, or unexpected non-serializable objects) before they reach
+  /// the native platform, where they would cause crashes such as iOS
+  /// NSInvalidArgumentException from NSJSONSerialization.
+  /// See: https://github.com/aws-amplify/amplify-flutter/issues/5891
+  static void _validateModelJson(Map<String, dynamic> json) {
+    try {
+      jsonEncode(json);
+    } on JsonUnsupportedObjectError catch (e) {
+      if (e.unsupportedObject is double) {
+        final value = e.unsupportedObject as double;
+        throw DataStoreException(
+          'Model contains a non-finite double value '
+          '(${value.isNaN ? "NaN" : value}). '
+          'NaN and Infinity are not valid JSON values and cannot be '
+          'serialized for DataStore operations.',
+          recoverySuggestion:
+              'Ensure all double fields contain finite values before saving. '
+              'You can check with value.isFinite, or replace non-finite values '
+              'with null or a valid default.',
+        );
+      }
+      throw DataStoreException(
+        'Model contains a value that cannot be serialized to JSON: '
+        '${e.unsupportedObject} (${e.unsupportedObject.runtimeType}). '
+        '${e.cause ?? ''}',
+        recoverySuggestion:
+            'Ensure all model fields contain JSON-serializable values '
+            '(String, int, finite double, bool, null, Map, or List).',
+      );
+    }
+  }
+
   @override
-  Stream<SubscriptionEvent<T>> observe<T extends Model>(ModelType<T> modelType,
-      {QueryPredicate? where}) async* {
+  Stream<SubscriptionEvent<T>> observe<T extends Model>(
+    ModelType<T> modelType, {
+    QueryPredicate? where,
+  }) async* {
     await _setUpObserveIfNeeded();
 
     // Step #1. Open the event channel if it's not already open. Note
     // that there is only one event channel for all observe calls for all models
-    const _eventChannel =
-        EventChannel('com.amazonaws.amplify/datastore_observe_events');
-    _allModelsStreamFromMethodChannel = _allModelsStreamFromMethodChannel ??
+    const _eventChannel = EventChannel(
+      'com.amazonaws.amplify/datastore_observe_events',
+    );
+    _allModelsStreamFromMethodChannel =
+        _allModelsStreamFromMethodChannel ??
         _eventChannel.receiveBroadcastStream(0);
 
     // Step #2. Apply client side filtering on the stream.
     // Currently only modelType filtering is supported.
-    Stream<dynamic> filteredStream =
-        _allModelsStreamFromMethodChannel.where((event) {
+    Stream<dynamic> filteredStream = _allModelsStreamFromMethodChannel.where((
+      event,
+    ) {
       //TODO: errors are not model specific. Should we pass all errors to users
       return _getModelNameFromEvent(event) == modelType.modelName();
     });
@@ -259,8 +318,9 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
   }
 
   String _getModelNameFromEvent(Map<dynamic, dynamic> serializedEvent) {
-    Map<String, dynamic> serializedItem =
-        Map<String, dynamic>.from(serializedEvent["item"]);
+    Map<String, dynamic> serializedItem = Map<String, dynamic>.from(
+      serializedEvent["item"],
+    );
     return serializedItem["__modelName"] as String;
   }
 
@@ -269,15 +329,16 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
       return DataStoreException.fromMap(Map<String, String>.from(e['details']));
     } else if (e['errorCode'] == 'AmplifyAlreadyConfiguredException') {
       return AmplifyAlreadyConfiguredException.fromMap(
-          Map<String, String>.from(e['details']));
+        Map<String, String>.from(e['details']),
+      );
     } else {
       // This shouldn't happen. All exceptions coming from platform for
       // amplify_datastore should have a known code. Throw an unknown error.
       return DataStoreException(
-          AmplifyExceptionMessages.missingExceptionMessage,
-          recoverySuggestion:
-              AmplifyExceptionMessages.missingRecoverySuggestion,
-          underlyingException: e.toString());
+        AmplifyExceptionMessages.missingExceptionMessage,
+        recoverySuggestion: AmplifyExceptionMessages.missingRecoverySuggestion,
+        underlyingException: e.toString(),
+      );
     }
   }
 
@@ -286,15 +347,16 @@ class AmplifyDataStoreMethodChannel extends AmplifyDataStore {
       return DataStoreException.fromMap(Map<String, String>.from(e.details));
     } else if (e.code == 'AmplifyAlreadyConfiguredException') {
       return AmplifyAlreadyConfiguredException.fromMap(
-          Map<String, String>.from(e.details));
+        Map<String, String>.from(e.details),
+      );
     } else {
       // This shouldn't happen. All exceptions coming from platform for
       // amplify_datastore should have a known code. Throw an unknown error.
       return DataStoreException(
-          AmplifyExceptionMessages.missingExceptionMessage,
-          recoverySuggestion:
-              AmplifyExceptionMessages.missingRecoverySuggestion,
-          underlyingException: e.toString());
+        AmplifyExceptionMessages.missingExceptionMessage,
+        recoverySuggestion: AmplifyExceptionMessages.missingRecoverySuggestion,
+        underlyingException: e.toString(),
+      );
     }
   }
 

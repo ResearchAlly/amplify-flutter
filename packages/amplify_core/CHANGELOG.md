@@ -1,3 +1,114 @@
+## 2.13.0
+
+### Features
+- feat(api): Add wasm support ([#7145](https://github.com/aws-amplify/amplify-flutter/pull/7145))
+
+## 2.12.1
+
+### Features
+- feat(auth): Add wasm support ([#7094](https://github.com/aws-amplify/amplify-flutter/pull/7094))
+- feat(secure_storage): Add wasm support ([#7094](https://github.com/aws-amplify/amplify-flutter/pull/7094))
+
+## 2.12.0
+
+- Minor bug fixes and improvements
+
+## 2.11.0
+
+### Features
+- feat(storage): Support pre-signed upload URLs ([#6673](https://github.com/aws-amplify/amplify-flutter/pull/6673))
+
+## 2.10.1
+
+### Fixes
+- fix(auth): handle SMS_OTP challenge in USER_AUTH flow ([#6632](https://github.com/aws-amplify/amplify-flutter/pull/6632))
+- fix(graphql): Keep type when parsing data ([#6657](https://github.com/aws-amplify/amplify-flutter/pull/6657))
+
+## 2.10.0
+
+### Features
+- feat(auth): Passwordless login ([#6538](https://github.com/aws-amplify/amplify-flutter/pull/6538))
+
+## 2.9.0
+
+### Features
+- Add support for custom Cognito endpoints ([#6477](https://github.com/aws-amplify/amplify-flutter/pull/6477))
+
+## 2.8.0
+
+### Features
+- feat(auth): add support for cognito oidc parameters in managed login ([#6442](https://github.com/aws-amplify/amplify-flutter/pull/6442))
+
+## 2.7.0
+
+### Features
+- feat(auth): Added support for Android private browsing ([#6336](https://github.com/aws-amplify/amplify-flutter/pull/6336))
+- feat(auth): Refresh token rotation ([#6293](https://github.com/aws-amplify/amplify-flutter/pull/6293))
+
+### Chores
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 2.6.5
+
+### Fixes
+- fix(auth): handle fallthrough exceptions in sign out state ([#6226](https://github.com/aws-amplify/amplify-flutter/pull/6226))
+
+## 2.6.4
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+- chore(auth): remove token query parameters ([#6179](https://github.com/aws-amplify/amplify-flutter/pull/6179))
+
+## 2.6.3
+
+- Minor bug fixes and improvements
+
+## 2.6.2
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 2.6.1
+
+- Minor bug fixes and improvements
+
+## 2.6.0
+
+### Features
+- feat(storage): add multi-bucket feature support  ([#5681](https://github.com/aws-amplify/amplify-flutter/pull/5681))
+
+### Fixes
+- fix(aws_common): removed JS streamed requests ([#5797](https://github.com/aws-amplify/amplify-flutter/pull/5797))
+
+## 2.5.0
+
+### Features
+- feat(auth, authenticator): Add support for Email OTP MFA ([#5449](https://github.com/aws-amplify/amplify-flutter/pull/5449)) (#5472)
+
+## 2.4.2
+
+### Features
+- feat(api): move App Sync subscription headers to protocol ([#5301](https://github.com/aws-amplify/amplify-flutter/pull/5301))
+
+### Fixes
+- fix(api): Reconnect WebSocket when resuming app from a paused state ([#5567](https://github.com/aws-amplify/amplify-flutter/pull/5567))
+
+## 2.4.1
+
+### Fixes
+- fix(api): web socket error handling ([#5359](https://github.com/aws-amplify/amplify-flutter/pull/5359))
+
+## 2.4.0
+
+### Features
+- feat(Auth): Add fetchCurrentDevice API ([#5251](https://github.com/aws-amplify/amplify-flutter/pull/5251))
+
+### Fixes
+- fix(datastore): Restart Sync Engine when network on/off ([#5218](https://github.com/aws-amplify/amplify-flutter/pull/5218))
+
+### Chores
+- chore: bump json_annotation dependency to v4.9
+
 ## 2.3.0
 
 - Minor bug fixes and improvements

@@ -11,24 +11,28 @@ class AuthenticatorPhoneField<FieldType extends Enum>
     super.requiredOverride,
     this.onChanged,
     this.validator,
-    this.enabled,
+    AuthenticatorTextEnabledOverride? enabled,
     this.initialValue,
     this.errorMaxLines,
     super.autofillHints,
+    this.authenticatorTextFieldController,
   }) : super._(
-          titleKey: InputResolverKey.phoneNumberTitle,
-          hintTextKey: InputResolverKey.phoneNumberHint,
-        );
+         titleKey: InputResolverKey.phoneNumberTitle,
+         hintTextKey: InputResolverKey.phoneNumberHint,
+         enabledOverride: enabled,
+       );
 
-  final bool? enabled;
   final String? initialValue;
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String?>? validator;
   final int? errorMaxLines;
 
   @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
+
+  @override
   AuthenticatorComponentState<AuthenticatorPhoneField<FieldType>>
-      createState() => _AuthenticatorPhoneFieldState<FieldType>();
+  createState() => _AuthenticatorPhoneFieldState<FieldType>();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -37,7 +41,6 @@ class AuthenticatorPhoneField<FieldType extends Enum>
       ..add(
         ObjectFlagProperty<ValueChanged<String>>.has('onChanged', onChanged),
       )
-      ..add(DiagnosticsProperty<bool?>('enabled', enabled))
       ..add(StringProperty('initialValue', initialValue))
       ..add(IntProperty('errorMaxLines', errorMaxLines))
       ..add(
@@ -45,16 +48,28 @@ class AuthenticatorPhoneField<FieldType extends Enum>
           'validator',
           validator,
         ),
+      )
+      ..add(
+        DiagnosticsProperty<AuthenticatorTextFieldController?>(
+          'authenticatorTextFieldController',
+          authenticatorTextFieldController,
+        ),
       );
   }
 }
 
 class _AuthenticatorPhoneFieldState<FieldType extends Enum>
-    extends AuthenticatorFormFieldState<FieldType, String,
-        AuthenticatorPhoneField<FieldType>>
+    extends
+        AuthenticatorFormFieldState<
+          FieldType,
+          String,
+          AuthenticatorPhoneField<FieldType>
+        >
     with
-        AuthenticatorPhoneFieldMixin<FieldType,
-            AuthenticatorPhoneField<FieldType>>,
+        AuthenticatorPhoneFieldMixin<
+          FieldType,
+          AuthenticatorPhoneField<FieldType>
+        >,
         AuthenticatorTextField<FieldType, AuthenticatorPhoneField<FieldType>> {
   @override
   String? get initialValue {
@@ -64,9 +79,6 @@ class _AuthenticatorPhoneFieldState<FieldType extends Enum>
     }
     return initialValue;
   }
-
-  @override
-  bool get enabled => widget.enabled ?? super.enabled;
 
   @override
   int get errorMaxLines => widget.errorMaxLines ?? super.errorMaxLines;
@@ -79,9 +91,9 @@ class _AuthenticatorPhoneFieldState<FieldType extends Enum>
 
   @override
   ValueChanged<String> get onChanged => (phoneNumber) {
-        phoneNumber = formatPhoneNumber(phoneNumber)!;
-        return (widget.onChanged ?? super.onChanged)(phoneNumber);
-      };
+    phoneNumber = formatPhoneNumber(phoneNumber)!;
+    return (widget.onChanged ?? super.onChanged)(phoneNumber);
+  };
 
   @override
   FormFieldValidator<String> get validator {
@@ -101,10 +113,7 @@ class _AuthenticatorPhoneFieldState<FieldType extends Enum>
 
   @override
   Iterable<String>? get autofillHints =>
-      widget.autofillHints ??
-      const [
-        AutofillHints.username,
-      ];
+      widget.autofillHints ?? const [AutofillHints.username];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

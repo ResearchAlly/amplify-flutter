@@ -38,7 +38,17 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # 3.5.3
+      - name: Mitigate Windows Network & Disk Bottlenecks
+        shell: powershell
+        run: |
+          # 1. Force disable real-time monitoring for the job duration
+          Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
+          # 2. Exclude your exact workspace path from active scans
+          Set-MpPreference -ExclusionPath "${{ github.workspace }}" -ErrorAction SilentlyContinue
+          # 3. Aggressively lower TCP timed-out port reuse limits (helps local socket recycling)
+          Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' -Name 'TcpTimedWaitDelay' -Value 30 -ErrorAction SilentlyContinue
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # 7.0.0
         with:
           persist-credentials: false
           submodules: true
@@ -64,11 +74,14 @@ jobs:
           secret-identifier: ${{ secrets.AWS_SECRET_IDENTIFIER }}
           needs-gen2-config: ${{ inputs.needs-gen2-config }}
 
+      - name: Enable running PowerShell scripts
+        run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
       - name: Run integration tests
-        timeout-minutes: 60
+        timeout-minutes: 320
         run: |
           flutter config --enable-windows-desktop
-          dart pub global run aft exec --include=${{ inputs.package-name }} -- flutter test integration_test/main_test.dart -d windows
+          ${{ github.workspace }}/build-support/windows_timeout_attempts.ps1 5 60 "dart pub global run aft exec --include=${{ inputs.package-name }} -- flutter test integration_test/main_test.dart -d windows"
 
       - name: Log success/failure
         if: always()

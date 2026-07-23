@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.set_dimension; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -17,13 +17,10 @@ abstract class SetDimension
     with _i1.AWSEquatable<SetDimension>
     implements Built<SetDimension, SetDimensionBuilder> {
   /// Specifies the dimension type and values for a segment dimension.
-  factory SetDimension({
-    DimensionType? dimensionType,
-    required List<String> values,
-  }) {
+  factory SetDimension({DimensionType? dimensionType, List<String>? values}) {
     return _$SetDimension._(
       dimensionType: dimensionType,
-      values: _i2.BuiltList(values),
+      values: values == null ? null : _i2.BuiltList(values),
     );
   }
 
@@ -34,30 +31,22 @@ abstract class SetDimension
   const SetDimension._();
 
   static const List<_i3.SmithySerializer<SetDimension>> serializers = [
-    SetDimensionRestJson1Serializer()
+    SetDimensionRestJson1Serializer(),
   ];
 
   /// The type of segment dimension to use. Valid values are: INCLUSIVE, endpoints that match the criteria are included in the segment; and, EXCLUSIVE, endpoints that match the criteria are excluded from the segment.
   DimensionType? get dimensionType;
 
   /// The criteria values to use for the segment dimension. Depending on the value of the DimensionType property, endpoints are included or excluded from the segment if their values match the criteria values.
-  _i2.BuiltList<String> get values;
+  _i2.BuiltList<String>? get values;
   @override
-  List<Object?> get props => [
-        dimensionType,
-        values,
-      ];
+  List<Object?> get props => [dimensionType, values];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('SetDimension')
-      ..add(
-        'dimensionType',
-        dimensionType,
-      )
-      ..add(
-        'values',
-        values,
-      );
+      ..add('dimensionType', dimensionType)
+      ..add('values', values);
     return helper.toString();
   }
 }
@@ -67,17 +56,13 @@ class SetDimensionRestJson1Serializer
   const SetDimensionRestJson1Serializer() : super('SetDimension');
 
   @override
-  Iterable<Type> get types => const [
-        SetDimension,
-        _$SetDimension,
-      ];
+  Iterable<Type> get types => const [SetDimension, _$SetDimension];
+
   @override
   Iterable<_i3.ShapeId> get supportedProtocols => const [
-        _i3.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i3.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   SetDimension deserialize(
     Serializers serializers,
@@ -95,18 +80,22 @@ class SetDimensionRestJson1Serializer
       }
       switch (key) {
         case 'DimensionType':
-          result.dimensionType = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(DimensionType),
-          ) as DimensionType);
+          result.dimensionType =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(DimensionType),
+                  )
+                  as DimensionType);
         case 'Values':
-          result.values.replace((serializers.deserialize(
-            value,
-            specifiedType: const FullType(
-              _i2.BuiltList,
-              [FullType(String)],
-            ),
-          ) as _i2.BuiltList<String>));
+          result.values.replace(
+            (serializers.deserialize(
+                  value,
+                  specifiedType: const FullType(_i2.BuiltList, [
+                    FullType(String),
+                  ]),
+                )
+                as _i2.BuiltList<String>),
+          );
       }
     }
 
@@ -121,23 +110,25 @@ class SetDimensionRestJson1Serializer
   }) {
     final result$ = <Object?>[];
     final SetDimension(:dimensionType, :values) = object;
-    result$.addAll([
-      'Values',
-      serializers.serialize(
-        values,
-        specifiedType: const FullType(
-          _i2.BuiltList,
-          [FullType(String)],
-        ),
-      ),
-    ]);
     if (dimensionType != null) {
       result$
         ..add('DimensionType')
-        ..add(serializers.serialize(
-          dimensionType,
-          specifiedType: const FullType(DimensionType),
-        ));
+        ..add(
+          serializers.serialize(
+            dimensionType,
+            specifiedType: const FullType(DimensionType),
+          ),
+        );
+    }
+    if (values != null) {
+      result$
+        ..add('Values')
+        ..add(
+          serializers.serialize(
+            values,
+            specifiedType: const FullType(_i2.BuiltList, [FullType(String)]),
+          ),
+        );
     }
     return result$;
   }

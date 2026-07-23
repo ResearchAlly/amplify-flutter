@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:aft/aft.dart';
 import 'package:aft/src/config/config_loader.dart';
@@ -91,8 +92,8 @@ abstract class AmplifyCommand extends Command<void>
   late final Directory rootDir = Directory.fromUri(aftConfig.rootDirectory);
 
   /// All packages in the Amplify Flutter repo.
-  late final Map<String, PackageInfo> repoPackages =
-      aftConfig.allPackages.toMap();
+  late final Map<String, PackageInfo> repoPackages = aftConfig.allPackages
+      .toMap();
 
   /// All packages included in this command's operation.
   ///
@@ -105,12 +106,12 @@ abstract class AmplifyCommand extends Command<void>
     ...Platform.environment,
     'AFT_ROOT': rootDir.uri.toFilePath(),
     // Needed for running `dart doc` for Flutter packages.
-    if (flutterRoot != null) 'FLUTTER_ROOT': flutterRoot!,
+    'FLUTTER_ROOT': ?flutterRoot,
   };
 
   /// The path to the Flutter SDK, if installed.
   late final String? flutterRoot = () {
-    final dartSdkPath = getSdkPath();
+    final dartSdkPath = sdkPath;
     final flutterBin = p.dirname(p.dirname(dartSdkPath));
     if (File(p.join(flutterBin, 'flutter')).existsSync()) {
       return p.dirname(flutterBin);
@@ -121,10 +122,7 @@ abstract class AmplifyCommand extends Command<void>
   late final Repo repo;
 
   /// Runs `git` with the given [args] from the repo's root directory.
-  Future<void> runGit(
-    List<String> args, {
-    bool echoOutput = false,
-  }) =>
+  Future<void> runGit(List<String> args, {bool echoOutput = false}) =>
       git.runGit(
         args,
         processWorkingDir: rootDir.path,
@@ -180,6 +178,68 @@ abstract class AmplifyCommand extends Command<void>
     }
 
     return PubVersionInfo(semvers..sort());
+  }
+
+  /// Whether [version] of [package] can be resolved by `pub get`.
+  ///
+  /// Writes a throwaway pubspec depending on `$package: $version` and runs
+  /// `pub get`. Success means dependents can resolve it — pub.dev analysis
+  /// need not have finished. [flavor] picks the `dart`/`flutter` entrypoint;
+  /// both share one pub cache, so a single check suffices.
+  Future<bool> canResolveVersion(
+    String package,
+    Version version, {
+    PackageFlavor flavor = PackageFlavor.flutter,
+  }) async {
+    final tempDir = Directory.systemTemp.createTempSync('aft_resolve_');
+    try {
+      final rand = Random();
+      final suffix = List.generate(
+        12,
+        (_) => rand.nextInt(36).toRadixString(36),
+      ).join();
+      File(p.join(tempDir.path, 'pubspec.yaml')).writeAsStringSync('''
+name: tmp_test_$suffix
+description: Test version
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  $package: $version
+''');
+      final result = await Process.run(
+        flavor.entrypoint,
+        ['pub', 'get'],
+        workingDirectory: tempDir.path,
+        runInShell: true,
+      );
+      if (result.exitCode != 0) {
+        logger.verbose('$package $version not resolvable yet: ${result.stderr}');
+      }
+      return result.exitCode == 0;
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  }
+
+  /// Waits until [version] of [package] can be resolved by `pub get`.
+  Future<void> awaitVersionResolvable(
+    String package,
+    Version version, {
+    PackageFlavor flavor = PackageFlavor.flutter,
+  }) async {
+    final qaDurations = Platform.environment.containsKey('QA_DURATIONS');
+
+    final pollInterval = qaDurations
+        ? const Duration(seconds: 1)
+        : const Duration(seconds: 15);
+
+    while (!await canResolveVersion(package, version, flavor: flavor)) {
+      await Future<void>.delayed(pollInterval);
+    }
   }
 
   @override
