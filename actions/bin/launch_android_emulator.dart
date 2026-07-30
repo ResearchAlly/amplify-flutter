@@ -6,8 +6,8 @@ import 'dart:async';
 import 'package:actions/actions.dart';
 import 'package:actions/src/android/avd_manager.dart';
 import 'package:actions/src/android/sdk_manager.dart';
-import 'package:actions/src/shell_script.dart';
 import 'package:actions/src/android/types.dart';
+import 'package:actions/src/shell_script.dart';
 
 Future<void> main() => wrapMain(_action);
 
@@ -44,7 +44,6 @@ Future<void> _action() async {
 
   // Retry the emulator launch and script execution up to maxRetries times
   Object? lastError;
-  StackTrace? lastStackTrace;
   for (var attempt = 1; attempt <= maxRetries; attempt++) {
     final startTime = DateTime.now();
 
@@ -76,7 +75,6 @@ Future<void> _action() async {
 
     if (!launchResult.success) {
       lastError = launchResult.error;
-      lastStackTrace = launchResult.stackTrace as StackTrace?;
 
       core..warning('')
       ..warning('════════════════════════════════════════════════════════════════════')
@@ -125,7 +123,6 @@ Future<void> _action() async {
 
     // Failed - store the error
     lastError = testResult.error;
-    lastStackTrace = testResult.stackTrace;
 
     if (testResult.timedOut) {
       core..warning('')
@@ -164,9 +161,6 @@ Future<void> _action() async {
   ..error('')
 
   ..setFailed('All $maxRetries attempts failed. Last error: $lastError');
-  if (lastError != null) {
-    Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
-  }
 }
 
 /// Result of an attempt with timeout

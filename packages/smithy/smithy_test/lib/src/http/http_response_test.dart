@@ -7,7 +7,7 @@ import 'dart:async';
 
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_common/testing.dart';
-import 'package:aws_signature_v4/src/signer/aws_signer.dart' show zSigningTest;
+import 'package:aws_signature_v4/aws_signature_v4.dart' show zSigningTest;
 import 'package:built_value/serializer.dart';
 import 'package:smithy/ast.dart';
 import 'package:smithy/smithy.dart';

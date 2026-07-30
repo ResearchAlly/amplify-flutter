@@ -141,6 +141,7 @@ class EnvironmentInfo {
 
 /// Multi-factor auth configuration information for the environment.
 class MfaInfo {
+  /// Creates a [MfaInfo].
   const MfaInfo({
     this.required = false,
     this.smsEnabled = false,
@@ -245,6 +246,7 @@ class AuthTestRunner {
         ? AmplifyOutputs.fromJson(jsonDecode(config) as Map<String, dynamic>)
         : AmplifyConfig.fromJson(
             jsonDecode(config) as Map<String, dynamic>,
+            // ignore: invalid_use_of_internal_member
           ).toAmplifyOutputs();
     final hasApiPlugin = outputs.data != null;
     final authPlugin = AmplifyAuthTestPlugin(hasApiPlugin: hasApiPlugin);

@@ -9,19 +9,26 @@ import 'package:amplify_auth_cognito_dart/amplify_auth_cognito_dart.dart';
 import 'package:amplify_auth_cognito_dart/src/jwt/jwt.dart';
 import 'package:amplify_core/amplify_core.dart';
 
+/// Thrown by [AmplifyAuthCognitoStub] when signing up a username that is
+/// already registered.
 const usernameExistsException = UsernameExistsException(
   'A user with this username already exists.',
 );
 
+/// Thrown by [AmplifyAuthCognitoStub] when operating on a username that
+/// isn't registered.
 const userNotFoundException = UserNotFoundException('The user does not exist.');
 
+/// Thrown by [AmplifyAuthCognitoStub] when an incorrect verification code
+/// is provided.
 const codeMismatchException = CodeMismatchException(
   'Incorrect code. Please try again.',
 );
 
-/// A stub of [AmplifyAuthCognito] that creates users in memory.
+/// A stub of [AuthPluginInterface] that creates users in memory.
 class AmplifyAuthCognitoStub extends AuthPluginInterface
     implements AmplifyPluginInterface {
+  /// Creates an [AmplifyAuthCognitoStub].
   AmplifyAuthCognitoStub({
     this.delay = const Duration(milliseconds: 10),
     List<MockCognitoUser> users = const [],
@@ -72,8 +79,8 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
       final newUser = MockCognitoUser(
         username: username,
         password: password,
-        email: options?.userAttributes['email'],
-        phoneNumber: options?.userAttributes['phone_number'],
+        email: options?.userAttributes[AuthUserAttributeKey.email],
+        phoneNumber: options?.userAttributes[AuthUserAttributeKey.phoneNumber],
       );
       _users[username] = newUser;
       _currentUser = newUser;
@@ -377,7 +384,9 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
   }
 }
 
+/// An in-memory user tracked by [AmplifyAuthCognitoStub].
 class MockCognitoUser {
+  /// Creates a [MockCognitoUser] with a randomly-generated [sub].
   factory MockCognitoUser({
     required String username,
     String? password,
@@ -399,12 +408,23 @@ class MockCognitoUser {
     required this.phoneNumber,
     required this.email,
   });
+
+  /// The user's unique Cognito subject identifier.
   final String sub;
+
+  /// The user's username.
   final String username;
+
+  /// The user's password.
   final String? password;
+
+  /// The user's email address.
   final String? email;
+
+  /// The user's phone number.
   final String? phoneNumber;
 
+  /// The mock Cognito user pool tokens issued for this user.
   CognitoUserPoolTokens get userPoolTokens {
     final accessToken = JsonWebToken(
       header: const JsonWebHeader(algorithm: Algorithm.hmacSha256),
@@ -431,6 +451,7 @@ class MockCognitoUser {
     );
   }
 
+  /// Returns a copy of this user with the given fields replaced.
   MockCognitoUser copyWith({
     String? sub,
     String? username,

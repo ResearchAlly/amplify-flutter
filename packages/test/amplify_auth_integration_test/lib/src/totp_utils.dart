@@ -39,6 +39,8 @@ Future<int> get _nextTotpTime async {
 }
 
 String? _sharedSecret;
+
+/// Sets up and verifies TOTP MFA for the current user under test.
 Future<void> setUpTotp({String? deviceName = friendlyDeviceName}) async {
   if (_sharedSecret != null) {
     throw StateError('Cannot reconfigure TOTP');

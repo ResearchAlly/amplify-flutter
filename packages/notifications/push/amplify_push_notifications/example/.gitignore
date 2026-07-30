@@ -45,3 +45,9 @@ app.*.map.json
 
 amplify_outputs.dart
 /linux/flutter/ephemeral/.plugin_symlinks/
+
+# macOS-related
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/macos/dgph
+**/macos/xcuserdata/

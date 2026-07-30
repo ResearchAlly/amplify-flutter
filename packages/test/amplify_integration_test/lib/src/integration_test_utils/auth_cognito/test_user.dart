@@ -44,7 +44,7 @@ class TestUser {
         throw Exception('Unable to sign in test user.');
       }
     } on Exception catch (e) {
-      print(e);
+      AmplifyLogger().error('Unable to sign in test user', e);
     }
   }
 

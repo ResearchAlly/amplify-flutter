@@ -5,9 +5,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:built_value/serializer.dart';
+// ignore: implementation_imports
 import 'package:built_value/src/bool_serializer.dart';
+// ignore: implementation_imports
 import 'package:built_value/src/built_list_serializer.dart';
+// ignore: implementation_imports
 import 'package:built_value/src/built_map_serializer.dart';
+// ignore: implementation_imports
 import 'package:built_value/src/built_set_serializer.dart';
 import 'package:smithy/smithy.dart' hide Serializer;
 

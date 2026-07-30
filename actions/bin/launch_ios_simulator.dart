@@ -60,7 +60,6 @@ Future<void> launch() async {
 
   // Retry the simulator launch and script execution up to maxRetries times
   Object? lastError;
-  StackTrace? lastStackTrace;
   for (var attempt = 1; attempt <= maxRetries; attempt++) {
     final startTime = DateTime.now();
 
@@ -85,7 +84,6 @@ Future<void> launch() async {
 
     if (!launchResult.success) {
       lastError = launchResult.error;
-      lastStackTrace = launchResult.stackTrace as StackTrace?;
 
       core..warning('')
       ..warning('════════════════════════════════════════════════════════════════════')
@@ -134,7 +132,6 @@ Future<void> launch() async {
 
     // Failed - store the error
     lastError = testResult.error;
-    lastStackTrace = testResult.stackTrace;
 
     if (testResult.timedOut) {
       core..warning('')
@@ -173,9 +170,6 @@ Future<void> launch() async {
   ..error('')
 
   ..setFailed('All $maxRetries attempts failed. Last error: $lastError');
-  if (lastError != null) {
-    Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
-  }
 }
 
 /// Launches the iOS simulator with the given runtime identifier.

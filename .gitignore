@@ -16,6 +16,7 @@ Podfile.lock
 .last_build_id
 temp/
 .fvm/
+.fvmrc
 .packages
 pubspec_overrides.yaml
 doc/api/
