@@ -227,10 +227,14 @@ class StateMachineBloc
           yield UnauthenticatedState.confirmSignInNewPassword;
         case AuthSignInStep.confirmSignInWithTotpMfaCode:
           yield UnauthenticatedState.confirmSignInWithTotpMfaCode;
+        case AuthSignInStep.confirmSignInWithOtpCode:
+          yield UnauthenticatedState.confirmSignInWithOtpCode;
         case AuthSignInStep.continueSignInWithMfaSelection:
           yield ContinueSignInWithMfaSelection(
             allowedMfaTypes: result.nextStep.allowedMfaTypes,
           );
+        case AuthSignInStep.continueSignInWithMfaSetupSelection:
+          yield await _handleMfaSetupSelection(result);
         case AuthSignInStep.continueSignInWithTotpSetup:
           assert(
             result.nextStep.totpSetupDetails != null,
@@ -240,6 +244,8 @@ class StateMachineBloc
             result.nextStep.totpSetupDetails!,
             totpOptions,
           );
+        case AuthSignInStep.continueSignInWithEmailMfaSetup:
+          yield UnauthenticatedState.continueSignInWithEmailMfaSetup;
         case AuthSignInStep.resetPassword:
           yield UnauthenticatedState.resetPassword;
         case AuthSignInStep.confirmSignUp:
@@ -255,8 +261,19 @@ class StateMachineBloc
             }
           }
           yield* _checkUserVerification();
-        default:
-          break;
+        case AuthSignInStep.continueSignInWithFirstFactorSelection:
+        case AuthSignInStep.confirmSignInWithOtp:
+        case AuthSignInStep.confirmSignInWithPassword:
+          // TODO(cadivus): Implement Passwordless Authenticator. See:
+          // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-authentication-flow-methods.html#amazon-cognito-user-pools-authentication-flow-methods-passkey
+          // https://docs.amplify.aws/react/build-a-backend/auth/concepts/passwordless/#webauthn-passkey
+          _exceptionController.add(
+            AuthenticatorException(
+              'Passwordless is not supported at this time. Please try again.',
+              showBanner: true,
+            ),
+          );
+          yield* _changeScreen(initialStep);
       }
     } on AuthNotAuthorizedException {
       /// The .failAuthentication flag available in the DefineAuthChallenge Lambda trigger
@@ -295,6 +312,8 @@ class StateMachineBloc
     } on Exception catch (e) {
       _exceptionController.add(AuthenticatorException(e));
     }
+    // Emit empty event to resolve bug with broken event handling on web (possible DDC issue)
+    yield* const Stream.empty();
   }
 
   Stream<AuthState> _resetPassword(AuthResetPasswordData data) async* {
@@ -305,6 +324,8 @@ class StateMachineBloc
     } on Exception catch (e) {
       _exceptionController.add(AuthenticatorException(e));
     }
+    // Emit empty event to resolve bug with broken event handling on web (possible DDC issue)
+    yield* const Stream.empty();
   }
 
   void _notifyCodeSent(String? destination) {
@@ -321,9 +342,7 @@ class StateMachineBloc
         _emit(UnauthenticatedState.confirmSignInMfa);
       case AuthSignInStep.confirmSignInWithCustomChallenge:
         _emit(
-          ConfirmSignInCustom(
-            publicParameters: result.nextStep.additionalInfo,
-          ),
+          ConfirmSignInCustom(publicParameters: result.nextStep.additionalInfo),
         );
       case AuthSignInStep.confirmSignInWithNewPassword:
         _emit(UnauthenticatedState.confirmSignInNewPassword);
@@ -333,19 +352,15 @@ class StateMachineBloc
             allowedMfaTypes: result.nextStep.allowedMfaTypes,
           ),
         );
-      case AuthSignInStep.continueSignInWithTotpSetup:
-        assert(
-          result.nextStep.totpSetupDetails != null,
-          'Sign In Result should have totpSetupDetails',
-        );
-        _emit(
-          await ContinueSignInTotpSetup.setupURI(
-            result.nextStep.totpSetupDetails!,
-            totpOptions,
-          ),
-        );
+      case AuthSignInStep.continueSignInWithMfaSetupSelection:
+        _emit(await _handleMfaSetupSelection(result));
+      case AuthSignInStep.continueSignInWithEmailMfaSetup:
+        _emit(UnauthenticatedState.continueSignInWithEmailMfaSetup);
       case AuthSignInStep.confirmSignInWithTotpMfaCode:
         _emit(UnauthenticatedState.confirmSignInWithTotpMfaCode);
+      case AuthSignInStep.confirmSignInWithOtpCode:
+        _notifyCodeSent(result.nextStep.codeDeliveryDetails?.destination);
+        _emit(UnauthenticatedState.confirmSignInWithOtpCode);
       case AuthSignInStep.resetPassword:
         _emit(UnauthenticatedState.confirmResetPassword);
       case AuthSignInStep.confirmSignUp:
@@ -372,14 +387,9 @@ class StateMachineBloc
       }
 
       if (data is AuthUsernamePasswordSignInData) {
-        final result = await _authService.signIn(
-          data.username,
-          data.password,
-        );
+        final result = await _authService.signIn(data.username, data.password);
         await _processSignInResult(result, isSocialSignIn: false);
       } else if (data is AuthSocialSignInData) {
-        // Do not await a social sign-in since multiple sign-in attempts
-        // can occur.
         await _authService
             .signInWithProvider(
               data.provider,
@@ -389,19 +399,24 @@ class StateMachineBloc
               (result) => _processSignInResult(result, isSocialSignIn: true),
             )
             .onError<Exception>((error, stackTrace) {
-          final log =
-              error is UserCancelledException ? logger.info : logger.error;
-          log('Error signing in', error, stackTrace);
-        });
+              final log = error is UserCancelledException
+                  ? logger.info
+                  : logger.error;
+              log('Error signing in', error, stackTrace);
+              // Emit exception so that the UI can exit loading state
+              _exceptionController.add(
+                AuthenticatorException(
+                  error,
+                  showBanner: error is! UserCancelledException,
+                ),
+              );
+            });
       } else {
         throw StateError('Bad sign in data: $data');
       }
     } on UserNotConfirmedException catch (e) {
       _exceptionController.add(
-        AuthenticatorException(
-          e.message,
-          showBanner: false,
-        ),
+        AuthenticatorException(e.message, showBanner: false),
       );
       yield UnauthenticatedState.confirmSignUp;
       if (data is AuthUsernamePasswordSignInData) {
@@ -421,8 +436,8 @@ class StateMachineBloc
 
   Stream<AuthState> _checkUserVerification() async* {
     try {
-      final attributeVerificationStatus =
-          await _authService.getAttributeVerificationStatus();
+      final attributeVerificationStatus = await _authService
+          .getAttributeVerificationStatus();
       final unverifiedAttributes =
           attributeVerificationStatus.unverifiedAttributes;
       final verifiedAttributes = attributeVerificationStatus.verifiedAttributes;
@@ -539,6 +554,50 @@ class StateMachineBloc
     }
     // Emit empty event to resolve bug with broken event handling on web (possible DDC issue)
     yield* const Stream.empty();
+  }
+
+  Future<UnauthenticatedState> _handleMfaSetupSelection(
+    SignInResult result,
+  ) async {
+    final allowedMfaTypes = result.nextStep.allowedMfaTypes;
+
+    if (allowedMfaTypes == null) {
+      throw const InvalidUserPoolConfigurationException(
+        'No MFA types are supported',
+        recoverySuggestion: 'Check your user pool MFA configuration.',
+      );
+    }
+
+    final mfaTypesForSetup = allowedMfaTypes.toSet()..remove(MfaType.sms);
+
+    if (mfaTypesForSetup.length != 1) {
+      return ContinueSignInWithMfaSetupSelection(
+        allowedMfaTypes: allowedMfaTypes,
+      );
+    }
+
+    final mfaType = mfaTypesForSetup.first;
+
+    switch (mfaType) {
+      case MfaType.totp:
+        assert(
+          result.nextStep.totpSetupDetails != null,
+          'Sign In Result should have totpSetupDetails',
+        );
+        return ContinueSignInTotpSetup.setupURI(
+          result.nextStep.totpSetupDetails!,
+          totpOptions,
+        );
+
+      case MfaType.email:
+        return UnauthenticatedState.continueSignInWithEmailMfaSetup;
+
+      default:
+        throw InvalidUserPoolConfigurationException(
+          'Unsupported MFA type: ${mfaType.name}',
+          recoverySuggestion: 'Check your user pool MFA configuration.',
+        );
+    }
   }
 
   @override

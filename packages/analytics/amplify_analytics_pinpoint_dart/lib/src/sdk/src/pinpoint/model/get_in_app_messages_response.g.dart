@@ -8,26 +8,21 @@ part of 'get_in_app_messages_response.dart';
 
 class _$GetInAppMessagesResponse extends GetInAppMessagesResponse {
   @override
-  final InAppMessagesResponse inAppMessagesResponse;
+  final InAppMessagesResponse? inAppMessagesResponse;
 
-  factory _$GetInAppMessagesResponse(
-          [void Function(GetInAppMessagesResponseBuilder)? updates]) =>
-      (new GetInAppMessagesResponseBuilder()..update(updates))._build();
+  factory _$GetInAppMessagesResponse([
+    void Function(GetInAppMessagesResponseBuilder)? updates,
+  ]) => (GetInAppMessagesResponseBuilder()..update(updates))._build();
 
-  _$GetInAppMessagesResponse._({required this.inAppMessagesResponse})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(inAppMessagesResponse,
-        r'GetInAppMessagesResponse', 'inAppMessagesResponse');
-  }
-
+  _$GetInAppMessagesResponse._({this.inAppMessagesResponse}) : super._();
   @override
   GetInAppMessagesResponse rebuild(
-          void Function(GetInAppMessagesResponseBuilder) updates) =>
-      (toBuilder()..update(updates)).build();
+    void Function(GetInAppMessagesResponseBuilder) updates,
+  ) => (toBuilder()..update(updates)).build();
 
   @override
   GetInAppMessagesResponseBuilder toBuilder() =>
-      new GetInAppMessagesResponseBuilder()..replace(this);
+      GetInAppMessagesResponseBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -52,17 +47,17 @@ class GetInAppMessagesResponseBuilder
 
   InAppMessagesResponseBuilder? _inAppMessagesResponse;
   InAppMessagesResponseBuilder get inAppMessagesResponse =>
-      _$this._inAppMessagesResponse ??= new InAppMessagesResponseBuilder();
+      _$this._inAppMessagesResponse ??= InAppMessagesResponseBuilder();
   set inAppMessagesResponse(
-          InAppMessagesResponseBuilder? inAppMessagesResponse) =>
-      _$this._inAppMessagesResponse = inAppMessagesResponse;
+    InAppMessagesResponseBuilder? inAppMessagesResponse,
+  ) => _$this._inAppMessagesResponse = inAppMessagesResponse;
 
   GetInAppMessagesResponseBuilder();
 
   GetInAppMessagesResponseBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _inAppMessagesResponse = $v.inAppMessagesResponse.toBuilder();
+      _inAppMessagesResponse = $v.inAppMessagesResponse?.toBuilder();
       _$v = null;
     }
     return this;
@@ -70,7 +65,6 @@ class GetInAppMessagesResponseBuilder
 
   @override
   void replace(GetInAppMessagesResponse other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$GetInAppMessagesResponse;
   }
 
@@ -85,17 +79,22 @@ class GetInAppMessagesResponseBuilder
   _$GetInAppMessagesResponse _build() {
     _$GetInAppMessagesResponse _$result;
     try {
-      _$result = _$v ??
-          new _$GetInAppMessagesResponse._(
-              inAppMessagesResponse: inAppMessagesResponse.build());
+      _$result =
+          _$v ??
+          _$GetInAppMessagesResponse._(
+            inAppMessagesResponse: _inAppMessagesResponse?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'inAppMessagesResponse';
-        inAppMessagesResponse.build();
+        _inAppMessagesResponse?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'GetInAppMessagesResponse', _$failedField, e.toString());
+        throw BuiltValueNestedFieldError(
+          r'GetInAppMessagesResponse',
+          _$failedField,
+          e.toString(),
+        );
       }
       rethrow;
     }

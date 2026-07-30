@@ -9,26 +9,31 @@ import 'package:amplify_auth_cognito_dart/amplify_auth_cognito_dart.dart';
 import 'package:amplify_auth_cognito_dart/src/jwt/jwt.dart';
 import 'package:amplify_core/amplify_core.dart';
 
+/// Thrown by [AmplifyAuthCognitoStub] when signing up a username that is
+/// already registered.
 const usernameExistsException = UsernameExistsException(
   'A user with this username already exists.',
 );
 
-const userNotFoundException = UserNotFoundException(
-  'The user does not exist.',
-);
+/// Thrown by [AmplifyAuthCognitoStub] when operating on a username that
+/// isn't registered.
+const userNotFoundException = UserNotFoundException('The user does not exist.');
 
+/// Thrown by [AmplifyAuthCognitoStub] when an incorrect verification code
+/// is provided.
 const codeMismatchException = CodeMismatchException(
   'Incorrect code. Please try again.',
 );
 
-/// A stub of [AmplifyAuthCognito] that creates users in memory.
+/// A stub of [AuthPluginInterface] that creates users in memory.
 class AmplifyAuthCognitoStub extends AuthPluginInterface
     implements AmplifyPluginInterface {
+  /// Creates an [AmplifyAuthCognitoStub].
   AmplifyAuthCognitoStub({
     this.delay = const Duration(milliseconds: 10),
     List<MockCognitoUser> users = const [],
-  })  : _users = {for (final user in users) user.username: user},
-        super();
+  }) : _users = {for (final user in users) user.username: user},
+       super();
 
   /// A delay added to mock API calls
   final Duration delay;
@@ -63,7 +68,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
   @override
   Future<SignUpResult> signUp({
     required String username,
-    required String password,
+    String? password,
     SignUpOptions? options,
   }) async {
     await Future<void>.delayed(delay);
@@ -74,8 +79,8 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
       final newUser = MockCognitoUser(
         username: username,
         password: password,
-        email: options?.userAttributes['email'],
-        phoneNumber: options?.userAttributes['phone_number'],
+        email: options?.userAttributes[AuthUserAttributeKey.email],
+        phoneNumber: options?.userAttributes[AuthUserAttributeKey.phoneNumber],
       );
       _users[username] = newUser;
       _currentUser = newUser;
@@ -152,9 +157,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
   }
 
   @override
-  Future<SignOutResult> signOut({
-    SignOutOptions? options,
-  }) async {
+  Future<SignOutResult> signOut({SignOutOptions? options}) async {
     _currentUser = null;
     return const SignOutResult();
   }
@@ -207,9 +210,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
     _currentUser = updatedUser;
     return const CognitoResetPasswordResult(
       isPasswordReset: true,
-      nextStep: ResetPasswordStep(
-        updateStep: AuthResetPasswordStep.done,
-      ),
+      nextStep: ResetPasswordStep(updateStep: AuthResetPasswordStep.done),
     );
   }
 
@@ -250,9 +251,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
   }
 
   @override
-  Future<AuthUser> getCurrentUser({
-    GetCurrentUserOptions? options,
-  }) async {
+  Future<AuthUser> getCurrentUser({GetCurrentUserOptions? options}) async {
     if (_currentUser == null) {
       throw const SignedOutException('There is no user signed in.');
     } else {
@@ -306,9 +305,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
     AuthProvider? provider,
     SignInWithWebUIOptions? options,
   }) async {
-    throw const InvalidStateException(
-      'social sign in is not implemented.',
-    );
+    throw const InvalidStateException('social sign in is not implemented.');
   }
 
   @override
@@ -331,7 +328,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
 
   @override
   Future<Map<AuthUserAttributeKey, UpdateUserAttributeResult>>
-      updateUserAttributes({
+  updateUserAttributes({
     required List<AuthUserAttribute> attributes,
     UpdateUserAttributesOptions? options,
   }) async {
@@ -349,7 +346,7 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
 
   @override
   Future<SendUserAttributeVerificationCodeResult>
-      sendUserAttributeVerificationCode({
+  sendUserAttributeVerificationCode({
     required AuthUserAttributeKey userAttributeKey,
     SendUserAttributeVerificationCodeOptions? options,
   }) async {
@@ -363,38 +360,36 @@ class AmplifyAuthCognitoStub extends AuthPluginInterface
 
   @override
   Future<void> rememberDevice() async {
-    throw UnimplementedError(
-      'rememberDevice is not implemented.',
-    );
+    throw UnimplementedError('rememberDevice is not implemented.');
+  }
+
+  @override
+  Future<AuthDevice> fetchCurrentDevice() async {
+    throw UnimplementedError('fetchCurrentDevice is not implemented.');
   }
 
   @override
   Future<void> forgetDevice([AuthDevice? device]) async {
-    throw UnimplementedError(
-      'forgetDevice is not implemented.',
-    );
+    throw UnimplementedError('forgetDevice is not implemented.');
   }
 
   @override
   Future<List<AuthDevice>> fetchDevices() async {
-    throw UnimplementedError(
-      'fetchDevices is not implemented.',
-    );
+    throw UnimplementedError('fetchDevices is not implemented.');
   }
 
   @override
   Future<void> deleteUser() async {
-    throw UnimplementedError(
-      'deleteUser is not implemented.',
-    );
+    throw UnimplementedError('deleteUser is not implemented.');
   }
 }
 
+/// An in-memory user tracked by [AmplifyAuthCognitoStub].
 class MockCognitoUser {
-
+  /// Creates a [MockCognitoUser] with a randomly-generated [sub].
   factory MockCognitoUser({
     required String username,
-    required String password,
+    String? password,
     String? email,
     String? phoneNumber,
   }) {
@@ -413,21 +408,30 @@ class MockCognitoUser {
     required this.phoneNumber,
     required this.email,
   });
+
+  /// The user's unique Cognito subject identifier.
   final String sub;
+
+  /// The user's username.
   final String username;
-  final String password;
+
+  /// The user's password.
+  final String? password;
+
+  /// The user's email address.
   final String? email;
+
+  /// The user's phone number.
   final String? phoneNumber;
 
+  /// The mock Cognito user pool tokens issued for this user.
   CognitoUserPoolTokens get userPoolTokens {
     final accessToken = JsonWebToken(
       header: const JsonWebHeader(algorithm: Algorithm.hmacSha256),
       claims: JsonWebClaims(
         subject: sub,
         expiration: DateTime.now().add(const Duration(minutes: 60)),
-        customClaims: {
-          'username': username,
-        },
+        customClaims: {'username': username},
       ),
       signature: const [],
     );
@@ -436,9 +440,7 @@ class MockCognitoUser {
       header: const JsonWebHeader(algorithm: Algorithm.hmacSha256),
       claims: JsonWebClaims(
         subject: sub,
-        customClaims: {
-          'cognito:username': username,
-        },
+        customClaims: {'cognito:username': username},
       ),
       signature: const [],
     );
@@ -449,6 +451,7 @@ class MockCognitoUser {
     );
   }
 
+  /// Returns a copy of this user with the given fields replaced.
   MockCognitoUser copyWith({
     String? sub,
     String? username,

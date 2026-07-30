@@ -15,11 +15,13 @@ import 'package:amplify_core/amplify_core.dart';
 // ignore: implementation_imports
 import 'package:amplify_core/src/config/amplify_outputs/notifications/notifications_outputs.dart';
 import 'package:amplify_push_notifications_pinpoint/src/event_info_type.dart';
+import 'package:amplify_push_notifications_pinpoint/src/pinpoint_event_type_source.dart';
 import 'package:amplify_secure_storage/amplify_secure_storage.dart';
 import 'package:flutter/widgets.dart';
 
-final AmplifyLogger _logger = AmplifyLogger.category(Category.pushNotifications)
-    .createChild('AmplifyPushNotification');
+final AmplifyLogger _logger = AmplifyLogger.category(
+  Category.pushNotifications,
+).createChild('AmplifyPushNotification');
 
 /// {@template amplify_push_notifications_pinpoint.pinpoint_provider}
 /// AWS Pinpoint provider that implements [ServiceProviderClient].
@@ -27,11 +29,17 @@ final AmplifyLogger _logger = AmplifyLogger.category(Category.pushNotifications)
 /// [init] method has to be called before other methods can be used.
 /// Once initialized, it can [registerDevice], [recordNotificationEvent]
 /// & [identifyUser] with Pinpoint.
+///
+/// To release any initialized resources [dispose] should be called.
 /// {@endtemplate}
 class PinpointProvider implements ServiceProviderClient {
   /// {@macro amplify_push_notifications_pinpoint.pinpoint_provider}
 
   late AnalyticsClient _analyticsClient;
+
+  /// Periodic timer for flushing events made public for testing
+  @visibleForTesting
+  late final StoppableTimer autoEventSubmitter;
 
   static const _androidCampaignIdKey = 'pinpoint.campaign.campaign_id';
   static const _androidCampaignActivityIdKey =
@@ -60,10 +68,19 @@ class PinpointProvider implements ServiceProviderClient {
     required AmplifyAuthProviderRepository authProviderRepo,
     @visibleForTesting AnalyticsClient? analyticsClient,
   }) async {
+    _logger.warn(
+      'AWS will end support for Amazon Pinpoint on October 30, 2026. '
+      'The guidance is to use AWS End User Messaging for push notifications and SMS, '
+      'Amazon Simple Email Service for sending emails, Amazon Connect for campaigns, journeys, endpoints, '
+      'and engagement analytics. Pinpoint recommends Amazon Kinesis for event collection and mobile analytics. '
+      'See https://docs.aws.amazon.com/pinpoint/latest/userguide/migrate.html for more details.',
+    );
+
     try {
       if (!_isInitialized) {
-        final authProvider = authProviderRepo
-            .getAuthProvider(APIAuthorizationType.iam.authProviderToken);
+        final authProvider = authProviderRepo.getAuthProvider(
+          APIAuthorizationType.iam.authProviderToken,
+        );
 
         if (authProvider == null) {
           throw ConfigurationError(
@@ -79,7 +96,8 @@ class PinpointProvider implements ServiceProviderClient {
           AmplifySecureStorageScope.awsPinpointAnalyticsPlugin,
         );
 
-        _analyticsClient = analyticsClient ??
+        _analyticsClient =
+            analyticsClient ??
             AnalyticsClient(
               endpointStorage: endpointStorage,
               deviceContextInfoProvider:
@@ -92,6 +110,12 @@ class PinpointProvider implements ServiceProviderClient {
           authProvider: authProvider,
         );
 
+        autoEventSubmitter = StoppableTimer(
+          duration: const Duration(seconds: 10),
+          callback: _flushEvents,
+          onError: (e) => _logger.warn('Exception in events auto flush', e),
+        );
+
         _isInitialized = true;
       }
     } on Exception catch (e) {
@@ -102,6 +126,10 @@ class PinpointProvider implements ServiceProviderClient {
         underlyingException: e,
       );
     }
+  }
+
+  Future<void> _flushEvents() {
+    return _analyticsClient.eventClient.flushEvents();
   }
 
   @override
@@ -119,10 +147,7 @@ class PinpointProvider implements ServiceProviderClient {
       }
 
       // setUser does not have any underlying network calls, hence not running it _withUserAgent
-      await _analyticsClient.endpointClient.setUser(
-        userId,
-        userProfile,
-      );
+      await _analyticsClient.endpointClient.setUser(userId, userProfile);
       await _withUserAgent(
         () async => _analyticsClient.endpointClient.updateEndpoint(),
       );
@@ -143,9 +168,7 @@ class PinpointProvider implements ServiceProviderClient {
   }) async {
     try {
       if (!_isInitialized) {
-        _logger.error(
-          'Pinpoint provider not configured.',
-        );
+        _logger.error('Pinpoint provider not configured.');
         return;
       }
       if (notification.data.isEmpty) {
@@ -171,9 +194,7 @@ class PinpointProvider implements ServiceProviderClient {
   @override
   Future<void> registerDevice(String deviceToken) async {
     if (!_isInitialized) {
-      _logger.error(
-        'Pinpoint provider not configured.',
-      );
+      _logger.error('Pinpoint provider not configured.');
       return;
     }
     _analyticsClient.endpointClient.address = deviceToken;
@@ -209,14 +230,14 @@ class PinpointProvider implements ServiceProviderClient {
   }) {
     final data = notification.data;
     final analyticsProperties = CustomProperties();
-    var source = PinpointEventSource.campaign.name;
+    var source = PinpointEventTypeSource.campaign.name;
     var campaign = <String, String>{};
     var journey = <String, String>{};
     var pinpointData = <Object?, Object?>{};
 
     // Android payload contain pinpoint.campaign.* format
     if (data.containsKey(_androidCampaignIdKey)) {
-      source = PinpointEventSource.campaign.name;
+      source = PinpointEventTypeSource.campaign.name;
       campaign['campaign_id'] = data[_androidCampaignIdKey] as String;
       if (data.containsKey(_androidCampaignActivityIdKey)) {
         campaign['campaign_activity_id'] =
@@ -239,7 +260,7 @@ class PinpointProvider implements ServiceProviderClient {
 
       // iOS payload conatin a nested map of pinpoint, campaign, * format
       if (pinpointData.containsKey('campaign')) {
-        source = PinpointEventSource.campaign.name;
+        source = PinpointEventTypeSource.campaign.name;
         campaign = Map<String, String>.from(
           pinpointData['campaign'] as Map<Object?, Object?>,
         );
@@ -247,7 +268,7 @@ class PinpointProvider implements ServiceProviderClient {
 
       // Common way of represting journeys both on Android and iOS payloads
       if (pinpointData.containsKey('journey')) {
-        source = PinpointEventSource.journey.name;
+        source = PinpointEventTypeSource.journey.name;
         journey = Map<String, String>.from(
           pinpointData['journey'] as Map<Object?, Object?>,
         );
@@ -273,5 +294,11 @@ class PinpointProvider implements ServiceProviderClient {
       }
       return ChannelType.apns;
     }
+  }
+
+  /// Cleans up and releases resources retained by this object.
+  /// This includes but is not limited to periodic timers for flushing events.
+  void dispose() {
+    autoEventSubmitter.stop();
   }
 }

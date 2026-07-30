@@ -15,17 +15,12 @@ import 'tear_down.dart';
 /// A tear down will be added to delete the user after the test completes.
 Future<String> signInNewUser() async {
   addTearDownCurrentUser();
-  final username = generateUsername();
+  final username = generateEmail();
   final password = generatePassword();
-  await Amplify.Auth.signUp(
-    username: username,
-    password: password,
-  );
-  await Amplify.Auth.signIn(
-    username: username,
-    password: password,
-  );
-  final session = await Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey)
-      .fetchAuthSession();
+  await Amplify.Auth.signUp(username: username, password: password);
+  await Amplify.Auth.signIn(username: username, password: password);
+  final session = await Amplify.Auth.getPlugin(
+    AmplifyAuthCognito.pluginKey,
+  ).fetchAuthSession();
   return session.identityIdResult.value;
 }

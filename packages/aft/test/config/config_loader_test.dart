@@ -3,6 +3,7 @@
 
 import 'dart:io';
 
+import 'package:aft/src/config/config.dart';
 import 'package:aft/src/config/config_loader.dart';
 import 'package:checks/checks.dart';
 import 'package:path/path.dart' as p;
@@ -17,14 +18,12 @@ name: my_repo
 publish_to: none
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.9.0
 
 dependencies:
-  json_serializable: ^6.0.0
+  json_serializable: ">=6.9.4 <6.10.0"
 ''';
-      await d.dir('repo', [
-        d.file('pubspec.yaml', rootPubspec),
-      ]).create();
+      await d.dir('repo', [d.file('pubspec.yaml', rootPubspec)]).create();
 
       final rootDirectory = p.normalize(d.path('repo'));
       final workingDirectory = rootDirectory;
@@ -40,8 +39,10 @@ dependencies:
           (config) => p.normalize(config.workingDirectory.toFilePath()),
           'workingDirectory',
         ).equals(workingDirectory)
-        ..has((config) => config.dependencies.toMap(), 'dependencies')
-            .containsKey('json_serializable');
+        ..has(
+          (config) => config.dependencies.toMap(),
+          'dependencies',
+        ).containsKey('json_serializable');
     });
 
     test('merges root config with child config', () async {
@@ -50,10 +51,10 @@ name: my_repo
 publish_to: none
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.9.0
 
 dependencies:
-  json_serializable: ^6.0.0
+  json_serializable: ">=6.9.4 <6.10.0"
 
 aft:
   scripts:
@@ -68,11 +69,11 @@ name: my_pkg
 version: 0.1.0
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.9.0
 
 dependencies:
-  built_value: ^8.0.0
-  json_serializable: ^6.0.0
+  built_value: ^8.10.1
+  json_serializable: ">=6.9.4 <6.10.0"
 
 aft:
   scripts:
@@ -85,16 +86,12 @@ aft:
       await d.dir('repo', [
         d.file('pubspec.yaml', rootPubspec),
         d.dir('packages', [
-          d.dir('my_pkg', [
-            d.file('pubspec.yaml', packagePubspec),
-          ]),
+          d.dir('my_pkg', [d.file('pubspec.yaml', packagePubspec)]),
         ]),
       ]).create();
 
       final rootDirectory = p.normalize(d.path('repo'));
-      final workingDirectory = p.normalize(
-        d.path('repo/packages/my_pkg'),
-      );
+      final workingDirectory = p.normalize(d.path('repo/packages/my_pkg'));
       final configLoader = AftConfigLoader(
         workingDirectory: Directory(workingDirectory),
       );
@@ -108,15 +105,89 @@ aft:
           'workingDirectory',
         ).equals(workingDirectory)
         ..has((config) => config.dependencies.toMap(), 'dependencies').which(
-          it()
+          (it) => it
             ..containsKey('json_serializable')
-            ..not(it()..containsKey('built_value')),
+            ..not((it) => it..containsKey('built_value')),
         )
         ..has((config) => config.scripts.toMap(), 'scripts').which(
-          it()
+          (it) => it
             ..containsKey('license')
             ..containsKey('format'),
         );
+    });
+  });
+
+  group('locatePackage', () {
+    late AftConfig config;
+
+    d.Descriptor package(String name, String version) => d.dir(name, [
+      d.file('pubspec.yaml', '''
+name: $name
+version: $version
+
+environment:
+  sdk: ^3.9.0
+'''),
+    ]);
+
+    setUp(() async {
+      await d.dir('repo', [
+        d.file('pubspec.yaml', '''
+name: my_repo
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+'''),
+        d.dir('packages', [
+          package('amplify_core', '2.10.1'),
+          package('aws_common', '0.7.6'),
+          package('aws_signature_v4', '0.7.1'),
+        ]),
+      ]).create();
+
+      config = AftConfigLoader(
+        workingDirectory: Directory(p.normalize(d.path('repo'))),
+      ).load();
+    });
+
+    test('resolves a plain package name to its path', () {
+      check(config.locatePackage('amplify_core'))
+          .isNotNull()
+          .has((pkg) => p.normalize(pkg.path), 'path')
+          .equals(p.normalize(d.path('repo/packages/amplify_core')));
+    });
+
+    test('resolves a tag to the same path as the plain name', () {
+      final byName = config.locatePackage('amplify_core');
+      check(byName).isNotNull();
+      check(
+        config.locatePackage('amplify_core-v2.10.1'),
+      ).isNotNull().has((pkg) => pkg.path, 'path').equals(byName!.path);
+    });
+
+    test('resolves a name containing `_v` by name and by tag', () {
+      final expectedPath = p.normalize(
+        d.path('repo/packages/aws_signature_v4'),
+      );
+
+      // The `_v4` in the plain name is not mistaken for a tag separator.
+      check(config.locatePackage('aws_signature_v4')).isNotNull()
+        ..has((pkg) => pkg.name, 'name').equals('aws_signature_v4')
+        ..has((pkg) => p.normalize(pkg.path), 'path').equals(expectedPath);
+
+      // The tag form strips only the trailing `-v0.7.1`, not `_v4`.
+      check(config.locatePackage('aws_signature_v4-v0.7.1')).isNotNull()
+        ..has((pkg) => pkg.name, 'name').equals('aws_signature_v4')
+        ..has((pkg) => p.normalize(pkg.path), 'path').equals(expectedPath);
+    });
+
+    test('returns null for an unknown package', () {
+      check(config.locatePackage('does_not_exist')).isNull();
+    });
+
+    test('treats a tag-like string without -v<digit> as a plain name', () {
+      check(config.locatePackage('amplify_core-vbeta')).isNull();
     });
   });
 }

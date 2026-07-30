@@ -16,6 +16,7 @@ Podfile.lock
 .last_build_id
 temp/
 .fvm/
+.fvmrc
 .packages
 pubspec_overrides.yaml
 doc/api/
@@ -34,14 +35,19 @@ doc/api/
 node_modules/
 aws-exports.js
 awsconfiguration.json
-amplifyconfiguration.dart
+amplifyconfiguration*.dart
 amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
-amplify_outputs.dart
+amplify_outputs*.dart
 
 # Smithy
 .smithy.lsp.log
 
+# Swift Package Manager
+.build/
+.swiftpm/
+
 # Custom Actions output
 **/*.cjs.deps
+.flutter-plugins-dependencies

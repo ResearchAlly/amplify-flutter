@@ -3,7 +3,7 @@
 
 import 'package:amplify_core/amplify_core.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
-import 'package:amplify_storage_s3_example/amplifyconfiguration.dart';
+import 'package:amplify_storage_s3_example/amplify_outputs.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 import 'package:integration_test/integration_test.dart';
@@ -109,15 +109,133 @@ void main() {
         });
       });
 
+      group('presigned URL upload (method: PUT)', () {
+        testWidgets('can upload via PUT presigned URL and verify content', (
+          _,
+        ) async {
+          final uploadPath = 'public/put-url-upload-${uuid()}';
+          final uploadData = 'uploaded via presigned PUT URL'.codeUnits;
+          addTearDownPath(StoragePath.fromString(uploadPath));
+
+          // Generate a PUT presigned URL
+          final putUrlResult = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(uploadPath),
+            options: const StorageGetUrlOptions(
+              pluginOptions: S3GetUrlPluginOptions(
+                method: StorageAccessMethod.put,
+                expiresIn: Duration(minutes: 5),
+              ),
+            ),
+          ).result;
+
+          // Upload via HTTP PUT using the presigned URL
+          final putResponse = await put(
+            putUrlResult.url,
+            body: uploadData,
+            headers: {'Content-Type': 'application/octet-stream'},
+          );
+          expect(putResponse.statusCode, 200);
+
+          // Verify the upload by downloading with a GET presigned URL
+          final getUrlResult = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(uploadPath),
+          ).result;
+          final actualData = await readData(getUrlResult.url);
+          expect(actualData, uploadData);
+        });
+
+        testWidgets('PUT presigned URL with text content type', (_) async {
+          final uploadPath = 'public/put-url-text-${uuid()}';
+          const uploadContent = 'Hello from presigned PUT URL!';
+          addTearDownPath(StoragePath.fromString(uploadPath));
+
+          final putUrlResult = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(uploadPath),
+            options: const StorageGetUrlOptions(
+              pluginOptions: S3GetUrlPluginOptions(
+                method: StorageAccessMethod.put,
+              ),
+            ),
+          ).result;
+
+          final putResponse = await put(
+            putUrlResult.url,
+            body: uploadContent,
+            headers: {'Content-Type': 'text/plain'},
+          );
+          expect(putResponse.statusCode, 200);
+
+          // Verify content
+          final getUrlResult = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(uploadPath),
+          ).result;
+          final downloadedContent = await read(getUrlResult.url);
+          expect(downloadedContent, uploadContent);
+        });
+
+        testWidgets('PUT presigned URL with useAccelerateEndpoint', (_) async {
+          final uploadPath = 'public/put-url-accelerate-${uuid()}';
+          final uploadData = 'accelerated upload'.codeUnits;
+          addTearDownPath(StoragePath.fromString(uploadPath));
+
+          final putUrlResult = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(uploadPath),
+            options: const StorageGetUrlOptions(
+              pluginOptions: S3GetUrlPluginOptions(
+                method: StorageAccessMethod.put,
+                useAccelerateEndpoint: true,
+              ),
+            ),
+          ).result;
+
+          expect(putUrlResult.url.host, contains('.s3-accelerate.'));
+
+          final putResponse = await put(putUrlResult.url, body: uploadData);
+          expect(putResponse.statusCode, 200);
+
+          // Verify
+          final getUrlResult = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(uploadPath),
+          ).result;
+          final actualData = await readData(getUrlResult.url);
+          expect(actualData, uploadData);
+        });
+
+        testWidgets('default method is GET (backward compatibility)', (
+          _,
+        ) async {
+          // Ensure that getUrl without method still works as a GET URL
+          final result = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(path),
+            options: const StorageGetUrlOptions(
+              pluginOptions: S3GetUrlPluginOptions(),
+            ),
+          ).result;
+          final actualData = await readData(result.url);
+          expect(actualData, data);
+        });
+
+        testWidgets('explicit method GET works the same as default', (_) async {
+          final result = await Amplify.Storage.getUrl(
+            path: StoragePath.fromString(path),
+            options: const StorageGetUrlOptions(
+              pluginOptions: S3GetUrlPluginOptions(
+                method: StorageAccessMethod.get,
+              ),
+            ),
+          ).result;
+          final actualData = await readData(result.url);
+          expect(actualData, data);
+        });
+      });
+
       group('with options', () {
         testWidgets('expiresIn', (_) async {
           const duration = Duration(seconds: 10);
           final result = await Amplify.Storage.getUrl(
             path: StoragePath.fromString(path),
             options: const StorageGetUrlOptions(
-              pluginOptions: S3GetUrlPluginOptions(
-                expiresIn: duration,
-              ),
+              pluginOptions: S3GetUrlPluginOptions(expiresIn: duration),
             ),
           ).result;
           expect(result.url.path, '/$path');
@@ -162,12 +280,58 @@ void main() {
           final result = await Amplify.Storage.getUrl(
             path: StoragePath.fromString(path),
             options: const StorageGetUrlOptions(
-              pluginOptions: S3GetUrlPluginOptions(
-                useAccelerateEndpoint: true,
-              ),
+              pluginOptions: S3GetUrlPluginOptions(useAccelerateEndpoint: true),
             ),
           ).result;
           expect(result.url.path, '/$path');
+          final actualData = await readData(result.url);
+          expect(actualData, data);
+        });
+      });
+
+      group('multi bucket', () {
+        final mainBucket = StorageBucket.fromOutputs(
+          'Storage Integ Test main bucket',
+        );
+        final secondaryBucket = StorageBucket.fromOutputs(
+          'Storage Integ Test secondary bucket',
+        );
+        final pathMain = 'public/multi-bucket-get-url-${uuid()}';
+        final pathSecondary = 'public/multi-bucket-get-url-${uuid()}';
+        final storagePathMain = StoragePath.fromString(pathMain);
+        final storagePathSecondary = StoragePath.fromString(pathSecondary);
+
+        setUp(() async {
+          addTearDownPath(storagePathMain);
+          addTearDownPath(storagePathSecondary);
+          await Amplify.Storage.uploadData(
+            data: StorageDataPayload.bytes(data),
+            path: storagePathMain,
+            options: StorageUploadDataOptions(bucket: mainBucket),
+          ).result;
+          await Amplify.Storage.uploadData(
+            data: StorageDataPayload.bytes(data),
+            path: storagePathSecondary,
+            options: StorageUploadDataOptions(bucket: secondaryBucket),
+          ).result;
+        });
+
+        testWidgets('can get url from main bucket', (_) async {
+          final result = await Amplify.Storage.getUrl(
+            path: storagePathMain,
+            options: StorageGetUrlOptions(bucket: mainBucket),
+          ).result;
+          expect(result.url.path, '/$pathMain');
+          final actualData = await readData(result.url);
+          expect(actualData, data);
+        });
+
+        testWidgets('can get url from secondary bucket', (_) async {
+          final result = await Amplify.Storage.getUrl(
+            path: storagePathSecondary,
+            options: StorageGetUrlOptions(bucket: secondaryBucket),
+          ).result;
+          expect(result.url.path, '/$pathSecondary');
           final actualData = await readData(result.url);
           expect(actualData, data);
         });
@@ -183,35 +347,27 @@ void main() {
           path: StoragePath.fromString(path),
         ).result;
       });
-      testWidgets(
-        'standard getUrl works',
-        (_) async {
-          final result = await Amplify.Storage.getUrl(
-            path: StoragePath.fromString(path),
-          ).result;
-          expect(result.url.path, contains('/$path'));
-          final actualData = await readData(result.url);
-          expect(actualData, data);
-        },
-      );
+      testWidgets('standard getUrl works', (_) async {
+        final result = await Amplify.Storage.getUrl(
+          path: StoragePath.fromString(path),
+        ).result;
+        expect(result.url.path, contains('/$path'));
+        final actualData = await readData(result.url);
+        expect(actualData, data);
+      });
 
-      testWidgets(
-        'useAccelerateEndpoint throws',
-        (_) async {
-          await expectLater(
-            () => Amplify.Storage.getUrl(
-              path: StoragePath.fromString(path),
-              options: const StorageGetUrlOptions(
-                pluginOptions: S3GetUrlPluginOptions(
-                  useAccelerateEndpoint: true,
-                ),
-              ),
-            ).result,
-            // useAccelerateEndpoint is not supported with a bucket name with dots
-            throwsA(isA<ConfigurationError>()),
-          );
-        },
-      );
+      testWidgets('useAccelerateEndpoint throws', (_) async {
+        await expectLater(
+          () => Amplify.Storage.getUrl(
+            path: StoragePath.fromString(path),
+            options: const StorageGetUrlOptions(
+              pluginOptions: S3GetUrlPluginOptions(useAccelerateEndpoint: true),
+            ),
+          ).result,
+          // useAccelerateEndpoint is not supported with a bucket name with dots
+          throwsA(isA<ConfigurationError>()),
+        );
+      });
     });
   });
 }

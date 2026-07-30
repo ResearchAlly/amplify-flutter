@@ -19,40 +19,50 @@ abstract class VerifyUserFormField<FieldValue extends Object>
     super.hintText,
     super.validator,
     super.autofillHints,
+    super.enabledOverride,
+    super.visible,
   }) : super._();
 
   static VerifyUserFormField<CognitoUserAttributeKey> verifyAttribute({
     Key? key,
     FormFieldValidator<CognitoUserAttributeKey>? validator,
-  }) =>
-      _VerifyUserRadioField(
-        key: keyVerifyUserRadioButtonFormField,
-        field: VerifyAttributeField.verify,
-        validator: validator,
-      );
+  }) => _VerifyUserRadioField(
+    key: keyVerifyUserRadioButtonFormField,
+    field: VerifyAttributeField.verify,
+    validator: validator,
+  );
 
   /// Creates a password component.
   static VerifyUserFormField<String> confirmVerifyAttribute({
     Key? key,
     FormFieldValidator<String>? validator,
     Iterable<String>? autofillHints,
-  }) =>
-      _VerifyUserTextField(
-        key: keyVerifyUserConfirmationCode,
-        titleKey: InputResolverKey.verificationCodeTitle,
-        hintTextKey: InputResolverKey.verificationCodeHint,
-        field: VerifyAttributeField.confirmVerify,
-        validator: validator,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+    AuthenticatorTextEnabledOverride? enabledOverride,
+    bool visible = true,
+  }) => _VerifyUserTextField(
+    key: keyVerifyUserConfirmationCode,
+    titleKey: InputResolverKey.verificationCodeTitle,
+    hintTextKey: InputResolverKey.verificationCodeHint,
+    field: VerifyAttributeField.confirmVerify,
+    validator: validator,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   @override
   bool get required => true;
 }
 
 abstract class _VerifyUserFormFieldState<FieldValue extends Object>
-    extends AuthenticatorFormFieldState<VerifyAttributeField, FieldValue,
-        VerifyUserFormField<FieldValue>> {
+    extends
+        AuthenticatorFormFieldState<
+          VerifyAttributeField,
+          FieldValue,
+          VerifyUserFormField<FieldValue>
+        > {
   @override
   int get errorMaxLines {
     return 1;
@@ -67,10 +77,27 @@ class _VerifyUserTextField extends VerifyUserFormField<String> {
     super.hintTextKey,
     super.validator,
     super.autofillHints,
+    super.enabledOverride,
+    super.visible,
+    this.authenticatorTextFieldController,
   }) : super._();
 
   @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
+
+  @override
   _VerifyUserTextFieldState createState() => _VerifyUserTextFieldState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AuthenticatorTextFieldController?>(
+        'authenticatorTextFieldController',
+        authenticatorTextFieldController,
+      ),
+    );
+  }
 }
 
 class _VerifyUserTextFieldState extends _VerifyUserFormFieldState<String>
@@ -97,10 +124,7 @@ class _VerifyUserTextFieldState extends _VerifyUserFormFieldState<String>
 
   @override
   Iterable<String>? get autofillHints =>
-      widget.autofillHints ??
-      [
-        AutofillHints.oneTimeCode,
-      ];
+      widget.autofillHints ?? [AutofillHints.oneTimeCode];
 
   @override
   FormFieldValidator<String> get validator {
@@ -131,7 +155,7 @@ class _VerifyAttributeFieldState
     with AuthenticatorRadioField {
   @override
   late final List<InputSelection<InputResolverKey, CognitoUserAttributeKey>>
-      selections;
+  selections;
 
   @override
   late final CognitoUserAttributeKey initialValue;

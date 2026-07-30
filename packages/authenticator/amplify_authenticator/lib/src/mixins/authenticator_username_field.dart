@@ -9,10 +9,194 @@ import 'package:amplify_authenticator/src/utils/validators.dart';
 import 'package:amplify_authenticator/src/widgets/component.dart';
 import 'package:amplify_authenticator/src/widgets/form_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
-mixin AuthenticatorUsernameField<FieldType extends Enum,
-        T extends AuthenticatorFormField<FieldType, UsernameInput>>
+mixin AuthenticatorUsernameField<
+  FieldType extends Enum,
+  T extends AuthenticatorFormField<FieldType, UsernameInput>
+>
     on AuthenticatorFormFieldState<FieldType, UsernameInput, T> {
+  TextEditingController? _controller;
+  UsernameType? _controllerUsernameType;
+  bool _applyingControllerText = false;
+  String? _lastSyncedText;
+  String? _pendingControllerText;
+  bool _controllerUpdateScheduled = false;
+
+  @protected
+  AuthenticatorTextFieldController? get textController =>
+      widget.authenticatorTextFieldController;
+
+  void _updateController() {
+    final controller = textController;
+    final type = selectedUsernameType;
+    final shouldListen = type != UsernameType.phoneNumber;
+
+    if (identical(controller, _controller) && type == _controllerUsernameType) {
+      if (!shouldListen && _controller != null) {
+        _controller!.removeListener(_handleControllerChanged);
+      }
+      return;
+    }
+
+    if (_controller != null) {
+      _controller!.removeListener(_handleControllerChanged);
+    }
+
+    _controller = controller;
+    _controllerUsernameType = type;
+    _lastSyncedText = null;
+    _pendingControllerText = null;
+
+    if (_controller != null && shouldListen) {
+      _controller!.addListener(_handleControllerChanged);
+    }
+  }
+
+  void _handleControllerChanged() {
+    final controller = _controller;
+    if (controller == null || _applyingControllerText) {
+      return;
+    }
+
+    final text = controller.text;
+    if (text == _lastSyncedText && _pendingControllerText == null) {
+      return;
+    }
+
+    _pendingControllerText = text;
+    if (_controllerUpdateScheduled) {
+      return;
+    }
+    _controllerUpdateScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _controllerUpdateScheduled = false;
+      final pendingText = _pendingControllerText;
+      _pendingControllerText = null;
+      if (!mounted || pendingText == null) {
+        return;
+      }
+      if (pendingText == _lastSyncedText) {
+        return;
+      }
+      _applyingControllerText = true;
+      try {
+        onChanged(
+          UsernameInput(type: selectedUsernameType, username: pendingText),
+        );
+        _lastSyncedText = pendingText;
+      } finally {
+        _applyingControllerText = false;
+      }
+    });
+  }
+
+  void _syncControllerText({bool force = false}) {
+    if (_controller == null ||
+        selectedUsernameType == UsernameType.phoneNumber) {
+      return;
+    }
+
+    // If there is a pending controller update, do not overwrite the controller
+    // with the state value, as the state value may be stale.
+    if (_pendingControllerText != null && !force) {
+      return;
+    }
+
+    final target = initialValue?.username ?? '';
+    final controllerText = _controller!.text;
+    if (!force && controllerText == target) {
+      _lastSyncedText = controllerText;
+      return;
+    }
+
+    // If the controller has changed locally (user input) but the state
+    // has not changed from what we last synced, ignore the state value
+    // as it is likely stale.
+    if (!force &&
+        controllerText != _lastSyncedText &&
+        target == _lastSyncedText) {
+      return;
+    }
+
+    final normalizedController = controllerText.trimRight();
+    final normalizedTarget = target.trimRight();
+    if (normalizedController == normalizedTarget) {
+      _lastSyncedText = controllerText;
+      return;
+    }
+
+    _applyingControllerText = true;
+    _controller!.value = _controller!.value.copyWith(
+      text: target,
+      selection: TextSelection.collapsed(offset: target.length),
+      composing: TextRange.empty,
+    );
+    _lastSyncedText = target;
+    _pendingControllerText = null;
+    _applyingControllerText = false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateController();
+    // Skip sync in initState since 'state' isn't available yet
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateController();
+    if (mounted) {
+      // First sync controller -> state if controller has initial text
+      if (_controller != null &&
+          _lastSyncedText == null &&
+          _controller!.text.isNotEmpty) {
+        final text = _controller!.text;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _applyingControllerText = true;
+          try {
+            onChanged(
+              UsernameInput(type: selectedUsernameType, username: text),
+            );
+            _lastSyncedText = text;
+          } finally {
+            _applyingControllerText = false;
+          }
+        });
+      } else {
+        // Then sync state -> controller to ensure they're in sync
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _syncControllerText();
+          }
+        });
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _syncControllerText();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_handleControllerChanged);
+    _controller = null;
+    _pendingControllerText = null;
+    _controllerUpdateScheduled = false;
+    super.dispose();
+  }
+
   @override
   UsernameInput? get initialValue {
     return UsernameInput(type: selectedUsernameType, username: state.username);
@@ -76,14 +260,8 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
       context,
       InputField.phoneNumber,
     );
-    final emailTitle = inputResolver.title(
-      context,
-      InputField.email,
-    );
-    final usernameTitle = inputResolver.title(
-      context,
-      InputField.usernameType,
-    );
+    final emailTitle = inputResolver.title(context, InputField.email);
+    final usernameTitle = inputResolver.title(context, InputField.usernameType);
     switch (usernameType) {
       case UsernameConfigType.emailOrPhoneNumber:
         return Column(
@@ -91,7 +269,8 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
           children: [
             Text(
               usernameTitle,
-              style: Theme.of(context).inputDecorationTheme.labelStyle ??
+              style:
+                  Theme.of(context).inputDecorationTheme.labelStyle ??
                   const TextStyle(fontSize: 16),
             ),
             SizedBox(height: labelGap),
@@ -104,7 +283,8 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
                 final toggleButtonsTheme = Theme.of(context).toggleButtonsTheme;
                 final buttonBorderWidth = toggleButtonsTheme.borderWidth ?? 1.0;
                 // half of the total width, minus the with of the borders
-                final buttonWidth = (constraints.maxWidth / buttonCount) -
+                final buttonWidth =
+                    (constraints.maxWidth / buttonCount) -
                     (buttonBorderWidth * bordersPerButton);
                 final buttonMinHeight =
                     toggleButtonsTheme.constraints?.minHeight ?? 36.0;
@@ -130,14 +310,14 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
                     }
                     // Determine the new username value based off the new username selection
                     // and the current user attributes
-                    final newUsername = newUsernameSelection ==
-                            UsernameSelection.email
+                    final newUsername =
+                        newUsernameSelection == UsernameSelection.email
                         ? state.getAttribute(CognitoUserAttributeKey.email) ??
-                            ''
+                              ''
                         : state.getAttribute(
-                              CognitoUserAttributeKey.phoneNumber,
-                            ) ??
-                            '';
+                                CognitoUserAttributeKey.phoneNumber,
+                              ) ??
+                              '';
                     // Clear user attributes
                     state.authAttributes.clear();
                     // Reset country code if phone is not being used as a username
@@ -169,21 +349,21 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
     switch (selectedUsernameType) {
       case UsernameType.username:
         return (input) => usernameValidator(
-              context: context,
-              inputResolver: stringResolver.inputs,
-            )(input?.username);
+          context: context,
+          inputResolver: stringResolver.inputs,
+        )(input?.username);
       case UsernameType.email:
         return (input) => validateEmail(
-              isOptional: isOptional,
-              context: context,
-              inputResolver: stringResolver.inputs,
-            )(input?.username);
+          isOptional: isOptional,
+          context: context,
+          inputResolver: stringResolver.inputs,
+        )(input?.username);
       case UsernameType.phoneNumber:
         return (input) => validatePhoneNumber(
-              isOptional: isOptional,
-              context: context,
-              inputResolver: stringResolver.inputs,
-            )(input?.username);
+          isOptional: isOptional,
+          context: context,
+          inputResolver: stringResolver.inputs,
+        )(input?.username);
     }
   }
 
@@ -199,22 +379,16 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
     final inputResolver = stringResolver.inputs;
     final hintText = inputResolver.resolve(context, hintKey);
 
-    void onChanged(String username) {
-      return this.onChanged(
-        UsernameInput(
-          type: selectedUsernameType,
-          username: username,
-        ),
+    void handleChanged(String username) {
+      return onChanged(
+        UsernameInput(type: selectedUsernameType, username: username),
       );
     }
 
     String? validator(String? username) {
       final validator = widget.validatorOverride ?? this.validator;
       return validator(
-        UsernameInput(
-          type: selectedUsernameType,
-          username: username ?? '',
-        ),
+        UsernameInput(type: selectedUsernameType, username: username ?? ''),
       );
     }
 
@@ -222,24 +396,33 @@ mixin AuthenticatorUsernameField<FieldType extends Enum,
       return AuthenticatorPhoneField<FieldType>(
         field: widget.field,
         requiredOverride: true,
-        onChanged: onChanged,
+        onChanged: handleChanged,
         validator: validator,
-        enabled: enabled,
+        enabled: widget.enabledOverride,
         errorMaxLines: errorMaxLines,
         initialValue: state.username,
         autofillHints: autofillHints,
+        authenticatorTextFieldController: textController,
       );
     }
+
+    _updateController();
+
+    final controllerInUse = _controller != null;
+
     return TextFormField(
-      style: enabled
+      style: effectiveEnabled
           ? null
-          : TextStyle(
-              color: Theme.of(context).disabledColor,
-            ),
-      initialValue: initialValue?.username,
-      enabled: enabled,
+          : TextStyle(color: Theme.of(context).disabledColor),
+      controller: _controller,
+      initialValue: _controller == null ? initialValue?.username : null,
+      enabled: effectiveEnabled,
       validator: validator,
-      onChanged: onChanged,
+      onChanged: (username) {
+        if (!controllerInUse) {
+          handleChanged(username);
+        }
+      },
       autocorrect: false,
       decoration: InputDecoration(
         prefixIcon: prefix,

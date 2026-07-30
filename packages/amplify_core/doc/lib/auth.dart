@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// Code excerpts for the Auth category.
-library auth;
+library;
 
 // #docregion imports
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
@@ -16,9 +16,7 @@ Future<CognitoSignInResult> signInWithCognito(
   String username,
   String password,
 ) async {
-  final cognitoPlugin = Amplify.Auth.getPlugin(
-    AmplifyAuthCognito.pluginKey,
-  );
+  final cognitoPlugin = Amplify.Auth.getPlugin(AmplifyAuthCognito.pluginKey);
   return cognitoPlugin.signIn(username: username, password: password);
 }
 // #enddocregion get-plugin
@@ -56,17 +54,15 @@ Future<void> signUpUser({
   try {
     final userAttributes = {
       AuthUserAttributeKey.email: email,
-      if (phoneNumber != null) AuthUserAttributeKey.phoneNumber: phoneNumber,
+      AuthUserAttributeKey.phoneNumber: ?phoneNumber,
       // additional attributes as needed
     };
     final result = await Amplify.Auth.signUp(
       username: username,
       password: password,
-      options: SignUpOptions(
-        userAttributes: userAttributes,
-      ),
+      options: SignUpOptions(userAttributes: userAttributes),
     );
-    return _handleSignUpResult(result);
+    return await _handleSignUpResult(result);
   } on AuthException catch (e) {
     safePrint('Error signing up user: ${e.message}');
   }
@@ -83,7 +79,7 @@ Future<void> confirmUser({
       username: username,
       confirmationCode: confirmationCode,
     );
-    return _handleSignUpResult(result);
+    return await _handleSignUpResult(result);
   } on AuthException catch (e) {
     safePrint('Error confirming user: ${e.message}');
   }
@@ -93,9 +89,7 @@ Future<void> confirmUser({
 // #docregion resend-signup-code
 Future<void> resendSignUpCode(String username) async {
   try {
-    final result = await Amplify.Auth.resendSignUpCode(
-      username: username,
-    );
+    final result = await Amplify.Auth.resendSignUpCode(username: username);
     final codeDeliveryDetails = result.codeDeliveryDetails;
     _handleCodeDelivery(codeDeliveryDetails);
   } on AuthException catch (e) {
@@ -104,22 +98,38 @@ Future<void> resendSignUpCode(String username) async {
 }
 // #enddocregion resend-signup-code
 
-// #docregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code
+// #docregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code, handle-confirm-signin-email-code, handle-confirm-signin-mfa-setup-selection, handle-confirm-signin-email-setup
 Future<void> _handleSignInResult(SignInResult result) async {
   switch (result.nextStep.signInStep) {
-    // #enddocregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code
+    // #enddocregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code, handle-confirm-signin-email-code, handle-confirm-signin-mfa-setup-selection, handle-confirm-signin-email-setup
     // #docregion handle-confirm-signin-mfa-selection
     case AuthSignInStep.continueSignInWithMfaSelection:
       final allowedMfaTypes = result.nextStep.allowedMfaTypes!;
       final selection = await _promptUserPreference(allowedMfaTypes);
       return _handleMfaSelection(selection);
     // #enddocregion handle-confirm-signin-mfa-selection
+    // #docregion handle-confirm-signin-mfa-setup-selection
+    case AuthSignInStep.continueSignInWithMfaSetupSelection:
+      final allowedMfaTypes = result.nextStep.allowedMfaTypes!;
+      if (allowedMfaTypes.length == 1) {
+        return _handleMfaSelection(allowedMfaTypes.first);
+      }
+      final selection = await _promptUserPreference(allowedMfaTypes);
+      safePrint('Selected MFA type: $selection');
+      return _handleMfaSelection(selection);
+    // #enddocregion handle-confirm-signin-mfa-setup-selection
     // #docregion handle-confirm-signin-totp-setup
     case AuthSignInStep.continueSignInWithTotpSetup:
       final totpSetupDetails = result.nextStep.totpSetupDetails!;
       final setupUri = totpSetupDetails.getSetupUri(appName: 'MyApp');
       safePrint('Open URI to complete setup: $setupUri');
     // #enddocregion handle-confirm-signin-totp-setup
+    // #docregion handle-confirm-signin-email-setup
+    case AuthSignInStep.continueSignInWithEmailMfaSetup:
+      safePrint(
+        'Enter the email address you want to use for two-factor authentication',
+      );
+    // #enddocregion handle-confirm-signin-email-setup
     // #docregion handle-confirm-signin-totp-code
     case AuthSignInStep.confirmSignInWithTotpMfaCode:
       safePrint('Enter a one-time code from your registered Authenticator app');
@@ -129,6 +139,11 @@ Future<void> _handleSignInResult(SignInResult result) async {
       final codeDeliveryDetails = result.nextStep.codeDeliveryDetails!;
       _handleCodeDelivery(codeDeliveryDetails);
     // #enddocregion handle-confirm-signin-sms
+    // #docregion handle-confirm-signin-email
+    case AuthSignInStep.confirmSignInWithOtpCode:
+      final codeDeliveryDetails = result.nextStep.codeDeliveryDetails!;
+      _handleCodeDelivery(codeDeliveryDetails);
+    // #enddocregion handle-confirm-signin-email
     // #docregion handle-confirm-signin-new-password
     case AuthSignInStep.confirmSignInWithNewPassword:
       safePrint('Enter a new password to continue signing in');
@@ -141,9 +156,7 @@ Future<void> _handleSignInResult(SignInResult result) async {
     // #enddocregion handle-confirm-signin-custom-challenge
     // #docregion handle-confirm-signin-reset-password
     case AuthSignInStep.resetPassword:
-      final resetResult = await Amplify.Auth.resetPassword(
-        username: username,
-      );
+      final resetResult = await Amplify.Auth.resetPassword(username: username);
       await _handleResetPasswordResult(resetResult);
     // #enddocregion handle-confirm-signin-reset-password
     // #docregion handle-confirm-signin-confirm-signup
@@ -158,10 +171,30 @@ Future<void> _handleSignInResult(SignInResult result) async {
     case AuthSignInStep.done:
       safePrint('Sign in is complete');
     // #enddocregion handle-confirm-signin-done
-    // #docregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code
+    // #docregion handle-confirm-signin-first-factor-selection
+    case AuthSignInStep.continueSignInWithFirstFactorSelection:
+      final allowedfirstFactorTypes = result.nextStep.availableFactors!;
+      if (allowedfirstFactorTypes.length == 1) {
+        return _handleFirstFactorSelection(allowedfirstFactorTypes.first);
+      }
+      final selection = await _promptUserFirstFactorPreference(
+        allowedfirstFactorTypes,
+      );
+      safePrint('Selected first factor type: $selection');
+      return _handleFirstFactorSelection(selection);
+    // #enddocregion handle-confirm-signin-first-factor-selection
+    // #docregion handle-confirm-signin-otp
+    case AuthSignInStep.confirmSignInWithOtp:
+      safePrint('Enter a one-time code');
+    // #enddocregion handle-confirm-signin-otp
+    // #docregion handle-confirm-signin-password
+    case AuthSignInStep.confirmSignInWithPassword:
+      safePrint('Enter your Password');
+    // #enddocregion handle-confirm-signin-password
+    // #docregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code, handle-confirm-signin-email-code, handle-confirm-signin-mfa-setup-selection, handle-confirm-signin-email-setup
   }
 }
-// #enddocregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code
+// #enddocregion handle-signin, handle-confirm-signin-sms, handle-confirm-signin-new-password, handle-confirm-signin-custom-challenge, handle-confirm-signin-reset-password, handle-confirm-signin-confirm-signup, handle-confirm-signin-done, handle-confirm-signin-mfa-selection, handle-confirm-signin-totp-setup, handle-confirm-signin-totp-code, handle-confirm-signin-email-code, handle-confirm-signin-mfa-setup-selection, handle-confirm-signin-email-setup
 
 // #docregion signin
 Future<void> signInUser(String username, String password) async {
@@ -170,7 +203,7 @@ Future<void> signInUser(String username, String password) async {
       username: username,
       password: password,
     );
-    return _handleSignInResult(result);
+    return await _handleSignInResult(result);
   } on AuthException catch (e) {
     safePrint('Error signing in: ${e.message}');
   }
@@ -183,7 +216,7 @@ Future<void> socialSignIn() async {
     final result = await Amplify.Auth.signInWithWebUI(
       provider: AuthProvider.google,
     );
-    return _handleSignInResult(result);
+    return await _handleSignInResult(result);
   } on AuthException catch (e) {
     safePrint('Error signing in: ${e.message}');
   }
@@ -205,10 +238,8 @@ Future<void> _handleResetPasswordResult(ResetPasswordResult result) async {
 // #docregion confirm-signin
 Future<void> confirmMfaUser(String mfaCode) async {
   try {
-    final result = await Amplify.Auth.confirmSignIn(
-      confirmationValue: mfaCode,
-    );
-    return _handleSignInResult(result);
+    final result = await Amplify.Auth.confirmSignIn(confirmationValue: mfaCode);
+    return await _handleSignInResult(result);
   } on AuthException catch (e) {
     safePrint('Error confirming MFA code: ${e.message}');
   }
@@ -229,9 +260,32 @@ Future<void> _handleMfaSelection(MfaType selection) async {
     final result = await Amplify.Auth.confirmSignIn(
       confirmationValue: selection.confirmationValue,
     );
-    return _handleSignInResult(result);
+    return await _handleSignInResult(result);
   } on AuthException catch (e) {
-    safePrint('Error resending code: ${e.message}');
+    safePrint('Error selecting MFA type: ${e.message}');
+  }
+}
+// #enddocregion handle-mfa-selection
+
+// #docregion prompt-user-preference
+Future<AuthFactorType> _promptUserFirstFactorPreference(
+  Set<AuthFactorType> allowedTypes,
+) async {
+  // #enddocregion prompt-user-preference
+  throw UnimplementedError();
+  // #docregion prompt-user-preference
+}
+// #enddocregion prompt-user-preference
+
+// #docregion handle-mfa-selection
+Future<void> _handleFirstFactorSelection(AuthFactorType selection) async {
+  try {
+    final result = await Amplify.Auth.confirmSignIn(
+      confirmationValue: selection.value,
+    );
+    return await _handleSignInResult(result);
+  } on AuthException catch (e) {
+    safePrint('Error selecting first factor preference: ${e.message}');
   }
 }
 // #enddocregion handle-mfa-selection
@@ -285,10 +339,8 @@ Future<void> updatePassword({
 // #docregion reset-password
 Future<void> resetPassword(String username) async {
   try {
-    final result = await Amplify.Auth.resetPassword(
-      username: username,
-    );
-    return _handleResetPasswordResult(result);
+    final result = await Amplify.Auth.resetPassword(username: username);
+    return await _handleResetPasswordResult(result);
   } on AuthException catch (e) {
     safePrint('Error resetting password: ${e.message}');
   }
@@ -364,9 +416,7 @@ Future<void> fetchCurrentUserAttributes() async {
 // #enddocregion fetch-user-attributes
 
 // #docregion handle-update-user-attribute
-void _handleUpdateUserAttributeResult(
-  UpdateUserAttributeResult result,
-) {
+void _handleUpdateUserAttributeResult(UpdateUserAttributeResult result) {
   switch (result.nextStep.updateAttributeStep) {
     case AuthUpdateAttributeStep.confirmAttributeWithCode:
       final codeDeliveryDetails = result.nextStep.codeDeliveryDetails!;
@@ -378,9 +428,7 @@ void _handleUpdateUserAttributeResult(
 // #enddocregion handle-update-user-attribute
 
 // #docregion update-user-attribute
-Future<void> updateUserEmail({
-  required String newEmail,
-}) async {
+Future<void> updateUserEmail({required String newEmail}) async {
   try {
     final result = await Amplify.Auth.updateUserAttribute(
       userAttributeKey: AuthUserAttributeKey.email,
@@ -483,6 +531,17 @@ Future<void> forgetSpecificDevice(AuthDevice myDevice) async {
 }
 // #enddocregion forget-specific-device
 
+// #docregion fetch-current-device
+Future<void> fetchCurrentDevice() async {
+  try {
+    final device = await Amplify.Auth.fetchCurrentDevice();
+    safePrint('Device: $device');
+  } on AuthException catch (e) {
+    safePrint('Fetch current device failed with error: $e');
+  }
+}
+// #enddocregion fetch-current-device
+
 // #docregion fetch-devices
 Future<void> fetchAllDevices() async {
   try {
@@ -505,4 +564,5 @@ Future<void> deleteUser() async {
     safePrint('Delete user failed with error: $e');
   }
 }
+
 // #enddocregion delete-user

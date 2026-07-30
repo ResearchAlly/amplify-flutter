@@ -7,6 +7,7 @@ import 'package:e2e/e2e_worker.dart';
 class E2EWorkerImpl extends E2EWorker {
   @override
   String get name => 'E2EWorker';
+
   @override
   List<String> get fallbackUrls {
     // When running in a test, we need to find the `packages` directory which
@@ -16,18 +17,25 @@ class E2EWorkerImpl extends E2EWorker {
         .takeWhile((segment) => segment != 'test')
         .map(Uri.encodeComponent)
         .join('/');
-    const relativePath = zDebugMode
-        ? 'packages/e2e/workers.debug.dart.js'
-        : 'packages/e2e/workers.release.dart.js';
-    final testRelativePath = Uri(
-      scheme: baseUri.scheme,
-      host: baseUri.host,
-      port: baseUri.port,
-      path: '$basePath/test/$relativePath',
-    ).toString();
+    const relativePaths = zDebugMode
+        ? [
+            'packages/e2e/workers.js',
+            'packages/e2e/workers.debug.dart.js',
+          ]
+        : [
+            'packages/e2e/workers.min.js',
+            'packages/e2e/workers.release.dart.js',
+          ];
     return [
-      relativePath,
-      testRelativePath,
+      for (final relativePath in relativePaths) ...[
+        relativePath,
+        Uri(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.port,
+          path: '$basePath/test/$relativePath',
+        ).toString(),
+      ],
     ];
   }
 }

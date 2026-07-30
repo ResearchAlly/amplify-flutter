@@ -3,7 +3,7 @@
 
 import 'package:amplify_core/amplify_core.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
-import 'package:amplify_storage_s3_example/amplifyconfiguration.dart';
+import 'package:amplify_storage_s3_example/amplify_outputs.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -71,8 +71,9 @@ void main() {
       group('with options', () {
         testWidgets('getProperties', (_) async {
           final destinationPath = 'public/copy-dest-metadata-${uuid()}';
-          final destinationStoragePath =
-              StoragePath.fromString(destinationPath);
+          final destinationStoragePath = StoragePath.fromString(
+            destinationPath,
+          );
           addTearDownPath(destinationStoragePath);
           final result = await Amplify.Storage.copy(
             source: srcStoragePath,
@@ -136,6 +137,77 @@ void main() {
         ).result;
         expect(await objectExists(destinationStoragePath), true);
         expect(result.copiedItem.path, destinationPath);
+      });
+    });
+
+    group('multi bucket', () {
+      final data = 'copy data'.codeUnits;
+      final bucket1 = StorageBucket.fromOutputs(
+        'Storage Integ Test main bucket',
+      );
+      final bucket2 = StorageBucket.fromOutputs(
+        'Storage Integ Test secondary bucket',
+      );
+      final bucket1PathSource = 'public/multi-bucket-get-url-${uuid()}';
+      final bucket2PathSource = 'public/multi-bucket-get-url-${uuid()}';
+      final bucket2PathDestination = 'public/multi-bucket-get-url-${uuid()}';
+      final storageBucket1PathSource = StoragePath.fromString(
+        bucket1PathSource,
+      );
+      final storageBucket2PathSource = StoragePath.fromString(
+        bucket2PathSource,
+      );
+      final storageBucket2PathDestination = StoragePath.fromString(
+        bucket2PathDestination,
+      );
+
+      setUp(() async {
+        await configure(amplifyEnvironments['main']!);
+        addTearDownPath(storageBucket1PathSource);
+        addTearDownPath(storageBucket2PathSource);
+        addTearDownPath(storageBucket2PathDestination);
+        await Amplify.Storage.uploadData(
+          data: StorageDataPayload.bytes(data),
+          path: storageBucket1PathSource,
+          options: StorageUploadDataOptions(bucket: bucket1),
+        ).result;
+        await Amplify.Storage.uploadData(
+          data: StorageDataPayload.bytes(data),
+          path: storageBucket2PathSource,
+          options: StorageUploadDataOptions(bucket: bucket2),
+        ).result;
+      });
+
+      testWidgets('copy to a different bucket', (_) async {
+        final result = await Amplify.Storage.copy(
+          source: storageBucket1PathSource,
+          destination: storageBucket2PathDestination,
+          options: StorageCopyOptions(
+            buckets: CopyBuckets(source: bucket1, destination: bucket2),
+          ),
+        ).result;
+        expect(result.copiedItem.path, bucket2PathDestination);
+
+        final downloadResult = await Amplify.Storage.downloadData(
+          path: storageBucket2PathDestination,
+          options: StorageDownloadDataOptions(bucket: bucket2),
+        ).result;
+        expect(downloadResult.bytes, data);
+      });
+
+      testWidgets('copy to the same bucket', (_) async {
+        final result = await Amplify.Storage.copy(
+          source: storageBucket2PathSource,
+          destination: storageBucket2PathDestination,
+          options: StorageCopyOptions(buckets: CopyBuckets.sameBucket(bucket2)),
+        ).result;
+        expect(result.copiedItem.path, bucket2PathDestination);
+
+        final downloadResult = await Amplify.Storage.downloadData(
+          path: storageBucket2PathDestination,
+          options: StorageDownloadDataOptions(bucket: bucket2),
+        ).result;
+        expect(downloadResult.bytes, data);
       });
     });
   });

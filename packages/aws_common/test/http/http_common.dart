@@ -9,7 +9,7 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test/test.dart';
 
 AWSHttpClient get debugClient {
-  final client = AWSHttpClient()..onBadCertificate = (_, __, ___) => true;
+  final client = AWSHttpClient()..onBadCertificate = (_, _, _) => true;
   addTearDown(client.close);
   return client;
 }
@@ -22,7 +22,8 @@ void clientTest(
     StreamQueue<Object?> Function() getHttpServerQueue,
     StreamChannel<Object?> Function() getHttpServerChannel,
     Uri Function(String) createUri,
-  ) testCases, {
+  )
+  testCases, {
   Object? skip,
 }) {
   AWSLogger().logLevel = LogLevel.verbose;
@@ -51,7 +52,10 @@ void clientTest(
             ..sink.add(protocol.value)
             ..sink.add(secure);
           httpServerQueue = StreamQueue(httpServerChannel.stream);
-          host = 'localhost:${await httpServerQueue.next}';
+          // Under dart2wasm, numbers from spawnHybridUri arrive as double
+          // (e.g. 63515.0 instead of 63515), so we must convert to int.
+          final port = (await httpServerQueue.next as num).toInt();
+          host = 'localhost:$port';
           client = debugClient..supportedProtocols = supportedProtocols;
         });
         tearDown(() async {

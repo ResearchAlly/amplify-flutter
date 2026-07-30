@@ -36,7 +36,9 @@ sealed class SignUpEvent extends AuthEvent<SignUpEventType, SignUpStateType> {
 
   /// {@macro amplify_auth_cognito.sign_up_succeeded}
   const factory SignUpEvent.succeeded({
+    String? username,
     String? userId,
+    String? session,
   }) = SignUpSucceeded;
 
   @override
@@ -72,12 +74,12 @@ final class SignUpInitiate extends SignUpEvent {
 
   @override
   List<Object?> get props => [
-        type,
-        parameters,
-        userAttributes,
-        clientMetadata,
-        validationData,
-      ];
+    type,
+    parameters,
+    userAttributes,
+    clientMetadata,
+    validationData,
+  ];
 }
 
 /// {@template amplify_auth_cognito.sign_up_confirm}
@@ -89,8 +91,8 @@ final class SignUpConfirm extends SignUpEvent {
     required this.username,
     required this.confirmationCode,
     Map<String, String>? clientMetadata,
-  })  : clientMetadata = clientMetadata ?? const {},
-        super._();
+  }) : clientMetadata = clientMetadata ?? const {},
+       super._();
 
   /// Username to confirm.
   final String username;
@@ -105,12 +107,7 @@ final class SignUpConfirm extends SignUpEvent {
   SignUpEventType get type => SignUpEventType.confirm;
 
   @override
-  List<Object?> get props => [
-        type,
-        username,
-        confirmationCode,
-        clientMetadata,
-      ];
+  List<Object?> get props => [type, username, confirmationCode, clientMetadata];
 }
 
 /// {@template amplify_auth_cognito.sign_up_succeeded}
@@ -118,16 +115,20 @@ final class SignUpConfirm extends SignUpEvent {
 /// {@endtemplate}
 final class SignUpSucceeded extends SignUpEvent {
   /// {@macro amplify_auth_cognito.sign_up_succeeded}
-  const SignUpSucceeded({
-    this.userId,
-  }) : super._();
+  const SignUpSucceeded({this.username, this.userId, this.session}) : super._();
+
+  /// The username of the user.
+  final String? username;
 
   /// The ID of the user.
   final String? userId;
+
+  /// The sign up session
+  final String? session;
 
   @override
   SignUpEventType get type => SignUpEventType.succeeded;
 
   @override
-  List<Object?> get props => [type, userId];
+  List<Object?> get props => [type, username, userId, session];
 }

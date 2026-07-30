@@ -24,6 +24,7 @@ class MockAuthenticatorApp extends StatefulWidget {
     this.authPlugin,
     this.signInForm,
     this.signUpForm,
+    this.stringResolver,
     this.child,
   });
 
@@ -34,6 +35,7 @@ class MockAuthenticatorApp extends StatefulWidget {
   final AuthPluginInterface? authPlugin;
   final SignInForm? signInForm;
   final SignUpForm? signUpForm;
+  final AuthStringResolver? stringResolver;
   final Widget? child;
 
   @override
@@ -69,10 +71,7 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
       case AuthenticatorStep.continueSignInWithMfaSelection:
         baseBloc.setState(
           const ContinueSignInWithMfaSelection(
-            allowedMfaTypes: {
-              MfaType.totp,
-              MfaType.sms,
-            },
+            allowedMfaTypes: {MfaType.totp, MfaType.sms, MfaType.email},
           ),
         );
       case AuthenticatorStep.continueSignInWithTotpSetup:
@@ -87,9 +86,14 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
             ),
           ),
         );
+      case AuthenticatorStep.continueSignInWithMfaSetupSelection:
+        baseBloc.setState(
+          const ContinueSignInWithMfaSetupSelection(
+            allowedMfaTypes: {MfaType.sms, MfaType.totp, MfaType.email},
+          ),
+        );
       default:
         baseBloc.add(const AuthLoad());
-        break;
     }
 
     return baseBloc;
@@ -108,7 +112,9 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
       authBlocOverride: _authBloc,
       signInForm: widget.signInForm,
       signUpForm: widget.signUpForm,
-      child: widget.child ??
+      stringResolver: widget.stringResolver ?? const AuthStringResolver(),
+      child:
+          widget.child ??
           MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: widget.lightTheme,
@@ -117,9 +123,7 @@ class _MockAuthenticatorAppState extends State<MockAuthenticatorApp> {
             builder: Authenticator.builder(),
             home: const Scaffold(
               key: authenticatedAppKey,
-              body: Center(
-                child: SignOutButton(),
-              ),
+              body: Center(child: SignOutButton()),
             ),
           ),
     );

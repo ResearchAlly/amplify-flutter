@@ -38,7 +38,7 @@ class AuthHubEvent extends HubEvent<AuthUser>
   /// a user was already signed in.
   /// {@endtemplate}
   AuthHubEvent.signedIn(AuthUser user)
-      : this._(AuthHubEventType.signedIn, payload: user);
+    : this._(AuthHubEventType.signedIn, payload: user);
 
   /// {@template amplify_common.hub.auth_hub_event_signed_out}
   /// Emitted when the user is signed out, either by calling
@@ -57,10 +57,7 @@ class AuthHubEvent extends HubEvent<AuthUser>
   /// Emitted when a user is deleted by calling `Amplify.Auth.deleteUser`.
   /// {@endtemplate}
   AuthHubEvent.userDeleted() : this._(AuthHubEventType.userDeleted);
-  AuthHubEvent._(
-    this.type, {
-    AuthUser? payload,
-  }) : super(type.eventName, payload: payload);
+  AuthHubEvent._(this.type, {super.payload}) : super(type.eventName);
 
   /// {@macro amplify_common.hub.auth_hub_event_type}
   final AuthHubEventType type;

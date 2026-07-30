@@ -88,11 +88,26 @@ abstract class AftConfig
   String componentForPackage(String packageName) {
     return components.values
             .firstWhereOrNull(
-              (component) => component.packages
-                  .any((package) => package.name == packageName),
+              (component) => component.packages.any(
+                (package) => package.name == packageName,
+              ),
             )
             ?.name ??
         packageName;
+  }
+
+  /// Locates the package identified by [nameOrTag] in [allPackages], or `null`
+  /// if no matching package exists.
+  ///
+  /// [nameOrTag] may be a package name (`amplify_core`) or a publish tag of
+  /// the form `$name-v$version` as emitted by `aft publish --tags`
+  /// (`amplify_core-v2.10.1`); the trailing `-v$version` is stripped to recover
+  /// the name. Anchoring on `-v` + a digit (never `_v`) leaves names like
+  /// `aws_signature_v4` intact.
+  PackageInfo? locatePackage(String nameOrTag) {
+    final name =
+        _packageTagPattern.firstMatch(nameOrTag)?.group(1) ?? nameOrTag;
+    return allPackages[name];
   }
 
   @override
@@ -236,6 +251,18 @@ class PackageInfo
     return dir.existsSync();
   }
 
+  /// Whether this package opts into `dart2wasm` browser test coverage.
+  ///
+  /// A package opts in by adding a `test/wasm_smoke_test.dart` file. This
+  /// is additive: the default (dart2js) browser test job still runs for all
+  /// web packages — opting in adds a parallel `dart2wasm` run so both web
+  /// compilers stay covered. Packages turn this on as their web code is
+  /// verified to compile and pass under `dart2wasm`.
+  bool get hasWasmTest {
+    final expectedPath = p.join(path, 'test', 'wasm_smoke_test.dart');
+    return File(expectedPath).existsSync();
+  }
+
   /// The integration test directory within the enclosing directory, if any
   Directory? get integrationTestDirectory {
     final expectedPath = p.join(path, 'integration_test');
@@ -295,13 +322,9 @@ class PackageInfo
   /// Whether [package] is a direct or transitive dependency of `this`.
   bool dependsOn(PackageInfo package, Repo repo) {
     var found = false;
-    dfs(
-      repo.getPackageGraph(includeDevDependencies: true),
-      root: this,
-      (pkg) {
-        if (pkg == package) found = true;
-      },
-    );
+    dfs(repo.getPackageGraph(includeDevDependencies: true), root: this, (pkg) {
+      if (pkg == package) found = true;
+    });
     return found;
   }
 
@@ -334,9 +357,17 @@ class PackageInfo
   }
 
   /// The parsed `CHANGELOG.md`.
+  ///
+  /// If the `CHANGELOG.md` file does not exist, an empty [Changelog] is
+  /// returned. This allows newly-added packages without a changelog to be
+  /// handled gracefully during `version-bump` — a new `CHANGELOG.md` will
+  /// be written on disk by [Repo.writeChanges] if the package gets bumped.
   Changelog get changelog {
-    final changelogMd = File(p.join(path, 'CHANGELOG.md')).readAsStringSync();
-    return Changelog.parse(changelogMd);
+    final changelogFile = File(p.join(path, 'CHANGELOG.md'));
+    if (!changelogFile.existsSync()) {
+      return Changelog.empty();
+    }
+    return Changelog.parse(changelogFile.readAsStringSync());
   }
 
   /// The current version in `pubspec.yaml`.
@@ -361,7 +392,7 @@ class PackageInfo
 
   /// The Dart SDK constraint set by the package.
   VersionConstraint get dartSdkConstraint =>
-      pubspecInfo.pubspec.environment!['sdk']!;
+      pubspecInfo.pubspec.environment['sdk']!;
 
   @override
   List<Object?> get props => [name];
@@ -450,15 +481,11 @@ extension DirectoryX on Directory {
 ///
 /// This parses the version from calling `dart --version`.
 final Version activeDartSdkVersion = () {
-  final ProcessResult(
-    :exitCode,
-    :stdout,
-    :stderr,
-  ) = Process.runSync('dart', ['--version']);
+  final ProcessResult(:exitCode, :stdout, :stderr) = Process.runSync('dart', [
+    '--version',
+  ]);
   if (exitCode != 0) {
-    throw Exception(
-      'Error running `dart --version` ($exitCode): $stderr',
-    );
+    throw Exception('Error running `dart --version` ($exitCode): $stderr');
   }
   // Example output:
   // Dart SDK version: 3.1.0 (stable) (Tue Aug 15 21:33:36 2023 +0000) on "macos_arm64"
@@ -472,3 +499,6 @@ final Version activeDartSdkVersion = () {
 }();
 
 final _versionRegex = RegExp(r'\d+\.\d+\.\d+(-[a-zA-Z\d]+)?');
+
+// Strips the -v<version> suffix; anchoring on a digit avoids splitting _v in names like aws_signature_v4.
+final _packageTagPattern = RegExp(r'^(.+?)-v\d');

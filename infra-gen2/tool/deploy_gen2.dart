@@ -7,7 +7,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:amplify_core/amplify_core.dart';
+import 'package:amplify_core/amplify_core.dart' show UUID;
 import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
 
@@ -20,34 +20,139 @@ import 'package:path/path.dart' as p;
 /// 4. Run `dart tool/deploy_gen2.dart` to deploy the backend
 const List<AmplifyBackendGroup> infraConfig = [
   AmplifyBackendGroup(
-    category: Category.analytics,
-    defaultOutput: '',
-    backends: [],
-  ),
-  AmplifyBackendGroup(
-    category: Category.api,
+    category: 'API',
     defaultOutput: 'packages/api/amplify_api/example/lib',
     backends: [
       AmplifyBackend(
         name: 'apiMultiAuth',
         identifier: 'apiMultiAuth',
-        pathToSource: 'infra-gen2/backends/api/apiMultiAuth',
+        pathToSource: 'infra-gen2/backends/api/api-multi-auth',
       ),
     ],
   ),
   AmplifyBackendGroup(
-    category: Category.auth,
+    category: 'Auth',
     defaultOutput: 'packages/auth/amplify_auth_cognito/example/lib',
     sharedOutputs: [
       'packages/auth/amplify_auth_cognito_dart/example/lib',
       'packages/authenticator/amplify_authenticator/example/lib',
     ],
-    backends: [],
+    backends: [
+      AmplifyBackend(
+        name: 'email-sign-in',
+        identifier: 'email-sign-in',
+        pathToSource: 'infra-gen2/backends/auth/email-sign-in',
+      ),
+      AmplifyBackend(
+        name: 'phone-sign-in',
+        identifier: 'phone-sign-in',
+        pathToSource: 'infra-gen2/backends/auth/phone-sign-in',
+      ),
+      AmplifyBackend(
+        name: 'mfa-optional-sms',
+        identifier: 'mfa-opt-sms',
+        pathToSource: 'infra-gen2/backends/auth/mfa-optional-sms',
+      ),
+      AmplifyBackend(
+        name: 'mfa-required-sms',
+        identifier: 'mfa-req-sms',
+        pathToSource: 'infra-gen2/backends/auth/mfa-required-sms',
+      ),
+      AmplifyBackend(
+        name: 'mfa-required-email',
+        identifier: 'mfa-req-email',
+        pathToSource: 'infra-gen2/backends/auth/mfa-required-email',
+      ),
+      AmplifyBackend(
+        name: 'mfa-required-email-sms',
+        identifier: 'mfa-req-ema-sms',
+        pathToSource: 'infra-gen2/backends/auth/mfa-required-email-sms',
+      ),
+      AmplifyBackend(
+        name: 'mfa-optional-email',
+        identifier: 'mfa-opt-email',
+        pathToSource: 'infra-gen2/backends/auth/mfa-optional-email',
+      ),
+      AmplifyBackend(
+        name: 'mfa-optional-email-sms',
+        identifier: 'mfa-opt-ema-sms',
+        pathToSource: 'infra-gen2/backends/auth/mfa-optional-email-sms',
+      ),
+      AmplifyBackend(
+        name: 'mfa-required-email-totp',
+        identifier: 'mfa-req-ema-tot',
+        pathToSource: 'infra-gen2/backends/auth/mfa-required-email-totp',
+      ),
+      AmplifyBackend(
+        name: 'mfa-optional-email-totp',
+        identifier: 'mfa-opt-ema-tot',
+        pathToSource: 'infra-gen2/backends/auth/mfa-optional-email-totp',
+      ),
+      AmplifyBackend(
+        name: 'username-login-mfa',
+        identifier: 'user-login-mfa',
+        pathToSource: 'infra-gen2/backends/auth/username-login-mfa',
+      ),
+    ],
   ),
   AmplifyBackendGroup(
-    category: Category.storage,
-    defaultOutput: '',
-    backends: [],
+    category: 'Storage',
+    defaultOutput: 'packages/storage/amplify_storage_s3/example/lib',
+    backends: [
+      AmplifyBackend(
+        name: 'main',
+        identifier: 'main',
+        pathToSource: 'infra-gen2/backends/storage/main',
+      ),
+      AmplifyBackend(
+        name: 'dots-in-name',
+        identifier: 'dots-in-name',
+        pathToSource: 'infra-gen2/backends/storage/dots-in-name',
+      ),
+    ],
+  ),
+  AmplifyBackendGroup(
+    category: 'Analytics',
+    defaultOutput: 'packages/analytics/amplify_analytics_pinpoint/example/lib',
+    backends: [
+      AmplifyBackend(
+        name: 'main',
+        identifier: 'main',
+        pathToSource: 'infra-gen2/backends/analytics/main',
+      ),
+      AmplifyBackend(
+        name: 'no-unauth-access',
+        identifier: 'no-unauth-acc',
+        pathToSource: 'infra-gen2/backends/analytics/no-unauth-access',
+      ),
+      AmplifyBackend(
+        name: 'no-unauth-identities',
+        identifier: 'no-unauth-id',
+        pathToSource: 'infra-gen2/backends/analytics/no-unauth-identities',
+      ),
+    ],
+  ),
+  AmplifyBackendGroup(
+    category: 'Kinesis',
+    defaultOutput: 'packages/kinesis/amplify_kinesis_dart/lib',
+    backends: [
+      AmplifyBackend(
+        name: 'main',
+        identifier: 'main',
+        pathToSource: 'infra-gen2/backends/kinesis/main',
+      ),
+    ],
+  ),
+  AmplifyBackendGroup(
+    category: 'Firehose',
+    defaultOutput: 'packages/kinesis/amplify_firehose/example/lib',
+    backends: [
+      AmplifyBackend(
+        name: 'main',
+        identifier: 'firehose',
+        pathToSource: 'infra-gen2/backends/kinesis/firehose',
+      ),
+    ],
   ),
 ];
 
@@ -56,32 +161,54 @@ const pathToBackends = 'infra-gen2/backends';
 void main(List<String> arguments) async {
   final args = _parseArgs(arguments);
   final verbose = args.flag('verbose');
+  final categoryToDeploy = args['category'];
 
   final bucketNames = <String>[];
+
+  print('🏃 Running build for infra-gen2');
+  await _buildProject();
+
   print('🚀 Deploying Gen 2 backends!');
   for (final backendGroup in infraConfig) {
+    if (categoryToDeploy != null && backendGroup.category != categoryToDeploy) {
+      continue;
+    }
     // TODO(equartey): Could be removed when all backends are defined.
     if (backendGroup.backends.isEmpty) {
       continue;
     }
-    var amplifyEnvironments = <String, String>{};
-    final categoryName = backendGroup.category.name;
+    var gen2Environments = <String, String>{};
+    var gen1Environments = <String, String>{};
+    final categoryName = backendGroup.category;
     final outputPath = p.join(repoRoot.path, backendGroup.defaultOutput);
     final amplifyOutputs = File(p.join(outputPath, 'amplify_outputs.dart'));
+    final amplifyConfiguration = File(
+      p.join(outputPath, 'amplifyconfiguration.dart'),
+    );
 
     // create the output file if it does not exist
     if (!amplifyOutputs.existsSync()) {
       amplifyOutputs.createSync(recursive: true);
     }
+    if (!amplifyConfiguration.existsSync()) {
+      amplifyConfiguration.createSync(recursive: true);
+    }
 
     print('🏃 Running sandbox deployment for $categoryName');
     for (final backend in backendGroup.backends) {
       final backendName = backend.name;
-      await _deployBackend(
+      final stackID = await _deployBackend(
         backendGroup.category,
         backend,
         amplifyOutputs.path.replaceFirst('amplify_outputs.dart', ''),
         verbose,
+      );
+
+      _generateGen1Config(
+        backendGroup.category,
+        backend,
+        amplifyConfiguration.path.replaceFirst('amplifyconfiguration.dart', ''),
+        stackID,
       );
 
       // Skip if there is only one backend
@@ -90,33 +217,30 @@ void main(List<String> arguments) async {
       }
 
       // Cache the config contents to create environments map
-      amplifyEnvironments = {
-        ...amplifyEnvironments,
-        ..._cacheConfigContents(
-          backendName,
-          amplifyOutputs,
-        ),
+      gen2Environments = {
+        ...gen2Environments,
+        ..._cacheConfigContents(backendName, amplifyOutputs),
+      };
+      gen1Environments = {
+        ...gen1Environments,
+        ..._cacheConfigContents(backendName, amplifyConfiguration),
       };
     }
 
     // Only append environments if there are multiple backends
     if (backendGroup.backends.length > 1) {
-      _appendEnvironments(
-        amplifyEnvironments,
-        backendGroup,
-        amplifyOutputs,
-      );
+      _appendEnvironments(gen2Environments, backendGroup, amplifyOutputs);
+      _appendEnvironments(gen1Environments, backendGroup, amplifyConfiguration);
     }
 
-    // Copy amplify_outputs.dart to shared paths
-    _copyAmplifyOutputs(
-      backendGroup.sharedOutputs,
+    // Copy config files to shared paths
+    _copyConfigFile(backendGroup.sharedOutputs, [
       amplifyOutputs,
-    );
-
-    var bucketName = _createBucketName(categoryName);
+      amplifyConfiguration,
+    ]);
 
     // Check if the S3 bucket exists
+    var bucketName = _createBucketName(categoryName);
     final remoteBucketName = _getS3BucketName(bucketName);
     if (remoteBucketName != null && remoteBucketName.isNotEmpty) {
       bucketName = remoteBucketName;
@@ -126,11 +250,8 @@ void main(List<String> arguments) async {
     }
     bucketNames.add(bucketName);
 
-    // Upload amplify_outputs.dart to S3 bucket
-    _uploadAmplifyOutputs(
-      bucketName,
-      amplifyOutputs.path,
-    );
+    // Upload config files to S3 bucket
+    _uploadConfigFileToS3(bucketName, [amplifyOutputs, amplifyConfiguration]);
 
     print('✅ Deployment for $categoryName Category complete');
   }
@@ -140,6 +261,10 @@ void main(List<String> arguments) async {
   print('🪣 S3 Bucket Names: $bucketNames');
 }
 
+Future<Process> _buildProject() async {
+  return Process.start('npm', ['run', 'build']);
+}
+
 ArgResults _parseArgs(List<String> args) {
   final parser = ArgParser()
     ..addFlag(
@@ -147,57 +272,129 @@ ArgResults _parseArgs(List<String> args) {
       abbr: 'v',
       help: 'Run command in verbose mode',
       defaultsTo: false,
+    )
+    ..addOption(
+      'category',
+      abbr: 'c',
+      help: 'Specify the category to deploy.',
+      allowed: infraConfig.map((e) => e.category).toList(),
+      defaultsTo: null,
     );
 
   return parser.parse(args);
 }
 
 /// Deploy Sandbox for a given backend backend
-Future<void> _deployBackend(
-  Category category,
+Future<String> _deployBackend(
+  String category,
   AmplifyBackend backend,
   String outputPath,
   bool verbose,
 ) async {
-  print(
-    '🏖️  Deploying ${category.name} ${backend.name}, this may take a while...',
-  );
+  print('🏖️  Deploying $category ${backend.name}, this may take a while...');
+
+  final outputFile = File(p.join(outputPath, 'amplify_outputs.dart'));
+  if (outputFile.existsSync()) {
+    outputFile.deleteSync();
+  }
 
   // Deploy the backend
-  final process = await Process.start(
-    'npx',
-    [
-      'ampx',
-      'sandbox',
-      '--outputs-format',
-      'dart',
-      '--outputs-out-dir',
-      outputPath,
-      '--identifier',
-      backend.identifier,
-      '--profile=${Platform.environment['AWS_PROFILE'] ?? 'default'}',
-      '--once',
-    ],
-    workingDirectory: p.join(repoRoot.path, backend.pathToSource),
-  );
+  final process = await Process.start('npx', [
+    'ampx',
+    'sandbox',
+    '--outputs-format',
+    'dart',
+    '--outputs-out-dir',
+    outputPath,
+    '--identifier',
+    backend.identifier,
+    '--profile=${Platform.environment['AWS_PROFILE'] ?? 'default'}',
+    '--once',
+    '--debug',
+  ], workingDirectory: p.join(repoRoot.path, backend.pathToSource));
 
   if (verbose) {
-    process.stdout.transform(const SystemEncoding().decoder).listen(print);
     process.stderr.transform(const SystemEncoding().decoder).listen((data) {
       print('❌ Error: $data');
     });
+  }
+
+  var stackID = '';
+
+  // About deployment errors
+  var postedDeploymentError = false;
+  var postedDeploymentErrorReason = false;
+  var postedDeploymentUpdateFailed = false;
+
+  // About CDK build errors
+  var postingBackendBuildError = false;
+  var postedBackendBuildError = false;
+
+  var previousLine = '';
+
+  // Listen to stdout for stack ID
+  await for (final String line
+      in process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())) {
+    if (!line.startsWith('    at ') && line.trim().isNotEmpty) {
+      // This line does not belong to a cdk build error
+      postingBackendBuildError = false;
+    }
+
+    if (verbose) {
+      print(line);
+    } else if (line.contains(' [ERROR]')) {
+      print('❌   $line');
+      postedDeploymentError = true;
+    } else if (line.contains('  ∟ Caused by: ')) {
+      print('    $line');
+      postedDeploymentErrorReason = true;
+    } else if (line.contains(' | UPDATE_FAILED | ')) {
+      postedDeploymentUpdateFailed = true;
+    } else if (!postingBackendBuildError && line.startsWith('    at ')) {
+      // This line and the previous line log a cdk build error
+      print('❌   $previousLine');
+      print('    $line');
+      postedBackendBuildError = true;
+      postingBackendBuildError = true;
+    } else if (line.startsWith('    at ')) {
+      // This line logs a cdk build error
+      print('    $line');
+    }
+
+    // Save Stack ID
+    if (line.contains('Stack:')) {
+      stackID = line.split('Stack:').last.trim();
+    }
+
+    // Needed for printing cdk build errors
+    previousLine = line;
   }
 
   final exitCode = await process.exitCode;
 
   if (exitCode != 0) {
     throw Exception(
-      '❌ Error deploying ${category.name} ${backend.identifier} sandbox',
+      '❌ Error deploying $category ${backend.identifier} sandbox',
+    );
+  } else if (postedDeploymentError &&
+      postedDeploymentErrorReason &&
+      postedDeploymentUpdateFailed) {
+    throw Exception(
+      '❌ Error deploying $category ${backend.identifier} sandbox: Update failed',
+    );
+  } else if (postedBackendBuildError) {
+    throw Exception(
+      '❌ Error deploying $category ${backend.identifier} sandbox - CDK build failed',
+    );
+  } else if (!outputFile.existsSync()) {
+    throw Exception(
+      '❌ Error deploying $category ${backend.identifier} sandbox - Output file not generated',
     );
   } else {
-    print(
-      '👍 ${category.name} ${backend.identifier} sandbox deployed',
-    );
+    print('👍 $category ${backend.identifier} sandbox deployed');
+    return stackID;
   }
 }
 
@@ -219,9 +416,7 @@ Map<String, String> _cacheConfigContents(
   final exp = RegExp(r"'''(.*?)'''", dotAll: true);
   final configMap = exp.firstMatch(rawConfigContent)?.group(1) ?? '';
 
-  return {
-    backendName: '\'\'\'$configMap\'\'\'',
-  };
+  return {backendName: 'r\'\'\'$configMap\'\'\''};
 }
 
 /// Append the environments to amplify_outputs.dart
@@ -249,32 +444,33 @@ void _appendEnvironments(
   );
 }
 
-/// Copy the amplify_outputs.dart file to other shared paths
-void _copyAmplifyOutputs(
-  List<String> outputPaths,
-  File amplifyOutputs,
-) {
+/// Copy a given config file to a list of shared paths
+void _copyConfigFile(List<String> outputPaths, List<File> configFiles) {
   if (outputPaths.length <= 1) {
     return;
   }
 
-  print('👯 Copying amplify_outputs.dart to other shared paths');
-  for (final outputPath in outputPaths) {
-    final destination = p.join(repoRoot.path, outputPath);
-    final outputFile = File(p.join(destination, 'amplify_outputs.dart'));
+  for (final configFile in configFiles) {
+    final fileName = configFile.path.split('/').last;
 
-    if (!outputFile.existsSync()) {
-      outputFile.createSync(recursive: true);
+    print('👯 Copying $fileName to other shared paths');
+    for (final outputPath in outputPaths) {
+      final destination = p.join(repoRoot.path, outputPath);
+      final outputFile = File(p.join(destination, fileName));
+
+      if (!outputFile.existsSync()) {
+        outputFile.createSync(recursive: true);
+      }
+      final amplifyOutputsContents = configFile.readAsStringSync();
+
+      outputFile.writeAsStringSync(amplifyOutputsContents);
     }
-    final amplifyOutputsContents = amplifyOutputs.readAsStringSync();
-
-    outputFile.writeAsStringSync(amplifyOutputsContents);
   }
 }
 
 /// Create a unique bucket name
 String _createBucketName(String base) {
-  final uniqueShort = uuid().substring(0, 8);
+  final uniqueShort = UUID.getUUID().substring(0, 8);
   return '${base.toLowerCase()}-gen2-integ-$uniqueShort';
 }
 
@@ -321,7 +517,7 @@ String? _getS3BucketName(String bucketName) {
   return matchingBuckets.single;
 }
 
-/// Create an S3 bucke
+/// Create an S3 bucket
 void _createS3Bucket(String bucketName) {
   print('🪣 Creating S3 bucket: $bucketName');
   final createBucket = Process.runSync(
@@ -345,30 +541,75 @@ void _createS3Bucket(String bucketName) {
 }
 
 /// Upload the amplify_outputs.dart file to the S3 bucket
-void _uploadAmplifyOutputs(
-  String bucketName,
-  String pathToAmplifyOutputs,
-) {
-  print('📲 Uploading amplify_outputs.dart to S3 bucket');
-  final downloadRes = Process.runSync(
-    'aws',
-    [
-      '--profile=${Platform.environment['AWS_PROFILE'] ?? 'default'}',
-      's3',
-      'cp',
-      pathToAmplifyOutputs,
-      's3://$bucketName/amplify_outputs.dart',
-    ],
-    stdoutEncoding: utf8,
-    stderrEncoding: utf8,
-  );
-  if (downloadRes.exitCode != 0) {
-    throw Exception(
-      '❌ Error downloading $bucketName config from S3: '
-      '${downloadRes.stdout}\n${downloadRes.stderr}',
+void _uploadConfigFileToS3(String bucketName, List<File> configFiles) {
+  for (final configFile in configFiles) {
+    final fileName = configFile.path.split('/').last;
+    print('📲 Uploading $fileName to S3 bucket');
+    final downloadRes = Process.runSync(
+      'aws',
+      [
+        '--profile=${Platform.environment['AWS_PROFILE'] ?? 'default'}',
+        's3',
+        'cp',
+        configFile.path,
+        's3://$bucketName/$fileName',
+      ],
+      stdoutEncoding: utf8,
+      stderrEncoding: utf8,
     );
+    if (downloadRes.exitCode != 0) {
+      throw Exception(
+        '❌ Error downloading $bucketName config from S3: '
+        '${downloadRes.stdout}\n${downloadRes.stderr}',
+      );
+    }
+    print('👍 $fileName successfully uploaded to S3 bucket');
   }
-  print('👍 Amplify Outputs successfully uploaded to S3 bucket');
+}
+
+/// Generates gen 1 amplifyconfiguration.dart file
+void _generateGen1Config(
+  String category,
+  AmplifyBackend backend,
+  String outputPath,
+  String stack,
+) {
+  print('📁 Generating gen 1 config file for $category ${backend.name}...');
+
+  final outputFile = File(p.join(outputPath, 'amplifyconfiguration.dart'));
+  if (outputFile.existsSync()) {
+    outputFile.deleteSync();
+  }
+
+  // Deploy the backend
+  final process = Process.runSync('npx', [
+    'ampx',
+    'generate',
+    'outputs',
+    '--format',
+    'dart',
+    '--outputs-version',
+    '0',
+    '--out-dir',
+    outputPath,
+    '--profile=${Platform.environment['AWS_PROFILE'] ?? 'default'}',
+    '--stack',
+    stack,
+    '--debug',
+    'true',
+  ], workingDirectory: p.join(repoRoot.path, backend.pathToSource));
+
+  if (process.exitCode != 0) {
+    throw Exception(
+      '❌ Error generating gen 1 config file for $category ${backend.name}:: ${process.stdout}',
+    );
+  } else if (!outputFile.existsSync()) {
+    throw Exception(
+      '❌ Error generating gen 1 config file for $category ${backend.identifier} - Output file not generated',
+    );
+  } else {
+    print('👍 Gen 1 config file for $category ${backend.name} generated');
+  }
 }
 
 class AmplifyBackendGroup {
@@ -380,7 +621,7 @@ class AmplifyBackendGroup {
   });
 
   /// This is the category of the integration group
-  final Category category;
+  final String category;
 
   /// This is the list of backends for the group
   final List<AmplifyBackend> backends;

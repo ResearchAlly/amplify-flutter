@@ -7,13 +7,16 @@ import 'package:e2e/e2e_worker_throws.dart';
 class E2EWorkerThrowsImpl extends E2EWorkerThrows {
   @override
   String get name => 'E2EWorkerThrows';
+
   @override
   String get jsEntrypoint {
-    // Flutter web release builds must use the bundled asset.
-    if (zIsFlutter && !zDebugMode) {
+    // Flutter web builds must use the bundled asset. The minified worker is used
+    // in both debug and release modes so that only a single asset needs to be
+    // declared and shipped (see each package's `pubspec.yaml`).
+    if (zIsFlutter) {
       return 'assets/packages/e2e/lib/workers.min.js';
     }
-    // Default to the compiled, published worker.
+    // Default to the compiled, published worker (pure Dart / build_runner).
     return zDebugMode
         ? 'packages/e2e/workers.js'
         : 'packages/e2e/workers.min.js';
@@ -28,18 +31,25 @@ class E2EWorkerThrowsImpl extends E2EWorkerThrows {
         .takeWhile((segment) => segment != 'test')
         .map(Uri.encodeComponent)
         .join('/');
-    const relativePath = zDebugMode
-        ? 'packages/e2e/workers.debug.dart.js'
-        : 'packages/e2e/workers.release.dart.js';
-    final testRelativePath = Uri(
-      scheme: baseUri.scheme,
-      host: baseUri.host,
-      port: baseUri.port,
-      path: '$basePath/test/$relativePath',
-    ).toString();
+    const relativePaths = zDebugMode
+        ? [
+            'packages/e2e/workers.js',
+            'packages/e2e/workers.debug.dart.js',
+          ]
+        : [
+            'packages/e2e/workers.min.js',
+            'packages/e2e/workers.release.dart.js',
+          ];
     return [
-      relativePath,
-      testRelativePath,
+      for (final relativePath in relativePaths) ...[
+        relativePath,
+        Uri(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.port,
+          path: '$basePath/test/$relativePath',
+        ).toString(),
+      ],
     ];
   }
 }

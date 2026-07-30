@@ -1,5 +1,5 @@
-// Generated with smithy-dart 0.3.1. DO NOT MODIFY.
-// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,require_trailing_commas
+// Generated with smithy-dart 0.3.2. DO NOT MODIFY.
+// ignore_for_file: avoid_unused_constructor_parameters,deprecated_member_use_from_same_package,non_constant_identifier_names,unnecessary_library_name
 
 library amplify_analytics_pinpoint_dart.pinpoint.model.internal_server_error_exception; // ignore_for_file: no_leading_underscores_for_library_prefixes
 
@@ -12,17 +12,15 @@ part 'internal_server_error_exception.g.dart';
 
 /// Provides information about an API request or response.
 abstract class InternalServerErrorException
-    with
-        _i1.AWSEquatable<InternalServerErrorException>
+    with _i1.AWSEquatable<InternalServerErrorException>
     implements
-        Built<InternalServerErrorException,
-            InternalServerErrorExceptionBuilder>,
+        Built<
+          InternalServerErrorException,
+          InternalServerErrorExceptionBuilder
+        >,
         _i2.SmithyHttpException {
   /// Provides information about an API request or response.
-  factory InternalServerErrorException({
-    String? message,
-    String? requestId,
-  }) {
+  factory InternalServerErrorException({String? message, String? requestId}) {
     return _$InternalServerErrorException._(
       message: message,
       requestId: requestId,
@@ -30,9 +28,9 @@ abstract class InternalServerErrorException
   }
 
   /// Provides information about an API request or response.
-  factory InternalServerErrorException.build(
-          [void Function(InternalServerErrorExceptionBuilder) updates]) =
-      _$InternalServerErrorException;
+  factory InternalServerErrorException.build([
+    void Function(InternalServerErrorExceptionBuilder) updates,
+  ]) = _$InternalServerErrorException;
 
   const InternalServerErrorException._();
 
@@ -40,13 +38,12 @@ abstract class InternalServerErrorException
   factory InternalServerErrorException.fromResponse(
     InternalServerErrorException payload,
     _i1.AWSBaseHttpResponse response,
-  ) =>
-      payload.rebuild((b) {
-        b.headers = response.headers;
-      });
+  ) => payload.rebuild((b) {
+    b.headers = response.headers;
+  });
 
   static const List<_i2.SmithySerializer<InternalServerErrorException>>
-      serializers = [InternalServerErrorExceptionRestJson1Serializer()];
+  serializers = [InternalServerErrorExceptionRestJson1Serializer()];
 
   /// The message that's returned from the API.
   @override
@@ -56,35 +53,31 @@ abstract class InternalServerErrorException
   String? get requestId;
   @override
   _i2.ShapeId get shapeId => const _i2.ShapeId(
-        namespace: 'com.amazonaws.pinpoint',
-        shape: 'InternalServerErrorException',
-      );
+    namespace: 'com.amazonaws.pinpoint',
+    shape: 'InternalServerErrorException',
+  );
+
   @override
   _i2.RetryConfig? get retryConfig => null;
+
   @override
   @BuiltValueField(compare: false)
   int get statusCode => 500;
+
   @override
   @BuiltValueField(compare: false)
   Map<String, String>? get headers;
   @override
   Exception? get underlyingException => null;
+
   @override
-  List<Object?> get props => [
-        message,
-        requestId,
-      ];
+  List<Object?> get props => [message, requestId];
+
   @override
   String toString() {
     final helper = newBuiltValueToStringHelper('InternalServerErrorException')
-      ..add(
-        'message',
-        message,
-      )
-      ..add(
-        'requestId',
-        requestId,
-      );
+      ..add('message', message)
+      ..add('requestId', requestId);
     return helper.toString();
   }
 }
@@ -92,20 +85,19 @@ abstract class InternalServerErrorException
 class InternalServerErrorExceptionRestJson1Serializer
     extends _i2.StructuredSmithySerializer<InternalServerErrorException> {
   const InternalServerErrorExceptionRestJson1Serializer()
-      : super('InternalServerErrorException');
+    : super('InternalServerErrorException');
 
   @override
   Iterable<Type> get types => const [
-        InternalServerErrorException,
-        _$InternalServerErrorException,
-      ];
+    InternalServerErrorException,
+    _$InternalServerErrorException,
+  ];
+
   @override
   Iterable<_i2.ShapeId> get supportedProtocols => const [
-        _i2.ShapeId(
-          namespace: 'aws.protocols',
-          shape: 'restJson1',
-        )
-      ];
+    _i2.ShapeId(namespace: 'aws.protocols', shape: 'restJson1'),
+  ];
+
   @override
   InternalServerErrorException deserialize(
     Serializers serializers,
@@ -123,15 +115,19 @@ class InternalServerErrorExceptionRestJson1Serializer
       }
       switch (key) {
         case 'Message':
-          result.message = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.message =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
         case 'RequestID':
-          result.requestId = (serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String);
+          result.requestId =
+              (serializers.deserialize(
+                    value,
+                    specifiedType: const FullType(String),
+                  )
+                  as String);
       }
     }
 
@@ -149,18 +145,19 @@ class InternalServerErrorExceptionRestJson1Serializer
     if (message != null) {
       result$
         ..add('Message')
-        ..add(serializers.serialize(
-          message,
-          specifiedType: const FullType(String),
-        ));
+        ..add(
+          serializers.serialize(message, specifiedType: const FullType(String)),
+        );
     }
     if (requestId != null) {
       result$
         ..add('RequestID')
-        ..add(serializers.serialize(
-          requestId,
-          specifiedType: const FullType(String),
-        ));
+        ..add(
+          serializers.serialize(
+            requestId,
+            specifiedType: const FullType(String),
+          ),
+        );
     }
     return result$;
   }

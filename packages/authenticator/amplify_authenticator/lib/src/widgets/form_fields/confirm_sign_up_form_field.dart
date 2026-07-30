@@ -21,6 +21,8 @@ abstract class ConfirmSignUpFormField<FieldValue extends Object>
     super.hintText,
     super.validator,
     super.autofillHints,
+    super.enabledOverride,
+    super.visible,
   }) : super._();
 
   /// {@macro amplify_authenticator.username_form_field}
@@ -28,30 +30,40 @@ abstract class ConfirmSignUpFormField<FieldValue extends Object>
     Key? key,
     FormFieldValidator<UsernameInput>? validator,
     Iterable<String>? autofillHints,
-  }) =>
-      _ConfirmSignUpUsernameField(
-        key: key ?? keyUsernameConfirmSignUpFormField,
-        titleKey: InputResolverKey.usernameTitle,
-        hintTextKey: InputResolverKey.usernameHint,
-        field: ConfirmSignUpField.username,
-        validator: validator,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+    AuthenticatorTextEnabledOverride? enabledOverride,
+    bool visible = true,
+  }) => _ConfirmSignUpUsernameField(
+    key: key ?? keyUsernameConfirmSignUpFormField,
+    titleKey: InputResolverKey.usernameTitle,
+    hintTextKey: InputResolverKey.usernameHint,
+    field: ConfirmSignUpField.username,
+    validator: validator,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   /// Creates a verificationCode component.
   static ConfirmSignUpFormField<String> verificationCode({
     Key? key,
     FormFieldValidator<String>? validator,
     Iterable<String>? autofillHints,
-  }) =>
-      _ConfirmSignUpTextField(
-        key: key ?? keyCodeConfirmSignUpFormField,
-        titleKey: InputResolverKey.verificationCodeTitle,
-        hintTextKey: InputResolverKey.verificationCodeHint,
-        field: ConfirmSignUpField.code,
-        validator: validator,
-        autofillHints: autofillHints,
-      );
+    AuthenticatorTextFieldController? authenticatorTextFieldController,
+    AuthenticatorTextEnabledOverride? enabledOverride,
+    bool visible = true,
+  }) => _ConfirmSignUpTextField(
+    key: key ?? keyCodeConfirmSignUpFormField,
+    titleKey: InputResolverKey.verificationCodeTitle,
+    hintTextKey: InputResolverKey.verificationCodeHint,
+    field: ConfirmSignUpField.code,
+    validator: validator,
+    autofillHints: autofillHints,
+    authenticatorTextFieldController: authenticatorTextFieldController,
+    enabledOverride: enabledOverride,
+    visible: visible,
+  );
 
   @override
   int get displayPriority {
@@ -74,8 +86,12 @@ abstract class ConfirmSignUpFormField<FieldValue extends Object>
 }
 
 abstract class _ConfirmSignUpFormFieldState<FieldValue extends Object>
-    extends AuthenticatorFormFieldState<ConfirmSignUpField, FieldValue,
-        ConfirmSignUpFormField<FieldValue>> {
+    extends
+        AuthenticatorFormFieldState<
+          ConfirmSignUpField,
+          FieldValue,
+          ConfirmSignUpFormField<FieldValue>
+        > {
   @override
   TextInputType get keyboardType {
     switch (widget.field) {
@@ -100,8 +116,9 @@ abstract class _ConfirmSignUpFormFieldState<FieldValue extends Object>
   Widget? get companionWidget {
     switch (widget.field) {
       case ConfirmSignUpField.code:
-        final resendCodeButton =
-            InheritedForms.of(context).confirmSignUpForm.resendCodeButton;
+        final resendCodeButton = InheritedForms.of(
+          context,
+        ).confirmSignUpForm.resendCodeButton;
         return resendCodeButton ?? const LostCodeButton(key: keyLostCodeButton);
       default:
         return null;
@@ -113,13 +130,9 @@ abstract class _ConfirmSignUpFormFieldState<FieldValue extends Object>
     if (widget.autofillHints != null) return widget.autofillHints;
     switch (widget.field) {
       case ConfirmSignUpField.username:
-        return const [
-          AutofillHints.newUsername,
-        ];
+        return const [AutofillHints.newUsername];
       case ConfirmSignUpField.code:
-        return const [
-          AutofillHints.oneTimeCode,
-        ];
+        return const [AutofillHints.oneTimeCode];
     }
   }
 }
@@ -132,10 +145,27 @@ class _ConfirmSignUpTextField extends ConfirmSignUpFormField<String> {
     super.hintTextKey,
     super.validator,
     super.autofillHints,
+    super.enabledOverride,
+    super.visible,
+    this.authenticatorTextFieldController,
   }) : super._();
 
   @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
+
+  @override
   _ConfirmSignUpTextFieldState createState() => _ConfirmSignUpTextFieldState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AuthenticatorTextFieldController?>(
+        'authenticatorTextFieldController',
+        authenticatorTextFieldController,
+      ),
+    );
+  }
 }
 
 class _ConfirmSignUpTextFieldState extends _ConfirmSignUpFormFieldState<String>
@@ -200,18 +230,37 @@ class _ConfirmSignUpUsernameField
     super.hintTextKey,
     super.validator,
     super.autofillHints,
+    super.enabledOverride,
+    super.visible,
+    this.authenticatorTextFieldController,
   }) : super._();
+
+  @override
+  final AuthenticatorTextFieldController? authenticatorTextFieldController;
 
   @override
   _ConfirmSignUpUsernameFieldState createState() =>
       _ConfirmSignUpUsernameFieldState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<AuthenticatorTextFieldController?>(
+        'authenticatorTextFieldController',
+        authenticatorTextFieldController,
+      ),
+    );
+  }
 }
 
 class _ConfirmSignUpUsernameFieldState
     extends _ConfirmSignUpFormFieldState<UsernameInput>
     with
-        AuthenticatorUsernameField<ConfirmSignUpField,
-            ConfirmSignUpFormField<UsernameInput>> {
+        AuthenticatorUsernameField<
+          ConfirmSignUpField,
+          ConfirmSignUpFormField<UsernameInput>
+        > {
   @override
   Widget? get surlabel => null;
 }

@@ -10,26 +10,21 @@ class _$AttributeDimension extends AttributeDimension {
   @override
   final AttributeType? attributeType;
   @override
-  final _i2.BuiltList<String> values;
+  final _i2.BuiltList<String>? values;
 
-  factory _$AttributeDimension(
-          [void Function(AttributeDimensionBuilder)? updates]) =>
-      (new AttributeDimensionBuilder()..update(updates))._build();
+  factory _$AttributeDimension([
+    void Function(AttributeDimensionBuilder)? updates,
+  ]) => (AttributeDimensionBuilder()..update(updates))._build();
 
-  _$AttributeDimension._({this.attributeType, required this.values})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        values, r'AttributeDimension', 'values');
-  }
-
+  _$AttributeDimension._({this.attributeType, this.values}) : super._();
   @override
   AttributeDimension rebuild(
-          void Function(AttributeDimensionBuilder) updates) =>
-      (toBuilder()..update(updates)).build();
+    void Function(AttributeDimensionBuilder) updates,
+  ) => (toBuilder()..update(updates)).build();
 
   @override
   AttributeDimensionBuilder toBuilder() =>
-      new AttributeDimensionBuilder()..replace(this);
+      AttributeDimensionBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -60,7 +55,7 @@ class AttributeDimensionBuilder
 
   _i2.ListBuilder<String>? _values;
   _i2.ListBuilder<String> get values =>
-      _$this._values ??= new _i2.ListBuilder<String>();
+      _$this._values ??= _i2.ListBuilder<String>();
   set values(_i2.ListBuilder<String>? values) => _$this._values = values;
 
   AttributeDimensionBuilder();
@@ -69,7 +64,7 @@ class AttributeDimensionBuilder
     final $v = _$v;
     if ($v != null) {
       _attributeType = $v.attributeType;
-      _values = $v.values.toBuilder();
+      _values = $v.values?.toBuilder();
       _$v = null;
     }
     return this;
@@ -77,7 +72,6 @@ class AttributeDimensionBuilder
 
   @override
   void replace(AttributeDimension other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AttributeDimension;
   }
 
@@ -92,17 +86,23 @@ class AttributeDimensionBuilder
   _$AttributeDimension _build() {
     _$AttributeDimension _$result;
     try {
-      _$result = _$v ??
-          new _$AttributeDimension._(
-              attributeType: attributeType, values: values.build());
+      _$result =
+          _$v ??
+          _$AttributeDimension._(
+            attributeType: attributeType,
+            values: _values?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'values';
-        values.build();
+        _values?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'AttributeDimension', _$failedField, e.toString());
+        throw BuiltValueNestedFieldError(
+          r'AttributeDimension',
+          _$failedField,
+          e.toString(),
+        );
       }
       rethrow;
     }

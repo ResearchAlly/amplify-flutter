@@ -54,8 +54,8 @@ Future<void> logMetric() async {
   final runId = '${github.context.runId}';
 
   // Temporarily disable.
-  // Cloudwatch metrics are identified uniquely by dimension key and value. 
-  // Since failingStep value can vary, it causes multiple metrics to be created from the same job, confusing our data.   
+  // Cloudwatch metrics are identified uniquely by dimension key and value.
+  // Since failingStep value can vary, it causes multiple metrics to be created from the same job, confusing our data.
   final failingStep = isFailed
       ? await getFailingStep(jobIdentifier, githubToken, repo, runId)
       : '';
@@ -89,14 +89,15 @@ Future<void> logMetric() async {
     'smithy',
     'worker_bee',
     'amplify_flutter',
+    'amplify_foundation_dart_bridge',
+    'amplify_foundation_dart',
     'amplify_lints',
     'amplify_native_legacy_wrapper',
+    'kinesis',
     'pub_server',
   ];
 
-  final category = categories.firstWhereOrNull(
-    workingDirectory.contains,
-  );
+  final category = categories.firstWhereOrNull(workingDirectory.contains);
 
   if (category == null) {
     throw Exception(
@@ -112,16 +113,24 @@ Future<void> logMetric() async {
       'framework input of $framework must be one of: dart, flutter',
     );
   }
-  final flutterDartChannel =
-      core.getInput('flutter-dart-channel', defaultValue: defaultValue);
+  final flutterDartChannel = core.getInput(
+    'flutter-dart-channel',
+    defaultValue: defaultValue,
+  );
   final dartVersion = core.getInput('dart-version', defaultValue: defaultValue);
-  final flutterVersion =
-      core.getInput('flutter-version', defaultValue: defaultValue);
-  final dartCompiler =
-      core.getInput('dart-compiler', defaultValue: defaultValue);
+  final flutterVersion = core.getInput(
+    'flutter-version',
+    defaultValue: defaultValue,
+  );
+  final dartCompiler = core.getInput(
+    'dart-compiler',
+    defaultValue: defaultValue,
+  );
   final platform = core.getInput('platform', defaultValue: defaultValue);
-  final platformVersion =
-      core.getInput('platform-version', defaultValue: defaultValue);
+  final platformVersion = core.getInput(
+    'platform-version',
+    defaultValue: defaultValue,
+  );
 
   final value = isFailed ? '1' : '0';
 
@@ -140,8 +149,9 @@ Future<void> logMetric() async {
     //if (failingStep.isNotEmpty) 'failing-step': failingStep,
   };
 
-  final dimensionString =
-      dimensions.entries.map((e) => '${e.key}=${e.value}').join(',');
+  final dimensionString = dimensions.entries
+      .map((e) => '${e.key}=${e.value}')
+      .join(',');
 
   final cloudArgs = <String>[
     'cloudwatch',
@@ -156,9 +166,7 @@ Future<void> logMetric() async {
     dimensionString,
   ];
 
-  await processManager.run(
-    <String>['aws', ...cloudArgs],
-  );
+  await processManager.run(<String>['aws', ...cloudArgs]);
 
   core.info('Sent cloudwatch metric with args: $cloudArgs');
 }

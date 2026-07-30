@@ -1,3 +1,112 @@
+## 2.13.0
+
+- Minor bug fixes and improvements
+
+## 2.12.1
+
+- Minor bug fixes and improvements
+
+## 2.12.0
+
+### Features
+- feat(datastore): Add Swift Package Manager support ([#7004](https://github.com/aws-amplify/amplify-flutter/pull/7004))
+
+## 2.11.0
+
+- Minor bug fixes and improvements
+
+## 2.10.2
+
+### Fixes
+- fix(datastore): Catch invalid JSON ([#6669](https://github.com/aws-amplify/amplify-flutter/pull/6669))
+- fix(datastore): Fix error callbacks (android) ([#6742](https://github.com/aws-amplify/amplify-flutter/pull/6742))
+
+## 2.10.1
+
+- Minor bug fixes and improvements
+
+## 2.10.0
+
+### Fixes
+- fix(datastore): UninitializedPropertyAccessException crash on Android when amplify_datastore is included but not used ([#6485](https://github.com/aws-amplify/amplify-flutter/pull/6485))
+
+## 2.9.0
+
+- Minor bug fixes and improvements
+
+## 2.8.0
+
+- Minor bug fixes and improvements
+
+## 2.7.0
+
+### Chores
+- chore(all): Bumped Flutter SDK to ^3.35.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped com.android.tools.build:gradle to 8.12.1 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(datastore): Bumped org.jlleitschuh.gradle:ktlint-gradle to 13.1.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+
+## 2.6.6
+
+### Fixes
+- fix(datastore): corrected getToken return value for oidc
+
+## 2.6.5
+
+### Chores
+- chore(datastore): Bumped kotlin_version to 2.2.0 ([#6224](https://github.com/aws-amplify/amplify-flutter/pull/6224))
+- chore(datastore): Bumped com.android.tools:desugar_jdk_libs to 2.1.5 ([#6224](https://github.com/aws-amplify/amplify-flutter/pull/6224))
+- chore(datastore): Bumped com.google.code.gson:gson to 2.13.1 ([#6224](https://github.com/aws-amplify/amplify-flutter/pull/6224))
+- chore(datastore): Bumped com.android.tools.build:gradle to 8.11.0 ([#6203](https://github.com/aws-amplify/amplify-flutter/pull/6203))
+- chore(datastore): Bumped com.amplifyframework:aws-auth-cognito to 2.29.1 ([#6187](https://github.com/aws-amplify/amplify-flutter/pull/6187))
+- chore(datastore): Bumped com.amplifyframework:aws-api to 2.29.1 ([#6187](https://github.com/aws-amplify/amplify-flutter/pull/6187))
+- chore(datastore): Bumped com.amplifyframework:aws-datastore to 2.29.1 ([#6187](https://github.com/aws-amplify/amplify-flutter/pull/6187))
+- chore(datastore): Bumped com.amplifyframework:aws-api-appsync to 2.29.1 ([#6187](https://github.com/aws-amplify/amplify-flutter/pull/6187))
+- chore(datastore): Bumped org.jetbrains.kotlinx:kotlinx-coroutines-android: to 1.10.2 ([#6187](https://github.com/aws-amplify/amplify-flutter/pull/6187))
+
+## 2.6.4
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 2.6.3
+
+- Minor bug fixes and improvements
+
+## 2.6.2
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+- chore(datastore): Removed Starscream pinned version
+
+## 2.6.1
+
+- Minor bug fixes and improvements
+
+## 2.6.0
+
+### Fixes
+- fix(datastore): properly handle multiple configures on Android ([#5740](https://github.com/aws-amplify/amplify-flutter/pull/5740))
+
+## 2.5.0
+
+- Minor bug fixes and improvements
+
+## 2.4.2
+
+- Minor bug fixes and improvements
+
+## 2.4.1
+
+### Fixes
+- fix(datastore): FlutterSerializedModel.extractJsonValue returns `.some(nil)` instead of `nil` ([#5370](https://github.com/aws-amplify/amplify-flutter/pull/5370))
+
+## 2.4.0
+
+### Fixes
+- fix(datastore): Clear subscriptions on Stop ([#5253](https://github.com/aws-amplify/amplify-flutter/pull/5253))
+- fix(datastore): Restart Sync Engine when network on/off ([#5218](https://github.com/aws-amplify/amplify-flutter/pull/5218))
+
 ## 2.3.0
 
 - Minor bug fixes and improvements

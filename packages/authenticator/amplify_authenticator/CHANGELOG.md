@@ -1,3 +1,107 @@
+## 2.5.5
+
+- Minor bug fixes and improvements
+
+## 2.5.4
+
+- Minor bug fixes and improvements
+
+## 2.5.3
+
+- Minor bug fixes and improvements
+
+## 2.5.2
+
+- Minor bug fixes and improvements
+
+## 2.5.1
+
+### Fixes
+- fix(auth): Fix flaky web tests ([#6652](https://github.com/aws-amplify/amplify-flutter/pull/6652))
+- fix(auth): Fix tests (await UI changes, handle random number collision) ([#6650](https://github.com/aws-amplify/amplify-flutter/pull/6650))
+
+## 2.5.0
+
+### Features
+- feat(auth): Disable social sign-in button on awaiting actions ([#6517](https://github.com/aws-amplify/amplify-flutter/pull/6517))
+- feat(auth): Passwordless login ([#6538](https://github.com/aws-amplify/amplify-flutter/pull/6538))
+- feat(auth): Add cognito error message translation feature for authenticator ([#6541](https://github.com/aws-amplify/amplify-flutter/pull/6541))
+
+### Fixes
+- fix(auth): Fix login autofill on login ([#6554](https://github.com/aws-amplify/amplify-flutter/pull/6554))
+
+## 2.4.1
+
+- Minor bug fixes and improvements
+
+## 2.4.0
+
+### Features
+- feat(authenticator): Add TextEditingController, visible, and enabledOverride support to form fields ([#6424](https://github.com/aws-amplify/amplify-flutter/pull/6424))
+
+## 2.3.9
+
+- Minor bug fixes and improvements
+
+## 2.3.8
+
+### Chores
+- chore(all): Bumped Flutter SDK to ^3.35.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(all): Bumped Dart SDK to ^3.9.0 ([#6306](https://github.com/aws-amplify/amplify-flutter/pull/6306))
+- chore(authenticator): exported social_button ([#5880](https://github.com/aws-amplify/amplify-flutter/pull/5880))
+- chore(analytics, authenticator): Bumped package_info_plus to ^9.0.0 ([#6393](https://github.com/aws-amplify/amplify-flutter/pull/6393))
+
+## 2.3.7
+
+- Minor bug fixes and improvements
+
+## 2.3.6
+
+### Chores
+- chore(all): Bump Dart SDK to 3.8.0 ([#6165](https://github.com/aws-amplify/amplify-flutter/pull/6165))
+
+## 2.3.5
+
+- Minor bug fixes and improvements
+
+## 2.3.4
+
+### Chores
+- chore(all): Bump Dart SDK to 3.7.0 ([#6026](https://github.com/aws-amplify/amplify-flutter/pull/6026))
+
+## 2.3.3
+
+- Minor bug fixes and improvements
+
+## 2.3.2
+
+- Minor bug fixes and improvements
+
+## 2.3.1
+
+### Fixes
+- fix(authenticator): recover from exceptions during reset password flow ([#5672](https://github.com/aws-amplify/amplify-flutter/pull/5672))
+
+## 2.3.0
+
+### Features
+- feat(auth, authenticator): Add support for Email OTP MFA ([#5449](https://github.com/aws-amplify/amplify-flutter/pull/5449)) (#5472)
+
+## 2.2.0
+
+### Features
+- feat(authenticator): export unmet password requirements ([#5437](https://github.com/aws-amplify/amplify-flutter/pull/5437))
+
+## 2.1.3
+
+- Minor bug fixes and improvements
+
+## 2.1.2
+
+### Fixes
+- fix(authenticator): Export InstructionsResolver ([#5169](https://github.com/aws-amplify/amplify-flutter/pull/5169))
+- Minor bug fixes and improvements
+
 ## 2.1.1
 
 - Minor bug fixes and improvements
